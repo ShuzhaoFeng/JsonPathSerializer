@@ -6,7 +6,7 @@ namespace JsonPathSerializer
 {
     public class JsonPathManager
     {
-        private dynamic? _root;
+        private JToken? _root;
         private int _index;
 
         public IJEnumerable<JToken> Values =>
@@ -162,7 +162,7 @@ namespace JsonPathSerializer
                 throw new ArgumentException();
             }
 
-            dynamic lastToken = TravelToLastAvailableToken(pathTokens);
+            JToken lastToken = TravelToLastAvailableToken(pathTokens);
 
             if
             (!(
@@ -196,15 +196,14 @@ namespace JsonPathSerializer
                 );
             }
 
-            dynamic newToken = CreateNewToken(value, pathTokens);
+            JToken newToken = CreateNewToken(value, pathTokens);
 
             switch (pathTokens[_index].Type)
             {
                 case PathTokenType.Key:
-                    newToken = new JObject(lastToken)
-                    {
-                        [pathTokens[_index].Value] = newToken[pathTokens[_index].Value]
-                    };
+                    ((JObject) lastToken)
+                        .Add((string) pathTokens[_index].Value, newToken[pathTokens[_index].Value]);
+                    newToken = lastToken;
 
                     break;
                 case PathTokenType.Index:
@@ -244,14 +243,14 @@ namespace JsonPathSerializer
             _index = 0;
         }
 
-        private dynamic TravelToLastAvailableToken(PathToken[] pathTokens)
+        private JToken TravelToLastAvailableToken(PathToken[] pathTokens)
         {
             if (_root is null)
             {
                 _root = (pathTokens[0].Type is PathTokenType.Index) ? new JArray() : new JObject();
             }
 
-            dynamic currentToken = _root;
+            JToken currentToken = _root;
             int pathIndex = 0;
 
             while (true)
@@ -306,9 +305,9 @@ namespace JsonPathSerializer
             }
         }
 
-        private dynamic CreateNewToken(object value, PathToken[] pathTokens)
+        private JToken CreateNewToken(object value, PathToken[] pathTokens)
         {
-            dynamic newToken = new JObject();
+            JToken newToken = new JObject();
 
             for (int i = pathTokens.Length; i > _index; i--)
             {

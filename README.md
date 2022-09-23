@@ -64,5 +64,3 @@ There are several important known issues and limitations for **JsonPathSerialize
 * Supports for JSON path operators will be gradually implemented.
 
 * Currently missing a simple and reliable way to validate the JSON path string input. A wrongly-formatted JSON path will likely directly kill the process.
-
-* Use of `dynamic` to resolve conflict between JObject and JArray has big performance issues. Looking for a better methods to resolve the conflict.
