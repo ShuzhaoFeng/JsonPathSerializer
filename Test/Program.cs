@@ -6,8 +6,8 @@ Dictionary<string, string> pathToValue = new Dictionary<string, string>()
     { "$.say.hello.john", "Hello John!" },
     { "$.say.hi.jane", "Hi jane!" },
     { "$.say.hi.montreal[0].French", "Salut Montréal!" },
-    { "$.say.hi.montreal[2].English", "Hi Montreal!" },
-    { "$.say.hi.montreal[1].Spanish", "Hola Montreal!" }
+    { "$.say.hi.montreal[1].English", "Hi Montreal!" },
+    { "$.say.hi.montreal[2].Spanish", "Hola Montréal!" }
 };
 
 JsonPathManager manager = new JsonPathManager();
