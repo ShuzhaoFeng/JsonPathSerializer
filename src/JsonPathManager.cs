@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
 namespace JsonPathSerializer
 {
@@ -64,27 +65,31 @@ namespace JsonPathSerializer
             {
                 string pathElement = paths[i];
 
-                if (PathGlobals.PathRegex.KEY.IsMatch(pathElement))
+                Match keyMatch = PathGlobals.PathRegex.KEY.Match(pathElement);
+
+                if (keyMatch.Success)
                 {
-                    string key = pathElement.Substring(2, pathElement.Length - 4);
-                    pathTokens[i] = new PathToken(key, PathTokenType.Key);
+                    pathTokens[i] = new PathToken(keyMatch.Groups[1].Value, PathTokenType.Key);
+
+                    continue;
                 }
-                else if (PathGlobals.PathRegex.INDEX.IsMatch(pathElement))
+
+                Match indexMatch = PathGlobals.PathRegex.INDEX.Match(pathElement);
+
+                if (indexMatch.Success)
                 {
-                    int index = int.Parse(pathElement.Substring(1, pathElement.Length - 2));
-                    pathTokens[i] = new PathToken(index, PathTokenType.Index);
+                    pathTokens[i] = new PathToken(int.Parse(indexMatch.Groups[1].Value), PathTokenType.Index);
+
+                    continue;
+                }
+
+                if (pathElement.Contains('[') || pathElement.Contains(']'))
+                {
+                    pathTokens[i] = new PathToken(pathElement, PathTokenType.Unknown);
                 }
                 else
                 {
-                    if (pathElement.Contains('[') || pathElement.Contains(']'))
-                    {
-                        pathTokens[i] = new PathToken(pathElement, PathTokenType.Unknown);
-                    }
-                    else
-                    {
-                        pathTokens[i] = new PathToken(pathElement, PathTokenType.Key);
-                    }
-
+                    pathTokens[i] = new PathToken(pathElement, PathTokenType.Key);
                 }
             }
 
@@ -203,24 +208,28 @@ namespace JsonPathSerializer
 
                     break;
                 case PathTokenType.Index:
-                    int index = (int)pathTokens[_index].Value;
-                    if (index < lastToken.Count)
+                    JArray token = (JArray) lastToken;
+                    int index = (int) pathTokens[_index].Value;
+
+                    if (index < token.Count)
                     {
-                        lastToken[index] = newToken[index];
-                        newToken = lastToken;
+                        token[index] = newToken[index];
+                        newToken = token;
                     }
                     else
                     {
-                        for (int i = 0; i < index - lastToken.Count; i++)
+                        for (int i = 0; i < index - token.Count; i++)
                         {
-                            lastToken.Add(new JObject());
+                            token.Add(new JObject());
                         }
 
-                        lastToken.Add(newToken[index]);
-                        newToken = lastToken;
+                        token.Add(newToken[index]);
+                        newToken = token;
                     }
 
                     break;
+                default:
+                    throw new NotImplementedException();
             }
 
             if (_index == 0)
@@ -260,9 +269,9 @@ namespace JsonPathSerializer
                     case PathTokenType.Key:
                         string key = (string)token.Value;
 
-                        if (currentToken is JObject && ((JObject)currentToken).ContainsKey(key))
+                        if (currentToken is JObject && ((JObject) currentToken).ContainsKey(key))
                         {
-                            JObject currentJObject = (JObject)currentToken;
+                            JObject currentJObject = (JObject) currentToken;
                             currentToken = currentJObject[key] ?? throw new NullReferenceException();
 
                             break;
@@ -274,11 +283,11 @@ namespace JsonPathSerializer
                         }
 
                     case PathTokenType.Index:
-                        int index = (int)token.Value;
+                        int index = (int) token.Value;
 
-                        if (currentToken is JArray && !((JArray)currentToken)[index].Equals(null))
+                        if (currentToken is JArray && ((JArray) currentToken).Count > index)
                         {
-                            JArray currentJArray = (JArray)currentToken;
+                            JArray currentJArray = (JArray) currentToken;
                             currentToken = currentJArray[index];
 
                             break;
@@ -318,7 +327,7 @@ namespace JsonPathSerializer
                     case PathTokenType.Index:
                         JArray arrToken = new JArray();
 
-                        for (int j = 0; j < (int)token.Value; j++)
+                        for (int j = 0; j < (int) token.Value; j++)
                         {
                             arrToken.Add(new JObject());
                         }
