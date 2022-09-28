@@ -1,7 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 
 namespace JsonPathSerializer
@@ -16,7 +14,13 @@ namespace JsonPathSerializer
         {
             Unknown = 999,
             Key,
-            Index
+            Index,
+            IndexList,
+            IndexSpan,
+            IndexSpanStartOnly,
+            IndexSpanEndOnly,
+            IndexSpanReverse,
+            WildCard
         }
 
         public struct PathToken
@@ -125,6 +129,11 @@ namespace JsonPathSerializer
                 throw new ArgumentException("Path cannot be empty");
             }
 
+            if (trimmedPath.Contains(".."))
+            {
+                throw new ArgumentException("Recursive descent is unsupported for putting values into a path.");
+            }
+            
             if (trimmedPath[0].Equals('$'))
             {
                 if (trimmedPath.Length < 2)
