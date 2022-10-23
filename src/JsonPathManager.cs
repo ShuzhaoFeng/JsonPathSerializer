@@ -8,12 +8,12 @@ namespace JsonPathSerializer
     {
         private JToken? _root;
 
-        public IJEnumerable<JToken> Values => (_root ?? new JObject()).AsJEnumerable();
+        public IJEnumerable<JToken> Values => _root ?? new JObject();
 
         public enum PathTokenType
         {
             Unknown = 999,
-            Key,
+            Property,
             Index,
             IndexList,
             IndexSpan,
@@ -25,16 +25,14 @@ namespace JsonPathSerializer
 
         public struct PathToken
         {
-            private object _value;
-            private PathTokenType _type;
+            public object Value { get; }
 
-            public object Value => _value;
-            public PathTokenType Type => _type;
+            public PathTokenType Type { get; }
 
             public PathToken(object value, PathTokenType type)
             {
-                _value = value;
-                _type = type;
+                Value = value;
+                Type = type;
             }
         }
 
@@ -65,19 +63,14 @@ namespace JsonPathSerializer
         {
         }
 
-        public JsonPathManager(JObject root)
-        {
-            _root = root;
-        }
-
-        public JsonPathManager(JArray root)
+        public JsonPathManager(JToken root)
         {
             _root = root;
         }
 
         public string Build()
         {
-            return JsonConvert.SerializeObject(_root);
+            return JsonConvert.SerializeObject(_root ?? new JObject());
         }
 
         public void Add(object value, string path)
@@ -93,7 +86,7 @@ namespace JsonPathSerializer
 
                 if (keyMatch.Success)
                 {
-                    pathTokens[i] = new PathToken(keyMatch.Groups[1].Value, PathTokenType.Key);
+                    pathTokens[i] = new PathToken(keyMatch.Groups[1].Value, PathTokenType.Property);
 
                     continue;
                 }
@@ -113,7 +106,7 @@ namespace JsonPathSerializer
                 }
                 else
                 {
-                    pathTokens[i] = new PathToken(pathElement, PathTokenType.Key);
+                    pathTokens[i] = new PathToken(pathElement, PathTokenType.Property);
                 }
             }
 
@@ -131,7 +124,7 @@ namespace JsonPathSerializer
 
             if (trimmedPath.Contains(".."))
             {
-                throw new ArgumentException("Recursive descent is unsupported for putting values into a path.");
+                throw new ArgumentException("Deep scan \'..\' is unsupported.");
             }
             
             if (trimmedPath[0].Equals('$'))
@@ -200,7 +193,7 @@ namespace JsonPathSerializer
                     throw new ArgumentException
                     (
                         $"JSON element $.{lastToken.Token.Path} " +
-                        $"contains a value, therefore cannot contain other child elements."
+                        "contains a value, therefore cannot contain other child elements."
                     );
                 }
                 
@@ -217,7 +210,7 @@ namespace JsonPathSerializer
                     throw new ArgumentException
                     (
                         $"JSON element $.{lastToken.Token.Path} " +
-                        $"cannot be taken both as JObject and JArray."
+                        "cannot be taken both as JObject and JArray."
                     );
                 }
 
@@ -225,34 +218,46 @@ namespace JsonPathSerializer
 
                 switch (pathTokens[lastToken.Index].Type)
                 {
-                    case PathTokenType.Key:
-                        ((JObject) lastToken.Token)
-                            .Add
+                    case PathTokenType.Property:
+                        JObject lastJObject = (JObject)lastToken.Token;
+                        if
+                        (   
+                            lastToken.Index == pathTokens.Length - 1
+                            && lastJObject.ContainsKey((string)pathTokens.Last().Value)
+                        )
+                        {
+                            lastJObject[(string)pathTokens.Last().Value] = JToken.FromObject(value);
+                        }
+                        else
+                        {
+                            lastJObject.Add
                             (
-                                (string) pathTokens[lastToken.Index].Value,
+                                (string)pathTokens[lastToken.Index].Value,
                                 newToken[pathTokens[lastToken.Index].Value]
                             );
+                        }
+                        
                         newToken = lastToken.Token;
 
                         break;
                     case PathTokenType.Index:
-                        JArray token = (JArray) lastToken.Token;
+                        JArray lastJArray = (JArray) lastToken.Token;
                         int index = (int) pathTokens[lastToken.Index].Value;
 
-                        if (index < token.Count)
+                        if (index < lastJArray.Count)
                         {
-                            token[index] = newToken[index] ?? throw new NullReferenceException();
-                            newToken = token;
+                            lastJArray[index] = newToken[index] ?? throw new NullReferenceException();
+                            newToken = lastJArray;
                         }
                         else
                         {
-                            for (int i = 0; i < index - token.Count; i++)
+                            for (int i = 0; i < index - lastJArray.Count; i++)
                             {
-                                token.Add(new JObject());
+                                lastJArray.Add(new JObject());
                             }
 
-                            token.Add(newToken[index] ?? throw new NullReferenceException());
-                            newToken = token;
+                            lastJArray.Add(newToken[index] ?? throw new NullReferenceException());
+                            newToken = lastJArray;
                         }
 
                         break;
@@ -273,10 +278,7 @@ namespace JsonPathSerializer
 
         private List<JsonToken> TravelToLastAvailableToken(PathToken[] pathTokens)
         {
-            if (_root is null)
-            {
-                _root = (pathTokens[0].Type is PathTokenType.Index) ? new JArray() : new JObject();
-            }
+            _root ??= (pathTokens[0].Type is PathTokenType.Index) ? new JArray() : new JObject();
 
             int pathIndex = 0;
             List<JsonToken> currentTokens = new() { new (_root, pathIndex) };
@@ -292,7 +294,7 @@ namespace JsonPathSerializer
 
                 switch (token.Type)
                 {
-                    case PathTokenType.Key:
+                    case PathTokenType.Property:
                         string key = (string) token.Value;
 
                         for (int i = 0; i < currentTokens.Count; i++)
@@ -300,9 +302,8 @@ namespace JsonPathSerializer
                             JsonToken currentToken = currentTokens[i];
                             JToken jToken = currentToken.Token;
 
-                            if (jToken is JObject && ((JObject) jToken).ContainsKey(key))
+                            if (jToken is JObject currentJObject && currentJObject.ContainsKey(key))
                             {
-                                JObject currentJObject = (JObject) jToken;
                                 currentTokens[currentTokens.IndexOf(currentToken)] =
                                     new JsonToken
                                     (
@@ -327,13 +328,13 @@ namespace JsonPathSerializer
                             JsonToken currentToken = currentTokens[i];
                             JToken jToken = currentToken.Token;
 
-                            if (jToken is JArray && ((JArray) jToken).Count > index)
+                            if (jToken is JArray currentJArray && currentJArray.Count > (index < 0 ? Math.Abs(index + 1) : index))
                             {
-                                JObject currentJObject = (JObject)jToken;
+                                int absoluteIndex = index < 0 ? currentJArray.Count + index : index;
                                 currentTokens[currentTokens.IndexOf(currentToken)] =
                                     new JsonToken
                                     (
-                                        currentJObject[index] ?? throw new NullReferenceException(),
+                                        currentJArray[absoluteIndex] ?? throw new NullReferenceException(),
                                         currentToken.Index + 1
                                     );
                             }
@@ -372,7 +373,7 @@ namespace JsonPathSerializer
 
                 switch (token.Type)
                 {
-                    case PathTokenType.Key:
+                    case PathTokenType.Property:
                         newToken = new JObject()
                         {
                             [token.Value] =
