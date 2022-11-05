@@ -14,7 +14,7 @@ Dictionary<string, string> pathToValue = new Dictionary<string, string>()
 JsonPathManager manager = new JsonPathManager();
 foreach (var pair in pathToValue)
 {
-    manager.Add(pair.Value, pair.Key);
+    manager.Add(pair.Key, pair.Value);
 }
-manager.Add("Hello World!", "$.say.hello.world"); // overwrite, dot notation
+manager.Add("$.say.hello.world", "Hello World!"); // overwrite, dot notation
 Console.WriteLine(manager.Build());

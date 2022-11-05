@@ -17,7 +17,7 @@ namespace JsonPathSerializer
             public static readonly Regex WILDCARD = new(@"\[\s{0,1}(\*)\s{0,1}\]"); // also as plain *
 
             public static readonly Regex BRACKET = new(@"(\[[^\]]+\])");
-            public static readonly Regex PARENTHESIS_WITHIN_BRACKET = new(@"(\[\([^\)]+\)\])");
+            public static readonly Regex PARENTHESIS_WITHIN_BRACKET = new(@"(\[\??\([^\)]+\)\])");
         }
     }
 }
