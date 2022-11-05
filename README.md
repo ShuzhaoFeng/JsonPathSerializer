@@ -5,7 +5,7 @@ Class library that helps putting data into the right place in a Json string, usi
 
 Built with .NET and newtonsoft.Json, **JsonPathSerializer** is a class library that aims to help automated tests and simulations to build large JSON objects using only values and their respective JSON path.
 
-As of version 0.0.0.0, the project is more of a concept demo rather than a complete, deliverable .NET class library. See **Constaints** about known limitations of JsonPathSerializer.
+As of version 0.0.0.7, the project is more of a concept demo rather than a complete, deliverable .NET class library. See **Constaints** about known limitations of JsonPathSerializer.
 
 ## Quick-demo
 
@@ -25,7 +25,7 @@ Dictionary<string, string> pathToValue = new Dictionary<string, string>()
 JsonPathManager manager = new JsonPathManager();
 foreach (var pair in pathToValue)
 {
-    manager.Add(pair.Value, pair.Key);
+    manager.Add(pair.Key, pair.Value);
 }
 Console.WriteLine(manager.Build());
 ```
@@ -52,8 +52,8 @@ Which gives: `{"say":{"hello":{"world":"Hello world!","john":"Hello John!"},"hi"
 
 **JsonPathSerializer** supports JSON path in both **dot** and **bracket** notation, and currently support the following JSON path operation:
 
-* Basic key; `$.foo.key` or `['foo']['key']`
-* Array index; `$.foo[1]`
+* Property, e.g. `$.foo.key` or `['foo']['key']`
+* Index, e.g. `$.foo[1]`, `$[-2]`
 
 **JsonPathManager** instance can be initialized with no argument (will create a new empty root), or with a JObject or JArray as root.
 
@@ -62,5 +62,3 @@ Which gives: `{"say":{"hello":{"world":"Hello world!","john":"Hello John!"},"hi"
 There are several important known issues and limitations for **JsonPathSerializer** for future development:
 
 * Supports for JSON path operators will be gradually implemented.
-
-* Currently missing a simple and reliable way to validate the JSON path string input. A wrongly-formatted JSON path will likely directly kill the process.
