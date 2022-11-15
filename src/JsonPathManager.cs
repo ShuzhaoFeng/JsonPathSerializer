@@ -99,38 +99,40 @@ public class JsonPathManager : IJsonPathManager
     {
         ValidatePath(path);
         List<string> paths = ParsePathToList(path.Trim());
-        PathToken[] pathTokens = new PathToken[paths.Count];
+        List<PathToken> pathTokens = new();
 
-        for (int i = 0; i < paths.Count; i++)
+        foreach (string pathToken in paths)
         {
-            string pathElement = paths[i];
-
-            Match keyMatch = PathGlobals.PathRegex.KEY.Match(pathElement);
-
-            if (keyMatch.Success)
+            if ("$.".Contains(pathToken))
             {
-                pathTokens[i] = new PathToken(keyMatch.Groups[1].Value, PathTokenType.Property);
-
                 continue;
             }
 
-            Match indexMatch = PathGlobals.PathRegex.INDEX.Match(pathElement);
+            Match indexMatch = PathGlobals.PathRegex.INDEX.Match(pathToken);
 
             if (indexMatch.Success)
             {
-                pathTokens[i] = new PathToken(int.Parse(indexMatch.Groups[1].Value), PathTokenType.Index);
-
+                pathTokens.Add(new PathToken(int.Parse(indexMatch.Groups[1].Value), PathTokenType.Index));
                 continue;
             }
 
-            if (pathElement.Contains('[') || pathElement.Contains(']'))
+            Match propertyBracketMatch = PathGlobals.PathRegex.PROPERTY_BRACKET.Match(pathToken);
+
+            if (propertyBracketMatch.Success)
             {
-                pathTokens[i] = new PathToken(pathElement, PathTokenType.Unknown);
+                pathTokens.Add(new PathToken(propertyBracketMatch.Groups[1].Value, PathTokenType.Property));
+                continue;
             }
-            else
+
+            Match propertyDotMatch = PathGlobals.PathRegex.PROPERTY_DOT.Match(pathToken);
+
+            if (propertyDotMatch.Success)
             {
-                pathTokens[i] = new PathToken(pathElement, PathTokenType.Property);
+                pathTokens.Add(new PathToken(propertyDotMatch.Groups[1].Value, PathTokenType.Property));
+                continue;
             }
+
+            throw new NotImplementedException();
         }
 
         SetValueToPath(value, pathTokens);
@@ -171,40 +173,26 @@ public class JsonPathManager : IJsonPathManager
 
     private List<string> ParsePathToList(string path)
     {
-        if (path[0].Equals('$'))
+        List<string> paths = new();
+        
+        int index = 0;
+
+        while (index >= 0 && index < path.Length)
         {
-            path = path.Substring(path[1].Equals('.') ? 2 : 1);
+            int newIndex = path[index].Equals('[')
+                ? path.IndexOf(']', index) + 1
+                : FindNextDotOrOpenBracket(path, index + 1);
+
+            paths.Add(newIndex > 0 ? path.Substring(index, newIndex - index) : path.Substring(index));
+            index = newIndex;
         }
 
-        IEnumerable<string> pathFirstParsedByBrackets =
-            PathGlobals.PathRegex.BRACKET.Split(path).Where(x => x.Length > 0);
-
-        List<string> pathSecondParsedByDotsAndParenthesis = new();
-
-        foreach (string pathFirstMatchByBracket in pathFirstParsedByBrackets)
-        {
-            if (PathGlobals.PathRegex.PARENTHESIS_WITHIN_BRACKET.IsMatch(pathFirstMatchByBracket))
-            {
-                pathSecondParsedByDotsAndParenthesis.Add(pathFirstMatchByBracket);
-            }
-            else
-            {
-                IEnumerable<string> pathFirstMatchSecondParsedByDots =
-                    pathFirstMatchByBracket.Split('.').Where(x => x.Length > 0);
-
-                foreach (string pathSecondMatchByDot in pathFirstMatchSecondParsedByDots)
-                {
-                    pathSecondParsedByDotsAndParenthesis.Add(pathSecondMatchByDot);
-                }
-            }
-        }
-
-        return pathSecondParsedByDotsAndParenthesis;
+        return paths;
     }
 
-    private void SetValueToPath(object value, PathToken[] pathTokens)
+    private void SetValueToPath(object value, List<PathToken> pathTokens)
     {
-        if (pathTokens.Length < 1)
+        if (pathTokens.Count < 1)
         {
             throw new ArgumentException();
         }
@@ -247,7 +235,7 @@ public class JsonPathManager : IJsonPathManager
                     JObject lastJObject = (JObject)lastToken.Token;
                     if
                     (   
-                        lastToken.Index == pathTokens.Length - 1
+                        lastToken.Index == pathTokens.Count - 1
                         && lastJObject.ContainsKey((string)pathTokens.Last().Value)
                     )
                     {
@@ -301,7 +289,7 @@ public class JsonPathManager : IJsonPathManager
         }
     }
 
-    private List<JsonToken> TravelToLastAvailableToken(PathToken[] pathTokens)
+    private List<JsonToken> TravelToLastAvailableToken(List<PathToken> pathTokens)
     {
         _root ??= (pathTokens[0].Type is PathTokenType.Index) ? new JArray() : new JObject();
 
@@ -310,7 +298,7 @@ public class JsonPathManager : IJsonPathManager
 
         while (true)
         {
-            if (pathIndex >= pathTokens.Length - 1)
+            if (pathIndex >= pathTokens.Count - 1)
             {
                 return currentTokens.Select(x => x.AsLastAvailable()).ToList();
             }
@@ -388,11 +376,11 @@ public class JsonPathManager : IJsonPathManager
         }
     }
 
-    private JToken CreateNewToken(object value, PathToken[] pathTokens, int startIndex)
+    private JToken CreateNewToken(object value, List<PathToken> pathTokens, int startIndex)
     {
         JToken newToken = new JObject();
 
-        for (int i = pathTokens.Length; i > startIndex; i--)
+        for (int i = pathTokens.Count; i > startIndex; i--)
         {
             PathToken token = pathTokens[i - 1];
 
@@ -402,7 +390,7 @@ public class JsonPathManager : IJsonPathManager
                     newToken = new JObject()
                     {
                         [token.Value] =
-                            (i == pathTokens.Length) ? JToken.FromObject(value) : newToken
+                            i == pathTokens.Count ? JToken.FromObject(value) : newToken
                     };
 
                     break;
@@ -414,7 +402,7 @@ public class JsonPathManager : IJsonPathManager
                         arrToken.Add(new JObject());
                     }
 
-                    arrToken.Add((i == pathTokens.Length) ? JToken.FromObject(value) : newToken);
+                    arrToken.Add(i == pathTokens.Count ? JToken.FromObject(value) : newToken);
                     newToken = arrToken;
 
                     break;
@@ -424,5 +412,23 @@ public class JsonPathManager : IJsonPathManager
         }
 
         return newToken;
+    }
+
+    private int FindNextDotOrOpenBracket(string path, int index)
+    {
+        int dotIndex = path.IndexOf('.', index);
+        int bracketIndex = path.IndexOf('[', index);
+
+        if (dotIndex == -1)
+        {
+            return bracketIndex;
+        }
+
+        if (bracketIndex == -1)
+        {
+            return dotIndex;
+        }
+        
+        return Math.Min(dotIndex, bracketIndex);
     }
 }
