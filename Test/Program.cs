@@ -8,6 +8,11 @@ Dictionary<string, string> pathToValue = new Dictionary<string, string>()
     { "$.say.hi.montreal[0].French", "Salut Montréal!" }, // index
     { "$.say.hi.montreal[2].Spanish", "Hola Montréal!" }, // index gap
     { "$.say.hi.montreal[-2].English", "Hi Montreal!" }, // negative index
+    { "$.say.hi.four.times[0]", "Hey!" },
+    { "$.say.hi.four.times[1,2,3]", "Hi!" }, // index list
+    { "$.say.hi.nine.times[0,1,2][0].node", "Hi!" }, // index list
+    { "$.say.hi.nine.times[0,1,2][1,2].tree", "Hey!" }, // index list
+    { "$.say.hi.nine.times[0,1,2][0,2].node", "Hello!" }, // index list
     { "$.note", "test values" },
 };
 

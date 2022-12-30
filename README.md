@@ -5,20 +5,20 @@ Class library that helps putting data into the right place in a Json string, usi
 
 Built with .NET and newtonsoft.Json, **JsonPathSerializer** is a class library that aims to help automated tests and simulations to build large JSON objects using only values and their respective JSON path.
 
-As of version 0.0.0.7, the project is more of a concept demo rather than a complete, deliverable .NET class library. See **Constaints** about known limitations of JsonPathSerializer.
+As of version 0.0.1.0, the project is more of a concept demo rather than a complete, deliverable .NET class library. See **Constaints** about known limitations of JsonPathSerializer.
 
 ## Quick-demo
 
 After building the project, reference the class library in your program and import it as `using JsonPathSerializer;`. You will also need the nuget **Newtonsoft.Json**.
 
 Then, try the following code:
-```
+```CSharp
 Dictionary<string, string> pathToValue = new Dictionary<string, string>()
 {
     { "$.say.hello.world", "Hello world!" },
     { "$.say.hello.john", "Hello John!" },
     { "$.say.hi.jane", "Hi jane!" },
-    { "$.say.hi.montreal[0]", "Salut MontrÃ©al!" },
+    { "$.say.hi.montreal[0]", "Salut Montréal!" },
     { "$.say.hi.montreal[1]", "Hi Montreal!" },
 };
 
@@ -29,7 +29,7 @@ foreach (var pair in pathToValue)
 }
 Console.WriteLine(manager.Build());
 ```
-Which gives: `{"say":{"hello":{"world":"Hello world!","john":"Hello John!"},"hi":{"jane":"Hi jane!","montreal":["Salut MontrÃ©al!","Hi Montreal!"]}}}`, or:
+Which gives: `{"say":{"hello":{"world":"Hello world!","john":"Hello John!"},"hi":{"jane":"Hi jane!","montreal":["Salut Montréal!","Hi Montreal!"]}}}`, or:
 ```
 {
   "say": {
@@ -40,7 +40,7 @@ Which gives: `{"say":{"hello":{"world":"Hello world!","john":"Hello John!"},"hi"
     "hi": {
       "jane": "Hi jane!",
       "montreal": [
-        "Salut MontrÃ©al!",
+        "Salut Montréal!",
         "Hi Montreal!"
       ]
     }
@@ -54,8 +54,9 @@ Which gives: `{"say":{"hello":{"world":"Hello world!","john":"Hello John!"},"hi"
 
 * Property, e.g. `$.foo.key` or `['foo']['key']`
 * Index, e.g. `$.foo[1]`, `$[-2]`
+* Multiple indexes, e.g. `$.foo[1,2]`, `$[-2, 3, 1]`
 
-**JsonPathManager** instance can be initialized with no argument (will create a new empty root), or with a JObject or JArray as root.
+**JsonPathManager** instance can be initialized with no argument (will create a new empty root), or with a JObject or JArray as its root.
 
 ## Constaints
 
