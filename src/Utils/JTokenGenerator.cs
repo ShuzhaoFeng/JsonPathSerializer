@@ -1,4 +1,5 @@
 ﻿using JsonPathSerializer.Structs;
+using JsonPathSerializer.Structs.Types.IndexSpan;
 using Newtonsoft.Json.Linq;
 
 namespace JsonPathSerializer.Utils
@@ -57,8 +58,24 @@ namespace JsonPathSerializer.Utils
 
                         break;
 
+                    case JsonPathToken.TokenType.IndexSpan:
+                        jArray = new JArray();
+                        IndexSpanValueContainer indexSpan = (IndexSpanValueContainer)jsonPathToken.Value;
+                        int start = indexSpan.StartIndex;
+                        int end = indexSpan.EndIndex ?? 0;
+
+                        // insert jToken into all slots of the span.
+                        for (int j = Math.Min(start, end); j < Math.Max(start, end) + 1; j++)
+                        {
+                            jArray.Add(jToken);
+                        }
+
+                        jToken = jArray;
+
+                        break;
+
                     default:
-                        throw new NotImplementedException();
+                        throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
                 }
             }
 

@@ -1,4 +1,5 @@
 ﻿using JsonPathSerializer.Structs;
+using JsonPathSerializer.Structs.Types.IndexSpan;
 using Newtonsoft.Json.Linq;
 
 namespace JsonPathSerializer.Utils
@@ -38,12 +39,12 @@ namespace JsonPathSerializer.Utils
                             JToken jToken = currentToken.Token;
 
                             // Check whether the token's children contains the next element of the path.
-                            if (jToken is JObject currentJObject && currentJObject.ContainsKey(key))
+                            if (jToken is JObject currentJObject && currentJObject.TryGetValue(key, out var value))
                             {
                                 currentTokens[currentTokens.IndexOf(currentToken)] =
                                     new JsonNodeToken
                                     (
-                                        currentJObject[key] ?? throw new NullReferenceException(),
+                                        value ?? throw new NullReferenceException(),
                                         currentToken.Index + 1
                                     );
                             }
@@ -85,13 +86,10 @@ namespace JsonPathSerializer.Utils
 
                     case JsonPathToken.TokenType.Indexes:
                         List<int> indexes = (List<int>)token.Value;
+                        List<JsonNodeToken> indexesTemporaryTokens = new();
 
-                        int j = 0;
-
-                        while (j < currentTokens.Count)
+                        foreach (JsonNodeToken currentToken in currentTokens)
                         {
-                            JsonNodeToken currentToken = currentTokens[j];
-                            currentTokens.RemoveAt(j);
                             JToken jToken = currentToken.Token;
 
                             // split each token into the specified number of tokens
@@ -103,7 +101,7 @@ namespace JsonPathSerializer.Utils
                                     int absoluteIndex =
                                         indexOfList < 0 ? currentJArray.Count + indexOfList : indexOfList;
 
-                                    currentTokens.Insert(j, new JsonNodeToken
+                                    indexesTemporaryTokens.Add(new JsonNodeToken
                                     (
                                         currentJArray[absoluteIndex] ?? throw new NullReferenceException(),
                                         currentToken.Index + 1
@@ -112,17 +110,87 @@ namespace JsonPathSerializer.Utils
                                 }
                                 else
                                 {
-                                    currentTokens.Insert(j, currentToken.AsLastAvailable());
+                                    indexesTemporaryTokens.Add(currentToken.AsLastAvailable());
                                 }
-
-                                j++;
                             }
                         }
+
+                        currentTokens = indexesTemporaryTokens;
+
+                        break;
+
+                    case JsonPathToken.TokenType.IndexSpan:
+                        IndexSpanValueContainer indexSpan = (IndexSpanValueContainer)token.Value;
+                        List<JsonNodeToken> indexSpanTemporaryTokens = new();
+                        
+                        int start = indexSpan.StartIndex;
+                        int? end = indexSpan.EndIndex;
+
+                        foreach (JsonNodeToken currentToken in currentTokens)
+                        {
+                            JToken jToken = currentToken.Token;
+
+                            if (jToken is JArray currentJArray)
+                            {
+                                int realEnd = end ?? currentJArray.Count;
+
+                                int max = Math.Max(start, realEnd);
+                                int min = Math.Min(start, realEnd);
+
+                                if (currentJArray.Count < max - min)
+                                {
+                                    indexSpanTemporaryTokens.AddRange(currentJArray.Select(
+                                        t => new JsonNodeToken(
+                                            t ?? throw new NullReferenceException(),
+                                            currentToken.Index + 1)
+                                        ));
+
+                                    for (int i = currentJArray.Count; i <= max - min; i++)
+                                    {
+                                        indexSpanTemporaryTokens.Add(currentToken.AsLastAvailable());
+                                    }
+                                }
+                                else if (currentJArray.Count <= Math.Max(Math.Abs(start), Math.Abs(realEnd)))
+                                {
+                                    indexSpanTemporaryTokens.AddRange(currentJArray.Select(
+                                        t => new JsonNodeToken(
+                                            t ?? throw new NullReferenceException(),
+                                            currentToken.Index + 1)
+                                    ));
+
+                                    int bound = Math.Max(Math.Abs(start), Math.Abs(realEnd));
+                                    
+                                    for (int i = currentJArray.Count; i <= bound; i++)
+                                    {
+                                        indexSpanTemporaryTokens.Add(currentToken.AsLastAvailable());
+                                    }
+                                }
+                                else
+                                {
+                                    for (int i = start;
+                                         start > realEnd ? i >= realEnd : i <= realEnd;
+                                         i += start > realEnd ? -1 : 1)
+                                    {
+                                        int absoluteIndex = i < 0 ? currentJArray.Count + i : i;
+                                        
+                                        indexSpanTemporaryTokens.Add(new JsonNodeToken
+                                        (
+                                            currentJArray[absoluteIndex] ?? throw new NullReferenceException(),
+                                            currentToken.Index + 1
+                                        ));
+                                    }
+                                }
+
+                                
+                            }
+                        }
+
+                        currentTokens = indexSpanTemporaryTokens;
 
                         break;
 
                     default:
-                        throw new NotImplementedException();
+                        throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
                 }
 
                 if (currentTokens.Any(x => !x.IsLastAvailableToken))

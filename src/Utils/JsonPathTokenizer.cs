@@ -16,6 +16,7 @@ namespace JsonPathSerializer.Utils
             List<JsonPathToken> pathTokens = new();
 
             // Parse the JsonPath into strings of tokens.
+            
             foreach (string pathToken in ParseJsonPath(jsonPath.Trim()))
             {
                 // Ignore root token
@@ -25,48 +26,20 @@ namespace JsonPathSerializer.Utils
                 }
 
                 // Try match the token into a known type.
-                
-                Match indexStartFromMatch = SerializerGlobals.JsonPathRegex.INDEX_START_FROM.Match(pathToken);
-
-                if (indexStartFromMatch.Success)
-                {
-                    pathTokens.Add(new JsonPathToken(
-                        new IndexSpanValueContainer
-                        (
-                            int.Parse(indexStartFromMatch.Groups[1].Value),
-                            null
-                        ),
-                        JsonPathToken.TokenType.IndexSpan
-                    ));
-
-                    continue;
-                }
-
-                Match indexEndAtMatch = SerializerGlobals.JsonPathRegex.INDEX_END_AT.Match(pathToken);
-
-                if (indexEndAtMatch.Success)
-                {
-                    pathTokens.Add(new JsonPathToken(
-                        new IndexSpanValueContainer
-                        (
-                            0,
-                            int.Parse(indexEndAtMatch.Groups[1].Value)
-                        ),
-                        JsonPathToken.TokenType.IndexSpan
-                    ));
-
-                    continue;
-                }
-
                 Match indexSpanMatch = SerializerGlobals.JsonPathRegex.INDEX_SPAN.Match(pathToken);
 
                 if (indexSpanMatch.Success)
                 {
+
                     pathTokens.Add(new JsonPathToken(
                         new IndexSpanValueContainer
                         (
-                            int.Parse(indexSpanMatch.Groups[1].Value),
-                            int.Parse(indexSpanMatch.Groups[2].Value)
+                            indexSpanMatch.Groups[1].Value == ""
+                                ? 0
+                                : int.Parse(indexSpanMatch.Groups[1].Value),
+                            indexSpanMatch.Groups[2].Value == ""
+                                ? null
+                                : int.Parse(indexSpanMatch.Groups[2].Value)
                         ),
                         JsonPathToken.TokenType.IndexSpan
                     ));
@@ -115,7 +88,7 @@ namespace JsonPathSerializer.Utils
                 }
 
                 // If any token is not a known type, stop the process.
-                throw new NotImplementedException();
+                throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
             }
 
             return pathTokens;
