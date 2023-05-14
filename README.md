@@ -55,6 +55,7 @@ Which gives: `{"say":{"hello":{"world":"Hello world!","john":"Hello John!"},"hi"
 * Property, e.g. `$.foo.key` or `['foo']['key']`
 * Index, e.g. `$.foo[1]`, `$[-2]`
 * Multiple indexes, e.g. `$.foo[1,2]`, `$[-2, 3, 1]`
+* Index range, e.g. `$.foo[1:3]`, `$[-2:3]`, `$[1:-1]`
 
 **JsonPathManager** instance can be initialized with no argument (will create a new empty root), or with a JObject or JArray as its root.
 

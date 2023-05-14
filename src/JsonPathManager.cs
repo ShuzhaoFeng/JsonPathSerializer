@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using JsonPathSerializer.Structs;
+using JsonPathSerializer.Structs.Types.IndexSpan;
 using JsonPathSerializer.Utils;
 
 namespace JsonPathSerializer;
@@ -134,7 +135,7 @@ public class JsonPathManager : IJsonPathManager
 
                 case JsonPathToken.TokenType.Index:
                     JArray lastJArray;
-                    
+
                     if (lastAvailableToken.Token.HasValues)
                     {
                         lastJArray = (JArray) lastAvailableToken.Token;
@@ -146,17 +147,17 @@ public class JsonPathManager : IJsonPathManager
                     }
                     
                     int index = (int) splitToken.Value;
-                    
+
                     for (int i = 0; i < index - lastJArray.Count + 2; i++)
                     {
                         lastJArray.Add(new JObject());
                     }
                     
-                    lastJArray[index] = newToken;
+                    lastJArray[index < 0 ? lastJArray.Count + index : index] = newToken;
 
                     break;
 
-                case JsonPathToken.TokenType.Indexes: case JsonPathToken.TokenType.IndexSpan:
+                case JsonPathToken.TokenType.Indexes:
 
                     if (lastAvailableToken.Token.HasValues)
                     {
@@ -173,23 +174,72 @@ public class JsonPathManager : IJsonPathManager
                     }
                     
                     List<int> indexes = (List<int>) splitToken.Value;
-                    
-                    for (int i = 0; i < indexes.Max() + 1; i++)
+
+                    for (int i = 0; i <= indexes.Select(Math.Abs).Max(); i++)
                     {
-                        if (i < lastJArray.Count) // Array already contains the index i.
+                        if (i >= lastJArray.Count)
                         {
-                            if (indexes.Contains(i)) lastJArray[i] = newToken;
+                            lastJArray.Add(new JObject());
                         }
-                        else // Array does not contain the index i.
+                    }
+                    
+                    foreach (int i in indexes.Select(i => i < 0 ? lastJArray.Count + i : i))
+                    {
+                        lastJArray[i] = newToken;
+                    }
+
+                    break;
+
+                case JsonPathToken.TokenType.IndexSpan:
+
+                    if (lastAvailableToken.Token.HasValues)
+                    {
+                        lastJArray = (JArray)lastAvailableToken.Token;
+                    }
+                    else // empty JObject
+                    {
+                        lastJArray = new JArray();
+
+                        if (lastAvailableToken.Token.Parent is not null)
                         {
-                            lastJArray.Add(indexes.Contains(i) ? newToken : new JObject());
+                            lastAvailableToken.Token.Replace(lastJArray);
                         }
+                    }
+
+                    IndexSpanValueContainer indexSpan = (IndexSpanValueContainer)splitToken.Value;
+
+                    int realEnd = indexSpan.EndIndex ?? lastJArray.Count;
+
+                    int max = Math.Max(indexSpan.StartIndex, realEnd);
+                    int min = Math.Min(indexSpan.StartIndex, realEnd);
+
+                    if (lastJArray.Count < max - min)
+                    {
+                        for (int i = lastJArray.Count; i <= max - min; i++)
+                        {
+                            lastJArray.Add(new JObject());
+                        }
+                    }
+
+                    if (lastJArray.Count < Math.Max(Math.Abs(max), Math.Abs(min)))
+                    {
+                        for (int i = lastJArray.Count; i <= Math.Max(Math.Abs(max), Math.Abs(min)); i++)
+                        {
+                            lastJArray.Add(new JObject());
+                        }
+                    }
+
+                    for (int i = indexSpan.StartIndex;
+                         indexSpan.StartIndex > realEnd ? i >= realEnd : i <= realEnd;
+                         i += indexSpan.StartIndex > realEnd ? -1 : 1)
+                    {
+                        lastJArray[i < 0 ? lastJArray.Count + i : i] = newToken;
                     }
 
                     break;
 
                 default:
-                    throw new NotImplementedException();
+                    throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
             }
         }
 
