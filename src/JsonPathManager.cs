@@ -27,9 +27,28 @@ public class JsonPathManager : IJsonPathManager
     {
         JsonPathManager manager = new();
 
-        foreach ((string, object) jsonPathToValue in jsonPathToValues)
+        foreach ((string, object) jsonPathToValue in jsonPathToValues
+                                                     ?? throw new ArgumentNullException(nameof(jsonPathToValues)))
         {
             manager.Add(jsonPathToValue.Item1, jsonPathToValue.Item2);
+        }
+
+        return manager.Build();
+    }
+
+    /// <summary>
+    /// Serialize a collection of key-value pairs into a Json string.
+    /// </summary>
+    /// <param name="jsonPathToValues">The key-value pairs to serialize.</param>
+    /// <returns>The serialized string.</returns>
+    public static string SerializeAll(ICollection<KeyValuePair<string, object>> jsonPathToValues)
+    {
+        JsonPathManager manager = new();
+
+        foreach (KeyValuePair<string, object> jsonPathToValue in jsonPathToValues
+                ?? throw new ArgumentNullException(nameof(jsonPathToValues)))
+        {
+            manager.Add(jsonPathToValue.Key, jsonPathToValue.Value);
         }
 
         return manager.Build();
@@ -41,12 +60,12 @@ public class JsonPathManager : IJsonPathManager
 
     public JsonPathManager(JToken root)
     {
-        _root = root;
+        _root = root ?? throw new ArgumentNullException(nameof(root));
     }
 
     public JsonPathManager(string root)
     {
-        _root = JToken.Parse(root);
+        _root = JToken.Parse(root ?? throw new ArgumentNullException(nameof(root)));
     }
 
     public void Clear()
@@ -62,7 +81,7 @@ public class JsonPathManager : IJsonPathManager
     public void Add(string path, object value)
     {
         // Verify the path is a valid JsonPath for the operation.
-        JsonPathValidator.ValidateJsonPath(path.Trim());
+        JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
 
         // Tokenize the JsonPath.
 
@@ -78,7 +97,8 @@ public class JsonPathManager : IJsonPathManager
                           ?? (pathTokens[0].Type is JsonPathToken.TokenType.Index ? new JArray() : new JObject());
 
         // get the list of last available tokens that already exist within the root.
-        foreach (JsonNodeToken lastAvailableToken in JsonNodeTokenCollector.CollectLastAvailableTokens(rootCopy, pathTokens))
+        foreach (JsonNodeToken lastAvailableToken in 
+                 JsonNodeTokenCollector.CollectLastAvailableTokens(rootCopy, pathTokens))
         {
             // Check for conflicting types.
             
@@ -122,7 +142,8 @@ public class JsonPathManager : IJsonPathManager
                 pathTokens.Count - lastAvailableToken.Index - 1
             );
 
-            JToken newToken = JTokenGenerator.GenerateToken(unavailableTokens, value);
+            JToken newToken = JTokenGenerator.GenerateToken(unavailableTokens, value
+                            ?? throw new ArgumentNullException(nameof(value)));
 
             // merge the new JToken into the root copy using the split JsonPathToken.
             switch (splitToken.Type)
