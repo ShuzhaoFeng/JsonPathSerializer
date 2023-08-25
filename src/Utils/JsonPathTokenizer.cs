@@ -16,8 +16,10 @@ namespace JsonPathSerializer.Utils
             List<JsonPathToken> pathTokens = new();
 
             // Parse the JsonPath into strings of tokens.
-            
-            foreach (string pathToken in ParseJsonPath(jsonPath.Trim()))
+            List<string> parsedTokenList = ParseJsonPath(jsonPath.Trim());
+
+
+            foreach (string pathToken in parsedTokenList)
             {
                 // Ignore root token
                 if ("$.".Contains(pathToken))
@@ -78,13 +80,28 @@ namespace JsonPathSerializer.Utils
                     continue;
                 }
 
-                Match propertyDotMatch = SerializerGlobals.JsonPathRegex.PROPERTY_DOT.Match(pathToken);
-
-                if (propertyDotMatch.Success)
+                // guard against a first property without a dot, which should be allowed.
+                if (parsedTokenList.IndexOf(pathToken) == 0 && !pathToken.StartsWith('.'))
                 {
-                    pathTokens.Add(
-                        new JsonPathToken(propertyDotMatch.Groups[1].Value, JsonPathToken.TokenType.Property));
-                    continue;
+                    Match propertyDotMatch = SerializerGlobals.JsonPathRegex.PROPERTY_DOT.Match('.' + pathToken);
+
+                    if (propertyDotMatch.Success)
+                    {
+                        pathTokens.Add(
+                            new JsonPathToken(propertyDotMatch.Groups[1].Value, JsonPathToken.TokenType.Property));
+                        continue;
+                    }
+                }
+                else
+                {
+                    Match propertyDotMatch = SerializerGlobals.JsonPathRegex.PROPERTY_DOT.Match(pathToken);
+
+                    if (propertyDotMatch.Success)
+                    {
+                        pathTokens.Add(
+                            new JsonPathToken(propertyDotMatch.Groups[1].Value, JsonPathToken.TokenType.Property));
+                        continue;
+                    }
                 }
 
                 // If any token is not a known type, stop the process.

@@ -10,6 +10,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EA60E84A-BB6
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C3641C79-6C38-4481-B967-984C2196F958}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonPathSerializerTest", "JsonPathSerializerTest\JsonPathSerializerTest.csproj", "{92FA258E-5770-43B3-8519-4DDB0DDFAB8F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,12 +24,17 @@ Global
 		{C5201745-FFE5-49BA-95DB-E698D9582B65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5201745-FFE5-49BA-95DB-E698D9582B65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5201745-FFE5-49BA-95DB-E698D9582B65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92FA258E-5770-43B3-8519-4DDB0DDFAB8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92FA258E-5770-43B3-8519-4DDB0DDFAB8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92FA258E-5770-43B3-8519-4DDB0DDFAB8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92FA258E-5770-43B3-8519-4DDB0DDFAB8F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C5201745-FFE5-49BA-95DB-E698D9582B65} = {EA60E84A-BB67-4DB6-814C-487770D023EB}
+		{92FA258E-5770-43B3-8519-4DDB0DDFAB8F} = {C3641C79-6C38-4481-B967-984C2196F958}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F1D5DB29-0671-4903-AB38-ABA16E5A6BCF}

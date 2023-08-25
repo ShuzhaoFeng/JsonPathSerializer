@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+
+    <Version>$(VersionPrefix)</Version>
+
+    <Company>$(Authors)</Company>
+
+    <AssemblyVersion>0.0.1.2</AssemblyVersion>
+
+    <FileVersion>0.0.1.0</FileVersion>
+
+    <Title>JsonPathSerializerTest</Title>
+
+    <Description>Test Library for JsonPathSerializer</Description>
+
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <RepositoryUrl>https://github.com/ShuzhaoFeng/JsonPathSerializer</RepositoryUrl>
+
+    <Authors>Shuzhao Feng</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
+    <PackageReference Include="coverlet.collector" Version="3.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\JsonPathSerializer.csproj" />
+  </ItemGroup>
+
+</Project>
