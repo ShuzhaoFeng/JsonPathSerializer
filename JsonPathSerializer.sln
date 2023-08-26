@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EA60E84A-BB6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C3641C79-6C38-4481-B967-984C2196F958}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonPathSerializerTest", "JsonPathSerializerTest\JsonPathSerializerTest.csproj", "{92FA258E-5770-43B3-8519-4DDB0DDFAB8F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonPathSerializerTest", "test\JsonPathSerializerTest.csproj", "{92FA258E-5770-43B3-8519-4DDB0DDFAB8F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
