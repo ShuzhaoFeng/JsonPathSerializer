@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using JsonPathSerializer.Structs;
+﻿using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Types.IndexSpan;
 using JsonPathSerializer.Utils;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace JsonPathSerializer;
 
@@ -97,11 +97,11 @@ public class JsonPathManager : IJsonPathManager
                           ?? (pathTokens[0].Type is JsonPathToken.TokenType.Index ? new JArray() : new JObject());
 
         // get the list of last available tokens that already exist within the root.
-        foreach (JsonNodeToken lastAvailableToken in 
+        foreach (JsonNodeToken lastAvailableToken in
                  JsonNodeTokenCollector.CollectLastAvailableTokens(rootCopy, pathTokens))
         {
             // Check for conflicting types.
-            
+
             if (lastAvailableToken.Token is not JContainer)
             {
                 throw new ArgumentException
@@ -166,14 +166,14 @@ public class JsonPathManager : IJsonPathManager
                         lastJArray = new JArray();
                         lastAvailableToken.Token.Replace(lastJArray);
                     }
-                    
+
                     int index = (int) splitToken.Value;
 
                     for (int i = 0; i < index - lastJArray.Count + 2; i++)
                     {
                         lastJArray.Add(new JObject());
                     }
-                    
+
                     lastJArray[index < 0 ? lastJArray.Count + index : index] = newToken;
 
                     break;
@@ -193,7 +193,7 @@ public class JsonPathManager : IJsonPathManager
                             lastAvailableToken.Token.Replace(lastJArray);
                         }
                     }
-                    
+
                     List<int> indexes = (List<int>) splitToken.Value;
 
                     for (int i = 0; i <= indexes.Select(Math.Abs).Max(); i++)
@@ -203,7 +203,7 @@ public class JsonPathManager : IJsonPathManager
                             lastJArray.Add(new JObject());
                         }
                     }
-                    
+
                     foreach (int i in indexes.Select(i => i < 0 ? lastJArray.Count + i : i))
                     {
                         lastJArray[i] = newToken;

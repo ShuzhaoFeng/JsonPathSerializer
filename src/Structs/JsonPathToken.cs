@@ -15,7 +15,7 @@
             Indexes,
             IndexSpan
         }
-        
+
         /// <summary>
         /// The value in a JsonPathToken.
         /// </summary>

@@ -122,7 +122,7 @@ namespace JsonPathSerializer.Utils
                     case JsonPathToken.TokenType.IndexSpan:
                         IndexSpanValueContainer indexSpan = (IndexSpanValueContainer)token.Value;
                         List<JsonNodeToken> indexSpanTemporaryTokens = new();
-                        
+
                         int start = indexSpan.StartIndex;
                         int? end = indexSpan.EndIndex;
 
@@ -159,7 +159,7 @@ namespace JsonPathSerializer.Utils
                                     ));
 
                                     int bound = Math.Max(Math.Abs(start), Math.Abs(realEnd));
-                                    
+
                                     for (int i = currentJArray.Count; i <= bound; i++)
                                     {
                                         indexSpanTemporaryTokens.Add(currentToken.AsLastAvailable());
@@ -172,7 +172,7 @@ namespace JsonPathSerializer.Utils
                                          i += start > realEnd ? -1 : 1)
                                     {
                                         int absoluteIndex = i < 0 ? currentJArray.Count + i : i;
-                                        
+
                                         indexSpanTemporaryTokens.Add(new JsonNodeToken
                                         (
                                             currentJArray[absoluteIndex] ?? throw new NullReferenceException(),
@@ -181,7 +181,7 @@ namespace JsonPathSerializer.Utils
                                     }
                                 }
 
-                                
+
                             }
                         }
 
