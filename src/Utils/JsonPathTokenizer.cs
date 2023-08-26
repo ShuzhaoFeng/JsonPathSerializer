@@ -1,6 +1,6 @@
 ﻿using JsonPathSerializer.Structs;
-using System.Text.RegularExpressions;
 using JsonPathSerializer.Structs.Types.IndexSpan;
+using System.Text.RegularExpressions;
 
 namespace JsonPathSerializer.Utils
 {
