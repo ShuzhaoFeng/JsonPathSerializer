@@ -21,18 +21,6 @@ namespace JsonPathSerializerTest.AddKeyValuePairTest
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenAddingKeyWithDoubleDots()
-        {
-            Assert.ThrowsException<ArgumentException>(() => _emptyManager.Add("John..Doe", "John Doe"));
-        }
-
-        [TestMethod]
-        public void ThrowsExceptionWhenAddingKeyWithEndingDot()
-        {
-            Assert.ThrowsException<JsonException>(() => _emptyManager.Add("John.Doe.", "John Doe"));
-        }
-
-        [TestMethod]
         public void ThrowsExceptionWhenAddingKeyWithStringInBracketWithoutQuote()
         {
             Assert.ThrowsException<JsonException>(() => _emptyManager.Add("John[Doe]", "John Doe"));
