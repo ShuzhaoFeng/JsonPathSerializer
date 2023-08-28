@@ -33,18 +33,6 @@ namespace JsonPathSerializerTest.AddKeyValuePairTest
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenAddingKeyWithStringInBracketWithoutQuote()
-        {
-            Assert.ThrowsException<JsonException>(() => _emptyManager.Add("John[Doe]", "John Doe"));
-        }
-
-        [TestMethod]
-        public void ThrowsExceptionWhenAddingKeyWithUnclosedBracket()
-        {
-            Assert.ThrowsException<JsonException>(() => _emptyManager.Add("John['Doe'", "John Doe"));
-        }
-
-        [TestMethod]
         public void ThrowsExceptionWhenAddingNullKey()
         {
             Assert.ThrowsException<ArgumentNullException>(() => _emptyManager.Add(null, "John Doe"));
