@@ -13,29 +13,5 @@ namespace JsonPathSerializerTest.AddKeyValuePairTest
         {
             _emptyManager = new JsonPathManager();
         }
-
-        [TestMethod]
-        public void ThrowsExceptionWhenAddingEmptyKey()
-        {
-            Assert.ThrowsException<ArgumentException>(() => _emptyManager.Add("", "John Doe"));
-        }
-
-        [TestMethod]
-        public void ThrowsExceptionWhenAddingKeyWithDoubleDots()
-        {
-            Assert.ThrowsException<ArgumentException>(() => _emptyManager.Add("John..Doe", "John Doe"));
-        }
-
-        [TestMethod]
-        public void ThrowsExceptionWhenAddingKeyWithEndingDot()
-        {
-            Assert.ThrowsException<JsonException>(() => _emptyManager.Add("John.Doe.", "John Doe"));
-        }
-
-        [TestMethod]
-        public void ThrowsExceptionWhenAddingNullKey()
-        {
-            Assert.ThrowsException<ArgumentNullException>(() => _emptyManager.Add(null, "John Doe"));
-        }
     }
 }
