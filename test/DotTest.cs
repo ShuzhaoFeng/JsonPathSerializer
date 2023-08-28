@@ -76,7 +76,7 @@ namespace JsonPathSerializerTest
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenInsertingValueToValue()
+        public void ThrowsExceptionWhenInsertingValueAsChildUnderExistingValue()
         {
             Assert.ThrowsException<ArgumentException>(() => _loadedManager.Add("name.first.English", "Shuzhao"));
         }
