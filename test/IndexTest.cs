@@ -1,4 +1,5 @@
 ﻿using JsonPathSerializer;
+using Newtonsoft.Json;
 
 namespace JsonPathSerializerTest
 {
@@ -99,6 +100,24 @@ namespace JsonPathSerializerTest
             _emptyManager.Add("name[0].first", "Shuzhao");
 
             Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0]["first"].ToString());
+        }
+
+        [TestMethod]
+        public void ThrowsExceptionWhenAddingIndexToExistingPropertyObject()
+        {
+            Assert.ThrowsException<ArgumentException>(() => _propertyManager.Add("name[0]", "Shuzhao"));
+        }
+
+        [TestMethod]
+        public void ThrowsExceptionWhenIndexIsNotInteger()
+        {
+            Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[1.5]", "Shuzhao"));
+        }
+
+        [TestMethod]
+        public void ThrowsExceptionWhenBracketIsEmpty()
+        {
+            Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[]", "Shuzhao"));
         }
     }
 }
