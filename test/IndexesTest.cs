@@ -103,5 +103,22 @@ namespace JsonPathSerializerTest
             Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][1].ToString());
         }
 
+        [TestMethod]
+        public void ThrowsExceptionWhenAddingIndexesWithInvalidSeparator()
+        {
+            Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[0 1]", "Shuzhao"));
+        }
+
+        [TestMethod]
+        public void ThrowsExceptionWhenAddingIndexesToExistingPropertyObject()
+        {
+            Assert.ThrowsException<ArgumentException>(() => _propertyManager.Add("name[0, 1]", "Shuzhao"));
+        }
+
+        [TestMethod]
+        public void ThrowsExceptionWhenIndexesAreNotInteger()
+        {
+            Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[1.5, 7/4]", "Shuzhao"));
+        }
     }
 }
