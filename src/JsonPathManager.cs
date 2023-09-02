@@ -94,7 +94,7 @@ public class JsonPathManager : IJsonPathManager
 
         // Make a copy of root.
         JToken rootCopy = _root?.DeepClone()
-                          ?? (pathTokens[0].Type is JsonPathToken.TokenType.Index ? new JArray() : new JObject());
+                          ?? (JsonPathValidator.IsArray(pathTokens[0]) ? new JArray() : new JObject());
 
         // get the list of last available tokens that already exist within the root.
         foreach (JsonNodeToken lastAvailableToken in
@@ -164,12 +164,20 @@ public class JsonPathManager : IJsonPathManager
                     else // empty JObject
                     {
                         lastJArray = new JArray();
-                        lastAvailableToken.Token.Replace(lastJArray);
+
+                        if (lastAvailableToken.Index == 0)
+                        {
+                            rootCopy = lastJArray;
+                        }
+                        else
+                        {
+                            lastAvailableToken.Token.Replace(lastJArray);
+                        }
                     }
 
                     int index = (int) splitToken.Value;
 
-                    for (int i = 0; i < index - lastJArray.Count + 2; i++)
+                    for (int i = 0; i <= index - lastJArray.Count + 1; i++)
                     {
                         lastJArray.Add(new JObject());
                     }
