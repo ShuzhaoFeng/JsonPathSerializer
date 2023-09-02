@@ -1,7 +1,7 @@
 ﻿using JsonPathSerializer;
 using Newtonsoft.Json;
 
-namespace JsonPathSerializerTest
+namespace JsonPathSerializerTest.AddKeyValuePairTest.OperationSpecificTest
 {
     [TestClass]
     public class DotTest
