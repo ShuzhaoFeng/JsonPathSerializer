@@ -1,10 +1,11 @@
 ﻿using JsonPathSerializer;
 using Newtonsoft.Json;
 
-namespace JsonPathSerializerTest
+namespace JsonPathSerializerTest.AddKeyValuePairTest.OperationSpecificTest
 {
     [TestClass]
-    public class IndexTest {
+    public class IndexTest
+    {
         private JsonPathManager _emptyManager = new();
         private JsonPathManager _loadedManager = new();
         private JsonPathManager _propertyManager = new();
