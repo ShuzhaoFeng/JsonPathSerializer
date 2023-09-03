@@ -83,8 +83,27 @@ public class JsonPathManager : IJsonPathManager
         // Verify the path is a valid JsonPath for the operation.
         JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
 
-        
-        
+        try
+        {
+            var result = _root?.SelectTokens(path);
+
+            if (result != null)
+            {
+                foreach (var resultView in result)
+                {
+                    if (resultView is JContainer) // there exists a JSON child at the location that will be overriden.
+                    {
+                        throw new ArgumentException($"JSON element {path} contains a JSON child element," +
+                                                    $"therefore cannot contain a value.");
+                    }
+                }
+            }
+        }
+        catch (ArgumentOutOfRangeException) // indicates a negative index, which SelectTokens can't handle
+        {
+            // TODO: find a way to validate negative index
+        }
+
         // Tokenize the JsonPath.
         List<JsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
 

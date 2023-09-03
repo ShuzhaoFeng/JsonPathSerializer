@@ -41,6 +41,7 @@ namespace JsonPathSerializer.Utils
                             // Check whether the token's children contains the next element of the path.
                             if (jToken is JObject currentJObject && currentJObject.TryGetValue(key, out var value))
                             {
+                                // replace the current token with a new one.
                                 currentTokens[currentTokens.IndexOf(currentToken)] =
                                     new JsonNodeToken
                                     (
@@ -65,14 +66,20 @@ namespace JsonPathSerializer.Utils
                             JToken jToken = currentToken.Token;
 
                             // Check whether the token's children contains the next element of the path.
+                            // if the value is positive, then wee need Count >= index + 1
+                            // if the value is negative, then we need Count >= abs(index)
                             if (jToken is JArray currentJArray &&
-                                currentJArray.Count > (index < 0 ? Math.Abs(index + 1) : index))
+                                currentJArray.Count >= (index < 0 ? Math.Abs(index) : index + 1))
                             {
-                                int absoluteIndex = index < 0 ? currentJArray.Count + index : index;
+                                // C# arrays don't accept negative indexes, so we need to convert them to positive ones.
+                                // e.g. for an array of length 5, index -2 is the same as index 3, which is 5 - 2.
+                                int positiveIndex = index < 0 ? currentJArray.Count + index : index;
+
+                                // replace the current token with a new one.
                                 currentTokens[currentTokens.IndexOf(currentToken)] =
                                     new JsonNodeToken
                                     (
-                                        currentJArray[absoluteIndex] ?? throw new NullReferenceException(),
+                                        currentJArray[positiveIndex] ?? throw new NullReferenceException(),
                                         currentToken.Index + 1
                                     );
                             }
@@ -86,42 +93,53 @@ namespace JsonPathSerializer.Utils
 
                     case JsonPathToken.TokenType.Indexes:
                         List<int> indexes = (List<int>)token.Value;
-                        List<JsonNodeToken> indexesTemporaryTokens = new();
+
+                        // Indexes will multiply the number of tokens by the number of indexes if it is not the last available.
+                        // for simplicity, we create a new list to store the new tokens.
+                        List<JsonNodeToken> newIndexesCurrentTokens = new();
 
                         foreach (JsonNodeToken currentToken in currentTokens)
                         {
                             JToken jToken = currentToken.Token;
 
                             // split each token into the specified number of tokens
-                            foreach (int indexOfList in indexes)
+                            foreach (int indexInIndexes in indexes)
                             {
-                                if (jToken is JArray currentJArray && currentJArray.Count >
-                                    (indexOfList < 0 ? Math.Abs(indexOfList + 1) : indexOfList))
+                                // Check whether the token's children contains the next element of the path.
+                                // if the value is positive, then wee need Count >= index + 1
+                                // if the value is negative, then we need Count >= abs(index)
+                                if (jToken is JArray currentJArray && currentJArray.Count >=
+                                    (indexInIndexes < 0 ? Math.Abs(indexInIndexes) : indexInIndexes + 1))
                                 {
-                                    int absoluteIndex =
-                                        indexOfList < 0 ? currentJArray.Count + indexOfList : indexOfList;
+                                    // C# arrays don't accept negative indexes, so we need to convert them to positive ones.
+                                    // e.g. for an array of length 5, index -2 is the same as index 3, which is 5 - 2.
+                                    int positiveIndex =
+                                        indexInIndexes < 0 ? currentJArray.Count + indexInIndexes : indexInIndexes;
 
-                                    indexesTemporaryTokens.Add(new JsonNodeToken
+                                    newIndexesCurrentTokens.Add(new JsonNodeToken
                                     (
-                                        currentJArray[absoluteIndex] ?? throw new NullReferenceException(),
+                                        currentJArray[positiveIndex] ?? throw new NullReferenceException(),
                                         currentToken.Index + 1
                                     ));
 
                                 }
                                 else
                                 {
-                                    indexesTemporaryTokens.Add(currentToken.AsLastAvailable());
+                                    newIndexesCurrentTokens.Add(currentToken.AsLastAvailable());
                                 }
                             }
                         }
 
-                        currentTokens = indexesTemporaryTokens;
+                        currentTokens = newIndexesCurrentTokens;
 
                         break;
 
                     case JsonPathToken.TokenType.IndexSpan:
                         IndexSpanValueContainer indexSpan = (IndexSpanValueContainer)token.Value;
-                        List<JsonNodeToken> indexSpanTemporaryTokens = new();
+
+                        // IndexSpan will multiply the number of tokens by the number of indexes if it is not the last available.
+                        // for simplicity, we create a new list to store the new tokens.
+                        List<JsonNodeToken> newIndexSpanCurrentTokens = new();
 
                         int start = indexSpan.StartIndex;
                         int? end = indexSpan.EndIndex;
@@ -132,60 +150,88 @@ namespace JsonPathSerializer.Utils
 
                             if (jToken is JArray currentJArray)
                             {
+                                // if the end value is not provided (e.g. [1:]), then it is taken as the length of the array.
+                                // start value is simpler (always 0 if not provided), so it is already handled.
                                 int realEnd = end ?? currentJArray.Count;
 
                                 int max = Math.Max(start, realEnd);
                                 int min = Math.Min(start, realEnd);
 
-                                if (currentJArray.Count < max - min)
+                                // if the values have the same sign (e.g. [2:5]), the minimum Count required is whichever number with the greatest positive index.
+                                // if the values have different signs (e.g. [-5:7]), max - min is the minimum Count required.
+                                if (max > 0 && min > 0 && currentJArray.Count <= max) // both positive, same sign
                                 {
-                                    indexSpanTemporaryTokens.AddRange(currentJArray.Select(
-                                        t => new JsonNodeToken(
-                                            t ?? throw new NullReferenceException(),
-                                            currentToken.Index + 1)
-                                        ));
-
-                                    for (int i = currentJArray.Count; i <= max - min; i++)
-                                    {
-                                        indexSpanTemporaryTokens.Add(currentToken.AsLastAvailable());
-                                    }
-                                }
-                                else if (currentJArray.Count <= Math.Max(Math.Abs(start), Math.Abs(realEnd)))
-                                {
-                                    indexSpanTemporaryTokens.AddRange(currentJArray.Select(
+                                    newIndexSpanCurrentTokens.AddRange(currentJArray.Select(
                                         t => new JsonNodeToken(
                                             t ?? throw new NullReferenceException(),
                                             currentToken.Index + 1)
                                     ));
 
-                                    int bound = Math.Max(Math.Abs(start), Math.Abs(realEnd));
-
-                                    for (int i = currentJArray.Count; i <= bound; i++)
+                                    for (int i = currentJArray.Count; i <= max; i++)
                                     {
-                                        indexSpanTemporaryTokens.Add(currentToken.AsLastAvailable());
+                                        newIndexSpanCurrentTokens.Add(currentToken.AsLastAvailable());
                                     }
                                 }
-                                else
+                                else if (max > 0 && min < 0 && currentJArray.Count <= max - min) // max positive, min negative, different sign
                                 {
-                                    for (int i = start;
-                                         start > realEnd ? i >= realEnd : i <= realEnd;
-                                         i += start > realEnd ? -1 : 1)
-                                    {
-                                        int absoluteIndex = i < 0 ? currentJArray.Count + i : i;
+                                    newIndexSpanCurrentTokens.AddRange(currentJArray.Select(
+                                        t => new JsonNodeToken(
+                                            t ?? throw new NullReferenceException(),
+                                            currentToken.Index + 1)
+                                    ));
 
-                                        indexSpanTemporaryTokens.Add(new JsonNodeToken
-                                        (
-                                            currentJArray[absoluteIndex] ?? throw new NullReferenceException(),
-                                            currentToken.Index + 1
-                                        ));
+                                    for (int i = currentJArray.Count; i <= max - min; i++)
+                                    {
+                                        newIndexSpanCurrentTokens.Add(currentToken.AsLastAvailable());
                                     }
                                 }
+                                else if (currentJArray.Count < - min) // both negative, same sign
+                                {
+                                    newIndexSpanCurrentTokens.AddRange(currentJArray.Select(
+                                        t => new JsonNodeToken(
+                                            t ?? throw new NullReferenceException(),
+                                            currentToken.Index + 1)
+                                    ));
 
+                                    for (int i = currentJArray.Count; i < - min; i++)
+                                    {
+                                        newIndexSpanCurrentTokens.Add(currentToken.AsLastAvailable());
+                                    }
+                                }
+                                else // no last available token
+                                {
 
+                                   if (start < realEnd)
+                                   {
+                                        for (int i = start; i <= realEnd; i += 1)
+                                        {
+                                            int absoluteIndex = i < 0 ? currentJArray.Count + i : i;
+
+                                            newIndexSpanCurrentTokens.Add(new JsonNodeToken
+                                            (
+                                                currentJArray[absoluteIndex] ?? throw new NullReferenceException(),
+                                                currentToken.Index + 1
+                                            ));
+                                        }
+                                   }
+                                   else // start > end, a reverse span
+                                   {
+                                        for (int i = start; i >= realEnd; i -= 1)
+                                        {
+                                            int absoluteIndex = i < 0 ? currentJArray.Count + i : i;
+
+                                            newIndexSpanCurrentTokens.Add(new JsonNodeToken
+                                            (
+                                                currentJArray[absoluteIndex] ?? throw new NullReferenceException(),
+                                                currentToken.Index + 1
+                                            ));
+                                        }
+                                   }
+                                }
                             }
                         }
 
-                        currentTokens = indexSpanTemporaryTokens;
+                        currentTokens = newIndexSpanCurrentTokens;
 
                         break;
 

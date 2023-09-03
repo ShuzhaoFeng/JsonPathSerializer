@@ -24,7 +24,7 @@ namespace JsonPathSerializer.Utils
                 throw new ArgumentException("Deep scan \'..\' is unsupported.");
             }
 
-            // Check for invalid JsonPath string format
+            // If the string is not valid JsonPath, the following will throw a JsonException
             new JObject().SelectToken(path);
         }
 
