@@ -92,7 +92,7 @@ namespace JsonPathSerializerTest.AddKeyValuePairTest.OperationSpecificTest
             _loadedManager.Add("name[-5]", "John Doe");
 
             // C# array doesn't allow negative index value (but we do), so -5 is converted to 0.
-            Assert.AreEqual("John Doe", _loadedManager.Value["name"][-5].ToString());
+            Assert.AreEqual("John Doe", _loadedManager.Value["name"][0].ToString());
         }
 
         [TestMethod]
