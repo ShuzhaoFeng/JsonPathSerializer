@@ -83,8 +83,9 @@ public class JsonPathManager : IJsonPathManager
         // Verify the path is a valid JsonPath for the operation.
         JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
 
+        
+        
         // Tokenize the JsonPath.
-
         List<JsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
 
         if (pathTokens.Count < 1)
@@ -177,7 +178,7 @@ public class JsonPathManager : IJsonPathManager
 
                     int index = (int) splitToken.Value;
 
-                    for (int i = 0; i <= index - lastJArray.Count + 1; i++)
+                    for (int i = 0; i <= index - lastJArray.Count + 2; i++)
                     {
                         lastJArray.Add(new JObject());
                     }
