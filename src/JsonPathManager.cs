@@ -197,9 +197,19 @@ public class JsonPathManager : IJsonPathManager
 
                     int index = (int) splitToken.Value;
 
-                    for (int i = 0; i <= index - lastJArray.Count + 2; i++)
+                    if (index > 0)
                     {
-                        lastJArray.Add(new JObject());
+                        for (int i = 0; i <= index - lastJArray.Count + 2; i++)
+                        {
+                            lastJArray.Add(new JObject());
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i <= Math.Abs(index) - lastJArray.Count; i++)
+                        {
+                            lastJArray.Add(new JObject());
+                        }
                     }
 
                     lastJArray[index < 0 ? lastJArray.Count + index : index] = newToken;
