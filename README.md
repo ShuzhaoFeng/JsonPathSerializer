@@ -5,7 +5,7 @@ Class library that helps putting data into the right place in a Json string, usi
 
 Built with .NET and newtonsoft.Json, **JsonPathSerializer** is a class library that aims to help automated tests and simulations to build large JSON objects using only values and their respective JSON path.
 
-As of version 0.1.0.0-alpha, the project is more of a concept demo rather than a complete, deliverable .NET class library. See **Constaints** about known limitations of JsonPathSerializer.
+As of version 0.1.0.0-beta, the project is more of a concept demo rather than a complete, deliverable .NET class library. See **Constaints** about known limitations of JsonPathSerializer.
 
 ## Quick-demo
 
@@ -63,4 +63,7 @@ Which gives: `{"say":{"hello":{"world":"Hello world!","john":"Hello John!"},"hi"
 
 There are several important known issues and limitations for **JsonPathSerializer** for future development:
 
+* JsonPathSerializer currently cannot handle an indexed JsonPath with a combination of indexes and index range.
+* Recursive descent is not allowed because it doesn't make sense in the context of building a JSON object.
+* Supports for wildcard will be implemented in the future.
 * Supports for JSON path operators will be gradually implemented.

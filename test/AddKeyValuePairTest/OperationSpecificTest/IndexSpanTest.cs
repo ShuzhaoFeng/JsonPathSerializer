@@ -129,7 +129,7 @@ namespace JsonPathSerializerTest.AddKeyValuePairTest.OperationSpecificTest
         [TestMethod]
         public void ThrowsExceptionWhenAddingIndexesWithInvalidSeparator()
         {
-            Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[0,:1]", "Shuzhao"));
+            Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[0;:1]", "Shuzhao"));
         }
 
         [TestMethod]
