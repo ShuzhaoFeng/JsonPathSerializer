@@ -28,6 +28,7 @@ namespace JsonPathSerializer.Utils
                 }
 
                 // Try match the token into a known type.
+
                 Match indexSpanMatch = SerializerGlobals.JsonPathRegex.INDEX_SPAN.Match(pathToken);
 
                 if (indexSpanMatch.Success)
