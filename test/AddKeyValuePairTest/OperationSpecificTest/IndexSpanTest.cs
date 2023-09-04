@@ -109,21 +109,24 @@ namespace JsonPathSerializerTest.AddKeyValuePairTest.OperationSpecificTest
         [TestMethod]
         public void CanAddNegativeIndexSpan()
         {
-            _emptyManager.Add("name[-2:-1]", "Shuzhao");
+            _emptyManager.Add("name[-5:-3]", "Shuzhao");
 
-            // C# array doesn't allow negative index value (but we do), so -2 is converted to 0.
+            // C# array doesn't allow negative index value (but we do), so -5 is converted to 0 and -3 to 2.
             Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0].ToString());
             Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][1].ToString());
+            Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][2].ToString());
         }
 
         [TestMethod]
         public void CanAddNegativeAndPositiveIndexSpan()
         {
-            _emptyManager.Add("name[-1:1]", "Shuzhao");
-
-            // C# array doesn't allow negative index value (but we do), so -2 is converted to 0.
-            Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0].ToString());
-            Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][1].ToString());
+            _emptyManager.Add("name[-5:2]", "Shuzhao");
+            
+            // we need minimally 8 elements: 0, 1, 2, 3 (-5), 4 (-4), 5 (-3), 6 (-2) and 7 (-1)
+            for (int i = 0; i < 8; i++)
+            {
+                Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][i].ToString());
+            }
         }
 
         [TestMethod]
