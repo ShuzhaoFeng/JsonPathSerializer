@@ -54,30 +54,54 @@ public class JsonPathManager : IJsonPathManager
         return manager.Build();
     }
 
+    /// <summary>
+    /// Create a new JsonPathManager instance with an empty root.
+    /// </summary>
     public JsonPathManager()
     {
     }
 
+    /// <summary>
+    /// Create a new JsonPathManager instance with the input token as root.
+    /// </summary>
+    /// <param name="root">The root token.</param>
     public JsonPathManager(JToken root)
     {
         _root = root ?? throw new ArgumentNullException(nameof(root));
     }
 
+    /// <summary>
+    /// Create a new JsonPathManager instance with the input string as root.
+    /// Will throw an exception if the root string is not a valid Json string.
+    /// </summary>
+    /// <param name="root">The root string.</param>
     public JsonPathManager(string root)
     {
         _root = JToken.Parse(root ?? throw new ArgumentNullException(nameof(root)));
     }
 
+    /// <summary>
+    /// Clear the JsonPathManager root.
+    /// </summary>
     public void Clear()
     {
         _root = null;
     }
 
+    /// <summary>
+    /// Build the Json string from the JsonPathManager root.
+    /// </summary>
+    /// <returns>A Json string representing the root.</returns>
     public string Build()
     {
         return JsonConvert.SerializeObject(_root ?? new JObject());
     }
 
+    /// <summary>
+    /// Add a value to the JsonPathManager root.
+    /// </summary>
+    /// <param name="path">The path where to add the value.</param>
+    /// <param name="value">The value to be added.</param>
     public void Add(string path, object value)
     {
         // Verify the path is a valid JsonPath for the operation.
@@ -151,10 +175,10 @@ public class JsonPathManager : IJsonPathManager
                 }
             }
 
-            // identify the split JsonPathToken.
+            // identify the JsonPathToken on the split point.
             JsonPathToken splitToken = pathTokens[lastAvailableToken.Index];
 
-            // Generate a new JToken with the rest of JsonPathTokens.
+            // Generate a new JToken with all its child JsonPathTokens.
 
             List<JsonPathToken> unavailableTokens = pathTokens.GetRange
             (

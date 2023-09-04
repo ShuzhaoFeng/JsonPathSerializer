@@ -12,13 +12,12 @@ namespace JsonPathSerializer.Utils
         /// <param name="jsonPathTokens">List of JsonPathTokens to generate.</param>
         /// <param name="value">Value of the leaf element.</param>
         /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         public static JToken GenerateToken(List<JsonPathToken> jsonPathTokens, object value)
         {
             // Create leaf element with given value.
             JToken jToken = JToken.FromObject(value);
 
-            // Generate JToken bottom-up, starting from the leaf element.
+            // Build JToken bottom-up, starting from the leaf element.
             for (int i = jsonPathTokens.Count; i > 0; i--)
             {
                 JsonPathToken jsonPathToken = jsonPathTokens[i - 1];
@@ -31,12 +30,21 @@ namespace JsonPathSerializer.Utils
                         break;
 
                     case JsonPathToken.TokenType.Index:
-                        JArray jArray = new JArray { jToken };
+                        int index = (int)jsonPathToken.Value;
 
-                        // insert empty slots.
-                        for (int j = 0; j < (int)jsonPathToken.Value; j++)
+                        // if index is positive (e.g. [3]), then we need to insert {index} empty elements before inserting the value.
+                        // if index is negative (e.g. [-3]), then we need to insert -{index} - 1 empty elements after inserting the value.
+                        int numOfEmptyElements = index >= 0 ? index : - index - 1;
+
+                        JArray jArray = new JArray(Enumerable.Repeat(new JObject(), numOfEmptyElements));
+
+                        if (index > 0)
                         {
-                            jArray.Insert(0, new JObject());
+                            jArray.Add(jToken);
+                        }
+                        else
+                        {
+                            jArray.Insert(0, jToken);
                         }
 
                         jToken = jArray;
@@ -59,15 +67,38 @@ namespace JsonPathSerializer.Utils
                         break;
 
                     case JsonPathToken.TokenType.IndexSpan:
-                        jArray = new JArray();
                         IndexSpanValueContainer indexSpan = (IndexSpanValueContainer)jsonPathToken.Value;
+
+                        // if the end value is not provided (e.g. [1:], which to be fair doesn't make too much sense in the context of building a new JSON)
+                        // then it is defined to be 0.
+                        // start value is simpler (always 0 if not provided), so it is already handled.
                         int start = indexSpan.StartIndex;
                         int end = indexSpan.EndIndex ?? 0;
 
-                        // insert jToken into all slots of the span.
-                        for (int j = Math.Min(start, end); j < Math.Max(start, end) + 1; j++)
+                        // if the two values are positive (e.g. [3:5]), then we need Count > max(start, end), where the first min(start, end) elements are empty.
+                        // if the two values are negative (e.g. [-5:-3]), then we need Count >= max(-start, -end), where the last min(-start, -end) - 1 elements are empty.
+                        // if the two values have different signs (e.g. [-5:3]), then we need Count > their difference + 1, with no empty elements.
+                        if (start >= 0 && end >= 0) // both positive
                         {
-                            jArray.Add(jToken);
+                            jArray = new JArray(Enumerable.Repeat(new JObject(), Math.Min(start, end)));
+
+                            for (int j = Math.Min(start, end); j < Math.Max(start, end) + 1; j++)
+                            {
+                                jArray.Add(jToken);
+                            }
+                        }
+                        else if (start < 0 && end < 0) // both negative
+                        {
+                            jArray = new JArray(Enumerable.Repeat(new JObject(), Math.Min(-start, -end) - 1));
+
+                            for (int j = Math.Min(-start, -end); j <= Math.Max(-start, -end); j++)
+                            {
+                                jArray.Insert(0, jToken);
+                            }
+                        }
+                        else // different signs
+                        {
+                            jArray = new JArray(Enumerable.Repeat(jToken, Math.Abs(start - end) + 1));
                         }
 
                         jToken = jArray;
