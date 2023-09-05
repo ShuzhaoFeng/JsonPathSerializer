@@ -250,7 +250,11 @@ public class JsonPathManager : IJsonPathManager
                     {
                         lastJArray = new JArray();
 
-                        if (lastAvailableToken.Token.Parent is not null)
+                        if (lastAvailableToken.Index == 0)
+                        {
+                            rootCopy = lastJArray;
+                        }
+                        else if (lastAvailableToken.Token.Parent is not null)
                         {
                             lastAvailableToken.Token.Replace(lastJArray);
                         }
@@ -283,7 +287,11 @@ public class JsonPathManager : IJsonPathManager
                     {
                         lastJArray = new JArray();
 
-                        if (lastAvailableToken.Token.Parent is not null)
+                        if (lastAvailableToken.Index == 0)
+                        {
+                            rootCopy = lastJArray;
+                        }
+                        else if (lastAvailableToken.Token.Parent is not null)
                         {
                             lastAvailableToken.Token.Replace(lastJArray);
                         }
