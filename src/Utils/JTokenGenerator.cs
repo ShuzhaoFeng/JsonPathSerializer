@@ -56,8 +56,16 @@ namespace JsonPathSerializer.Utils
                         jArray = new JArray();
                         List<int> indexes = (List<int>)jsonPathToken.Value;
 
+                        // if index is positive (e.g. [3]), then the minimum index required is {index}
+                        // if index is negative (e.g. [-3]), then the minimum index required -{index} - 1.
+                        // the minimum index required for all indexes is thus the maximum of those.
+                        int bound = indexes.Select(ind => ind >= 0 ? ind : - ind - 1).Max();
+
+                        // convert the list of indexes into positive indexes.
+                        indexes = indexes.Select(ind => ind >= 0 ? ind : bound + ind).ToList();
+
                         // insert jToken into all slots specified by the indexes.
-                        for (int j = 0; j < indexes.Max() + 1; j++)
+                        for (int j = 0; j <= bound; j++)
                         {
                             jArray.Add(indexes.Contains(j) ? jToken : new JObject());
                         }
