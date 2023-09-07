@@ -1,6 +1,5 @@
 ﻿using JsonPathSerializer;
 using Newtonsoft.Json;
-using System.Xml.Linq;
 
 namespace JsonPathSerializerTest.AddKeyValuePairTest.OperationSpecificTest
 {
