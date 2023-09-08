@@ -109,6 +109,11 @@ namespace JsonPathSerializer.Utils
                 throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
             }
 
+            if (pathTokens.Count < 1)
+            {
+                throw new ArgumentException("There is no valid JsonPath element in the string.");
+            }
+
             return pathTokens;
         }
 

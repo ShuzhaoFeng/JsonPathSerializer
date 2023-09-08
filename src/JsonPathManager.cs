@@ -1,5 +1,4 @@
 ﻿using JsonPathSerializer.Structs;
-using JsonPathSerializer.Structs.Types.IndexSpan;
 using JsonPathSerializer.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -131,11 +130,6 @@ public class JsonPathManager : IJsonPathManager
         // Tokenize the JsonPath.
         List<JsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
 
-        if (pathTokens.Count < 1)
-        {
-            throw new ArgumentException("There is no valid JsonPath element in the string.");
-        }
-
         // Make a copy of root.
         JToken rootCopy = _root?.DeepClone()
                           ?? (JsonPathValidator.IsArray(pathTokens[0]) ? new JArray() : new JObject());
@@ -175,163 +169,35 @@ public class JsonPathManager : IJsonPathManager
                 }
             }
 
-            // identify the JsonPathToken on the split point.
-            JsonPathToken splitToken = pathTokens[lastAvailableToken.Index];
+            rootCopy = JTokenGenerator.GenerateNewRoot(lastAvailableToken, pathTokens, rootCopy, value);
+        }
 
-            // Generate a new JToken with all its child JsonPathTokens.
+        // assign root copy back to root.
+        _root = rootCopy;
+    }
 
-            List<JsonPathToken> unavailableTokens = pathTokens.GetRange
-            (
-                lastAvailableToken.Index + 1,
-                pathTokens.Count - lastAvailableToken.Index - 1
-            );
+    /// <summary>
+    /// Force add a value to the JsonPathManager root, regardless of whether existing values will be overriden.
+    /// </summary>
+    /// <param name="path">The path where to add the value.</param>
+    /// <param name="value">The value to be added.</param>
+    public void Force(string path, object value)
+    {
+        // Verify the path is a valid JsonPath for the operation.
+        JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
 
-            JToken newToken = JTokenGenerator.GenerateToken(unavailableTokens, value
-                            ?? throw new ArgumentNullException(nameof(value)));
+        // Tokenize the JsonPath.
+        List<JsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
 
-            // merge the new JToken into the root copy using the split JsonPathToken.
-            switch (splitToken.Type)
-            {
-                case JsonPathToken.TokenType.Property:
-                    JObject lastJObject = (JObject) lastAvailableToken.Token;
-                    lastJObject[(string) splitToken.Value] = newToken;
+        // Make a copy of root.
+        JToken rootCopy = _root?.DeepClone()
+                          ?? (JsonPathValidator.IsArray(pathTokens[0]) ? new JArray() : new JObject());
 
-                    break;
-
-                case JsonPathToken.TokenType.Index:
-                    JArray lastJArray;
-
-                    if (lastAvailableToken.Token.HasValues)
-                    {
-                        lastJArray = (JArray) lastAvailableToken.Token;
-                    }
-                    else // empty JObject
-                    {
-                        lastJArray = new JArray();
-
-                        if (lastAvailableToken.Index == 0)
-                        {
-                            rootCopy = lastJArray;
-                        }
-                        else
-                        {
-                            lastAvailableToken.Token.Replace(lastJArray);
-                        }
-                    }
-
-                    int index = (int) splitToken.Value;
-
-                    if (index > 0)
-                    {
-                        for (int i = 0; i <= index - lastJArray.Count + 2; i++)
-                        {
-                            lastJArray.Add(new JObject());
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i <= Math.Abs(index) - lastJArray.Count; i++)
-                        {
-                            lastJArray.Add(new JObject());
-                        }
-                    }
-
-                    lastJArray[index < 0 ? lastJArray.Count + index : index] = newToken;
-
-                    break;
-
-                case JsonPathToken.TokenType.Indexes:
-
-                    if (lastAvailableToken.Token.HasValues)
-                    {
-                        lastJArray = (JArray) lastAvailableToken.Token;
-                    }
-                    else // empty JObject
-                    {
-                        lastJArray = new JArray();
-
-                        if (lastAvailableToken.Index == 0)
-                        {
-                            rootCopy = lastJArray;
-                        }
-                        else if (lastAvailableToken.Token.Parent is not null)
-                        {
-                            lastAvailableToken.Token.Replace(lastJArray);
-                        }
-                    }
-
-                    List<int> indexes = (List<int>) splitToken.Value;
-
-                    for (int i = 0; i <= indexes.Select(Math.Abs).Max(); i++)
-                    {
-                        if (i >= lastJArray.Count)
-                        {
-                            lastJArray.Add(new JObject());
-                        }
-                    }
-
-                    foreach (int i in indexes.Select(i => i < 0 ? lastJArray.Count + i : i))
-                    {
-                        lastJArray[i] = newToken;
-                    }
-
-                    break;
-
-                case JsonPathToken.TokenType.IndexSpan:
-
-                    if (lastAvailableToken.Token.HasValues)
-                    {
-                        lastJArray = (JArray)lastAvailableToken.Token;
-                    }
-                    else // empty JObject
-                    {
-                        lastJArray = new JArray();
-
-                        if (lastAvailableToken.Index == 0)
-                        {
-                            rootCopy = lastJArray;
-                        }
-                        else if (lastAvailableToken.Token.Parent is not null)
-                        {
-                            lastAvailableToken.Token.Replace(lastJArray);
-                        }
-                    }
-
-                    IndexSpanValueContainer indexSpan = (IndexSpanValueContainer)splitToken.Value;
-
-                    int realEnd = indexSpan.EndIndex ?? lastJArray.Count;
-
-                    int max = Math.Max(indexSpan.StartIndex, realEnd);
-                    int min = Math.Min(indexSpan.StartIndex, realEnd);
-
-                    if (lastJArray.Count < max - min)
-                    {
-                        for (int i = lastJArray.Count; i <= max - min; i++)
-                        {
-                            lastJArray.Add(new JObject());
-                        }
-                    }
-
-                    if (lastJArray.Count < Math.Max(Math.Abs(max), Math.Abs(min)))
-                    {
-                        for (int i = lastJArray.Count; i <= Math.Max(Math.Abs(max), Math.Abs(min)); i++)
-                        {
-                            lastJArray.Add(new JObject());
-                        }
-                    }
-
-                    for (int i = indexSpan.StartIndex;
-                         indexSpan.StartIndex > realEnd ? i >= realEnd : i <= realEnd;
-                         i += indexSpan.StartIndex > realEnd ? -1 : 1)
-                    {
-                        lastJArray[i < 0 ? lastJArray.Count + i : i] = newToken;
-                    }
-
-                    break;
-
-                default:
-                    throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
-            }
+        // get the list of last available tokens that already exist within the root.
+        foreach (JsonNodeToken lastAvailableToken in
+                 JsonNodeTokenCollector.CollectLastAvailableTokens(rootCopy, pathTokens))
+        {
+            rootCopy = JTokenGenerator.GenerateNewRoot(lastAvailableToken, pathTokens, rootCopy, value);
         }
 
         // assign root copy back to root.
