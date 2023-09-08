@@ -6,13 +6,182 @@ namespace JsonPathSerializer.Utils
 {
     class JTokenGenerator
     {
+        public static JToken GenerateNewRoot
+        (
+            JsonNodeToken lastAvailableToken,
+            List<JsonPathToken> pathTokens,
+            JToken rootCopy,
+            object value
+        )
+        {
+            // identify the JsonPathToken on the split point.
+            JsonPathToken splitToken = pathTokens[lastAvailableToken.Index];
+
+            // Generate a new JToken with all its child JsonPathTokens.
+
+            List<JsonPathToken> unavailableTokens = pathTokens.GetRange
+            (
+                lastAvailableToken.Index + 1,
+                pathTokens.Count - lastAvailableToken.Index - 1
+            );
+
+            JToken newToken = GenerateToken(unavailableTokens, value
+                            ?? throw new ArgumentNullException(nameof(value)));
+
+            // merge the new JToken into the root copy using the split JsonPathToken.
+            switch (splitToken.Type)
+            {
+                case JsonPathToken.TokenType.Property:
+                    JObject lastJObject = (JObject)lastAvailableToken.Token;
+                    lastJObject[(string)splitToken.Value] = newToken;
+
+                    break;
+
+                case JsonPathToken.TokenType.Index:
+                    JArray lastJArray;
+
+                    if (lastAvailableToken.Token.HasValues)
+                    {
+                        lastJArray = (JArray)lastAvailableToken.Token;
+                    }
+                    else // empty JObject
+                    {
+                        lastJArray = new JArray();
+
+                        if (lastAvailableToken.Index == 0)
+                        {
+                            rootCopy = lastJArray;
+                        }
+                        else
+                        {
+                            lastAvailableToken.Token.Replace(lastJArray);
+                        }
+                    }
+
+                    int index = (int)splitToken.Value;
+
+                    if (index > 0)
+                    {
+                        for (int i = 0; i <= index - lastJArray.Count + 2; i++)
+                        {
+                            lastJArray.Add(new JObject());
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i <= Math.Abs(index) - lastJArray.Count; i++)
+                        {
+                            lastJArray.Add(new JObject());
+                        }
+                    }
+
+                    lastJArray[index < 0 ? lastJArray.Count + index : index] = newToken;
+
+                    break;
+
+                case JsonPathToken.TokenType.Indexes:
+
+                    if (lastAvailableToken.Token.HasValues)
+                    {
+                        lastJArray = (JArray)lastAvailableToken.Token;
+                    }
+                    else // empty JObject
+                    {
+                        lastJArray = new JArray();
+
+                        if (lastAvailableToken.Index == 0)
+                        {
+                            rootCopy = lastJArray;
+                        }
+                        else if (lastAvailableToken.Token.Parent is not null)
+                        {
+                            lastAvailableToken.Token.Replace(lastJArray);
+                        }
+                    }
+
+                    List<int> indexes = (List<int>)splitToken.Value;
+
+                    for (int i = 0; i <= indexes.Select(Math.Abs).Max(); i++)
+                    {
+                        if (i >= lastJArray.Count)
+                        {
+                            lastJArray.Add(new JObject());
+                        }
+                    }
+
+                    foreach (int i in indexes.Select(i => i < 0 ? lastJArray.Count + i : i))
+                    {
+                        lastJArray[i] = newToken;
+                    }
+
+                    break;
+
+                case JsonPathToken.TokenType.IndexSpan:
+
+                    if (lastAvailableToken.Token.HasValues)
+                    {
+                        lastJArray = (JArray)lastAvailableToken.Token;
+                    }
+                    else // empty JObject
+                    {
+                        lastJArray = new JArray();
+
+                        if (lastAvailableToken.Index == 0)
+                        {
+                            rootCopy = lastJArray;
+                        }
+                        else if (lastAvailableToken.Token.Parent is not null)
+                        {
+                            lastAvailableToken.Token.Replace(lastJArray);
+                        }
+                    }
+
+                    IndexSpanValueContainer indexSpan = (IndexSpanValueContainer)splitToken.Value;
+
+                    int realEnd = indexSpan.EndIndex ?? lastJArray.Count;
+
+                    int max = Math.Max(indexSpan.StartIndex, realEnd);
+                    int min = Math.Min(indexSpan.StartIndex, realEnd);
+
+                    if (lastJArray.Count < max - min)
+                    {
+                        for (int i = lastJArray.Count; i <= max - min; i++)
+                        {
+                            lastJArray.Add(new JObject());
+                        }
+                    }
+
+                    if (lastJArray.Count < Math.Max(Math.Abs(max), Math.Abs(min)))
+                    {
+                        for (int i = lastJArray.Count; i <= Math.Max(Math.Abs(max), Math.Abs(min)); i++)
+                        {
+                            lastJArray.Add(new JObject());
+                        }
+                    }
+
+                    for (int i = indexSpan.StartIndex;
+                         indexSpan.StartIndex > realEnd ? i >= realEnd : i <= realEnd;
+                         i += indexSpan.StartIndex > realEnd ? -1 : 1)
+                    {
+                        lastJArray[i < 0 ? lastJArray.Count + i : i] = newToken;
+                    }
+
+                    break;
+
+                default:
+                    throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
+            }
+
+            return rootCopy;
+        }
+
         /// <summary>
         /// Generate a nested JToken from a list of JsonPathTokens.
         /// </summary>
         /// <param name="jsonPathTokens">List of JsonPathTokens to generate.</param>
         /// <param name="value">Value of the leaf element.</param>
         /// <returns></returns>
-        public static JToken GenerateToken(List<JsonPathToken> jsonPathTokens, object value)
+        private static JToken GenerateToken(List<JsonPathToken> jsonPathTokens, object value)
         {
             // Create leaf element with given value.
             JToken jToken = JToken.FromObject(value);
