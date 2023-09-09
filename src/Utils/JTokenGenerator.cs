@@ -6,11 +6,19 @@ namespace JsonPathSerializer.Utils
 {
     class JTokenGenerator
     {
+        /// <summary>
+        /// Generate a new root JToken by adding a value at the specified path.
+        /// </summary>
+        /// <param name="lastAvailableToken">Specify the available tokens.</param>
+        /// <param name="pathTokens">Specify the path to insert the value.</param>
+        /// <param name="root">The current root.</param>
+        /// <param name="value">The value to be inserted at the specified path.</param>
+        /// <returns>A new JToken with the old root and the new value at the specified path.</returns>
         public static JToken GenerateNewRoot
         (
             JsonNodeToken lastAvailableToken,
             List<JsonPathToken> pathTokens,
-            JToken rootCopy,
+            JToken root,
             object value
         )
         {
@@ -50,7 +58,7 @@ namespace JsonPathSerializer.Utils
 
                         if (lastAvailableToken.Index == 0)
                         {
-                            rootCopy = lastJArray;
+                            root = lastJArray;
                         }
                         else
                         {
@@ -91,7 +99,7 @@ namespace JsonPathSerializer.Utils
 
                         if (lastAvailableToken.Index == 0)
                         {
-                            rootCopy = lastJArray;
+                            root = lastJArray;
                         }
                         else if (lastAvailableToken.Token.Parent is not null)
                         {
@@ -128,7 +136,7 @@ namespace JsonPathSerializer.Utils
 
                         if (lastAvailableToken.Index == 0)
                         {
-                            rootCopy = lastJArray;
+                            root = lastJArray;
                         }
                         else if (lastAvailableToken.Token.Parent is not null)
                         {
@@ -172,7 +180,7 @@ namespace JsonPathSerializer.Utils
                     throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
             }
 
-            return rootCopy;
+            return root;
         }
 
         /// <summary>

@@ -33,7 +33,7 @@ namespace JsonPathSerializer.Utils
         /// </summary>
         /// <param name="token">The JsonPathToken to check.</param>
         /// <returns>True if the token is an array type, false otherwise.</returns>
-        public static bool IsArray(JsonPathToken token)
+        public static bool IsIndex(JsonPathToken token)
         {
             switch (token.Type)
             {
