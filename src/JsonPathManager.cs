@@ -40,7 +40,7 @@ public class JsonPathManager : IJsonPathManager
     /// </summary>
     /// <param name="jsonPathToValues">The key-value pairs to serialize.</param>
     /// <returns>The serialized string.</returns>
-    public static string SerializeAll(ICollection<KeyValuePair<string, object>> jsonPathToValues)
+    public static string SerializeAll(IEnumerable<KeyValuePair<string, object>> jsonPathToValues)
     {
         JsonPathManager manager = new();
 
@@ -132,7 +132,7 @@ public class JsonPathManager : IJsonPathManager
 
         // Make a copy of root.
         JToken rootCopy = _root?.DeepClone()
-                          ?? (JsonPathValidator.IsArray(pathTokens[0]) ? new JArray() : new JObject());
+                          ?? (JsonPathValidator.IsIndex(pathTokens[0]) ? new JArray() : new JObject());
 
         // get the list of last available tokens that already exist within the root.
         foreach (JsonNodeToken lastAvailableToken in
@@ -153,14 +153,14 @@ public class JsonPathManager : IJsonPathManager
             {
                 switch (lastAvailableToken.Token)
                 {
-                    case JArray when pathTokens[lastAvailableToken.Index].Type < JsonPathToken.TokenType.Index:
+                    case JArray when !JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index]):
                         throw new ArgumentException
                         (
                             $"JSON element $.{lastAvailableToken.Token.Path} " +
                             "is a JArray, therefore cannot be taken as a JObject."
                         );
 
-                    case JObject when pathTokens[lastAvailableToken.Index].Type >= JsonPathToken.TokenType.Index:
+                    case JObject when JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index]):
                         throw new ArgumentException
                         (
                             $"JSON element $.{lastAvailableToken.Token.Path} " +
@@ -191,12 +191,39 @@ public class JsonPathManager : IJsonPathManager
 
         // Make a copy of root.
         JToken rootCopy = _root?.DeepClone()
-                          ?? (JsonPathValidator.IsArray(pathTokens[0]) ? new JArray() : new JObject());
+                          ?? (JsonPathValidator.IsIndex(pathTokens[0]) ? new JArray() : new JObject());
 
         // get the list of last available tokens that already exist within the root.
         foreach (JsonNodeToken lastAvailableToken in
                  JsonNodeTokenCollector.CollectLastAvailableTokens(rootCopy, pathTokens))
         {
+            if (lastAvailableToken.Token is not JContainer)
+            {
+                lastAvailableToken.Token.Replace
+                (
+                    JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index])
+                        ? new JArray() : new JObject()
+                );
+            }
+
+            if (lastAvailableToken.Token.HasValues)
+            {
+                switch (lastAvailableToken.Token)
+                {
+                    case JArray when !JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index]):
+
+                        // replace the parent with a JObject and thus clearing all its children.
+                        lastAvailableToken.Token.Replace(new JObject());
+                        break;
+
+                    case JObject when JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index]):
+
+                        // replace the parent with a JArray and thus clearing all its children.
+                        lastAvailableToken.Token.Replace(new JArray());
+                        break;
+                }
+            }
+
             rootCopy = JTokenGenerator.GenerateNewRoot(lastAvailableToken, pathTokens, rootCopy, value);
         }
 
