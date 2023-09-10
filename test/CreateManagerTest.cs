@@ -1,6 +1,3 @@
-using JsonPathSerializer;
-using Newtonsoft.Json.Linq;
-
 namespace JsonPathSerializerTest
 {
     [TestClass]

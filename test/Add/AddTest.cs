@@ -1,13 +1,10 @@
-﻿using JsonPathSerializer;
-using Newtonsoft.Json.Linq;
-
-namespace JsonPathSerializerTest.AddKeyValuePairTest
+﻿namespace JsonPathSerializerTest.Add
 {
     /// <summary>
     /// Test methods in this class should all throw an exception when adding a value to JsonPathManager with a invalid key.
     /// </summary>
     [TestClass]
-    public class AddKeyValuePairTest
+    public class AddTest
     {
         private JsonPathManager _emptyManager = new();
         private JsonPathManager _loadedManager = new();

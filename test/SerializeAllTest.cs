@@ -1,6 +1,4 @@
-﻿using JsonPathSerializer;
-
-namespace JsonPathSerializerTest
+﻿namespace JsonPathSerializerTest
 {
     [TestClass]
     public class SerializeAllTest
