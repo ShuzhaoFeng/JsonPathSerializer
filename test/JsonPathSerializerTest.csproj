@@ -44,4 +44,8 @@
     <ProjectReference Include="..\src\JsonPathSerializer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Force\" />
+  </ItemGroup>
+
 </Project>
