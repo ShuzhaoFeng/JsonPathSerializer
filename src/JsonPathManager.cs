@@ -199,11 +199,12 @@ public class JsonPathManager : IJsonPathManager
         {
             if (lastAvailableToken.Token is not JContainer)
             {
-                lastAvailableToken.Token.Replace
-                (
-                    JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index])
-                        ? new JArray() : new JObject()
-                );
+                JContainer emptyContainer = JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index])
+                    ? new JArray() : new JObject();
+
+                lastAvailableToken.Token.Replace(emptyContainer);
+
+                lastAvailableToken.Token = emptyContainer;
             }
 
             if (lastAvailableToken.Token.HasValues)
@@ -213,13 +214,18 @@ public class JsonPathManager : IJsonPathManager
                     case JArray when !JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index]):
 
                         // replace the parent with a JObject and thus clearing all its children.
-                        lastAvailableToken.Token.Replace(new JObject());
+                        JObject emptyJObject = new();
+                        lastAvailableToken.Token.Replace(emptyJObject);
+                        lastAvailableToken.Token = emptyJObject;
+
                         break;
 
                     case JObject when JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index]):
 
                         // replace the parent with a JArray and thus clearing all its children.
-                        lastAvailableToken.Token.Replace(new JArray());
+                        JArray emptyJArray = new();
+                        lastAvailableToken.Token.Replace(emptyJArray);
+                        lastAvailableToken.Token = emptyJArray;
                         break;
                 }
             }
