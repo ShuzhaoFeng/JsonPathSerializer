@@ -7,7 +7,7 @@ namespace JsonPathSerializer.Structs
         /// <summary>
         /// Json node.
         /// </summary>
-        public JToken Token { get; }
+        public JToken Token { get; set; }
 
         /// <summary>
         /// Depth of the Json node.
