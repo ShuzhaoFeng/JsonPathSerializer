@@ -79,6 +79,22 @@
         }
 
         [TestMethod]
+        public void CanAddIndexToExistingArrayToLastPosition()
+        {
+            _loadedManager.Add("name[2]", "John Doe");
+
+            // indexes that should not be affected
+            Assert.AreEqual("Shuzhao", _loadedManager.Value["name"][0].ToString());
+            Assert.AreEqual("Feng", _loadedManager.Value["name"][1].ToString());
+
+            // index that should be affected
+            Assert.AreEqual("John Doe", _loadedManager.Value["name"][2].ToString());
+
+            // no extra indexes are added
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][3].ToString());
+        }
+
+        [TestMethod]
         public void CanAddIndexToExistingArrayThatRequiresExpansion()
         {
             _loadedManager.Add("name[5]", "John Doe");
