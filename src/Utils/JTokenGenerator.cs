@@ -70,7 +70,12 @@ namespace JsonPathSerializer.Utils
 
                     if (index > 0)
                     {
-                        for (int i = 0; i <= index - lastJArray.Count + 2; i++)
+                        for (int i = 0; i < index - lastJArray.Count + 1; i++)
+                        {
+                            lastJArray.Add(new JObject());
+                        }
+
+                        if (index >= lastJArray.Count)
                         {
                             lastJArray.Add(new JObject());
                         }
