@@ -68,24 +68,11 @@ namespace JsonPathSerializer.Utils
 
                     int index = (int)splitToken.Value;
 
-                    if (index > 0)
-                    {
-                        for (int i = 0; i < index - lastJArray.Count + 1; i++)
-                        {
-                            lastJArray.Add(new JObject());
-                        }
+                    int bound = index >= 0 ? index - lastJArray.Count + 1 : - index - lastJArray.Count;
 
-                        if (index >= lastJArray.Count)
-                        {
-                            lastJArray.Add(new JObject());
-                        }
-                    }
-                    else
+                    for (int i = 0; i < bound; i++)
                     {
-                        for (int i = 0; i <= Math.Abs(index) - lastJArray.Count; i++)
-                        {
-                            lastJArray.Add(new JObject());
-                        }
+                        lastJArray.Add(new JObject());
                     }
 
                     lastJArray[index < 0 ? lastJArray.Count + index : index] = newToken;
