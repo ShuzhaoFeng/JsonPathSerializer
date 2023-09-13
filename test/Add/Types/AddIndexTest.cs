@@ -116,6 +116,27 @@
         }
 
         [TestMethod]
+        public void CanAddIndexToExistingArrayThatRequiresLargeExpansion()
+        {
+            _loadedManager.Add("name[123]", "John Doe");
+
+            // indexes that should not be affected
+            Assert.AreEqual("Shuzhao", _loadedManager.Value["name"][0].ToString());
+            Assert.AreEqual("Feng", _loadedManager.Value["name"][1].ToString());
+            Assert.AreEqual("Shuzhao Feng", _loadedManager.Value["name"][2].ToString());
+
+            // empty indexes added to fill the gap
+            Assert.AreEqual("{}", _loadedManager.Value["name"][3].ToString());
+            Assert.AreEqual("{}", _loadedManager.Value["name"][122].ToString());
+
+            // index that should be affected
+            Assert.AreEqual("John Doe", _loadedManager.Value["name"][123].ToString());
+
+            // no extra indexes are added
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][124].ToString());
+        }
+
+        [TestMethod]
         public void CanAddNegativeIndex()
         {
             _emptyManager.Add("name[-1]", "Shuzhao");
@@ -164,6 +185,27 @@
             
             // no extra indexes are added
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][5].ToString());
+        }
+
+        [TestMethod]
+        public void CanAddNegativeIndexToExistingArrayThatRequiresLargeExpansion()
+        {
+            _loadedManager.Add("name[-123]", "John Doe");
+
+            // index that should be affected
+            // C# array doesn't allow negative index value (but we do), so -5 is converted to 0.
+            Assert.AreEqual("John Doe", _loadedManager.Value["name"][0].ToString());
+
+            // indexes that should not be affected
+            Assert.AreEqual("Feng", _loadedManager.Value["name"][1].ToString());
+            Assert.AreEqual("Shuzhao Feng", _loadedManager.Value["name"][2].ToString());
+
+            // empty indexes added to fill the gap
+            Assert.AreEqual("{}", _loadedManager.Value["name"][3].ToString());
+            Assert.AreEqual("{}", _loadedManager.Value["name"][122].ToString());
+
+            // no extra indexes are added
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][123].ToString());
         }
 
         [TestMethod]
