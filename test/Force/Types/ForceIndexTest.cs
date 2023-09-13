@@ -36,7 +36,7 @@
             // index that should be affected
             Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0].ToString());
 
-            // no extra indexes are Forced
+            // no extra indexes are forced
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][1].ToString());
         }
 
@@ -48,7 +48,7 @@
             // index that should be affected
             Assert.AreEqual("Shuzhao Feng", _emptyManager.Value[0].ToString());
 
-            // no extra indexes are Forced
+            // no extra indexes are forced
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value[1].ToString());
         }
 
@@ -60,7 +60,7 @@
             // index that should be affected
             Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0][0].ToString());
 
-            // no extra indexes are Forced
+            // no extra indexes are forced
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][1].ToString());
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][0][1].ToString());
         }
@@ -78,7 +78,7 @@
             Assert.AreEqual("Shuzhao Feng", _loadedManager.Value["name"][2].ToString());
             Assert.AreEqual("SF", _loadedManager.Value["name"][3][0].ToString());
 
-            // no extra indexes are Forced
+            // no extra indexes are forced
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][3][1].ToString());
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][4].ToString());
         }
@@ -96,7 +96,7 @@
             // index that should be affected
             Assert.AreEqual("John Doe", _loadedManager.Value["name"][3][0].ToString());
 
-            // no extra indexes are added
+            // no extra indexes are forced
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][3][1].ToString());
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][4].ToString());
         }
@@ -112,15 +112,37 @@
             Assert.AreEqual("Shuzhao Feng", _loadedManager.Value["name"][2].ToString());
             Assert.AreEqual("SF", _loadedManager.Value["name"][3][0].ToString());
 
-            // empty indexes Forced to fill the gap
+            // empty indexes forced to fill the gap
             Assert.AreEqual("{}", _loadedManager.Value["name"][4].ToString());
 
             // index that should be affected
             Assert.AreEqual("John Doe", _loadedManager.Value["name"][5].ToString());
 
-            // no extra indexes are Forced
+            // no extra indexes are forced
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][3][1].ToString());
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][6].ToString());
+        }
+
+        [TestMethod]
+        public void CanForceIndexToExistingArrayThatRequiresLargeExpansion()
+        {
+            _loadedManager.Force("name[123]", "John Doe");
+
+            // indexes that should not be affected
+            Assert.AreEqual("Shuzhao", _loadedManager.Value["name"][0].ToString());
+            Assert.AreEqual("Feng", _loadedManager.Value["name"][1].ToString());
+            Assert.AreEqual("Shuzhao Feng", _loadedManager.Value["name"][2].ToString());
+            Assert.AreEqual("SF", _loadedManager.Value["name"][3][0].ToString());
+
+            // empty indexes forced to fill the gap
+            Assert.AreEqual("{}", _loadedManager.Value["name"][4].ToString());
+            Assert.AreEqual("{}", _loadedManager.Value["name"][122].ToString());
+
+            // index that should be affected
+            Assert.AreEqual("John Doe", _loadedManager.Value["name"][123].ToString());
+
+            // no extra indexes are forced
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][124].ToString());
         }
 
         [TestMethod]
@@ -132,7 +154,7 @@
             // C# array doesn't allow negative index value (but we do), so -1 is converted to 0.
             Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0].ToString());
 
-            // no extra indexes are Forced
+            // no extra indexes are forced
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][1].ToString());
         }
 
@@ -150,7 +172,7 @@
             Assert.AreEqual("John Doe", _loadedManager.Value["name"][2].ToString());
             Assert.AreEqual("SF", _loadedManager.Value["name"][3][0].ToString());
 
-            // no extra indexes are Forced
+            // no extra indexes are forced
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][3][1].ToString());
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][4].ToString());
         }
@@ -169,12 +191,35 @@
             Assert.AreEqual("Shuzhao Feng", _loadedManager.Value["name"][2].ToString());
             Assert.AreEqual("SF", _loadedManager.Value["name"][3][0].ToString());
 
-            // empty indexes Forced to fill the gap
+            // empty indexes forced to fill the gap
             Assert.AreEqual("{}", _loadedManager.Value["name"][4].ToString());
 
-            // no extra indexes are Forced
+            // no extra indexes are forced
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][3][1].ToString());
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][5].ToString());
+        }
+
+        [TestMethod]
+        public void CanForceNegativeIndexToExistingArrayThatRequiresLargeExpansion()
+        {
+            _loadedManager.Force("name[-123]", "John Doe");
+
+            // index that should be affected
+            // C# array doesn't allow negative index value (but we do), so -5 is converted to 0.
+            Assert.AreEqual("John Doe", _loadedManager.Value["name"][0].ToString());
+
+            // indexes that should not be affected
+            Assert.AreEqual("Feng", _loadedManager.Value["name"][1].ToString());
+            Assert.AreEqual("Shuzhao Feng", _loadedManager.Value["name"][2].ToString());
+            Assert.AreEqual("SF", _loadedManager.Value["name"][3][0].ToString());
+
+            // empty indexes forced to fill the gap
+            Assert.AreEqual("{}", _loadedManager.Value["name"][4].ToString());
+            Assert.AreEqual("{}", _loadedManager.Value["name"][122].ToString());
+
+            // no extra indexes are forced
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][3][1].ToString());
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][123].ToString());
         }
 
         [TestMethod]
@@ -185,7 +230,7 @@
             // index that should be affected
             Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0]["first"].ToString());
 
-            // no extra indexes are Forced
+            // no extra indexes are forced
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][1].ToString());
         }
 
@@ -202,7 +247,7 @@
             // index that should be affected
             Assert.AreEqual("John Doe", _loadedManager.Value["name"][3].ToString());
 
-            // no extra indexes are Forced
+            // no extra indexes are forced
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][4].ToString());
         }
 
@@ -219,7 +264,7 @@
             Assert.AreEqual("Shuzhao Feng", _loadedManager.Value["name"][2].ToString());
             Assert.AreEqual("SF", _loadedManager.Value["name"][3][0].ToString());
 
-            // no extra indexes are Forced
+            // no extra indexes are forced
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][3][1].ToString());
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][4].ToString());
         }
@@ -232,7 +277,7 @@
             // index that should be affected
             Assert.AreEqual("Shuzhao", _propertyManager.Value["name"][0].ToString());
 
-            // no extra indexes are Forced
+            // no extra indexes are forced
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _propertyManager.Value["name"][1].ToString());
         }
 
