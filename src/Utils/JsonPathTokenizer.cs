@@ -168,5 +168,10 @@ namespace JsonPathSerializer.Utils
 
             return Math.Min(dotIndex, bracketIndex);
         }
+
+        public static string BuildPath(List<JsonPathToken> rootTokens)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
