@@ -236,4 +236,40 @@ public class JsonPathManager : IJsonPathManager
         // assign root copy back to root.
         _root = rootCopy;
     }
+
+    /// <summary>
+    /// Remove a value or child from the JsonPathManager root and return it.
+    /// </summary>
+    /// <param name="path">The path where to remove the value or child.</param>
+    /// <returns>The removed value or child.</returns>
+    public JToken? Remove(string path)
+    {
+        // Verify the path is a valid JsonPath for the operation.
+        JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
+
+        // Tokenize the JsonPath.
+        List<JsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
+
+        List<JsonPathToken> rootTokens = pathTokens.GetRange(0, pathTokens.Count - 1);
+        JsonPathToken leafToken = pathTokens[^1];
+
+        JToken? parentRoot = _root?.SelectToken(JsonPathTokenizer.BuildPath(rootTokens));
+
+        switch (parentRoot)
+        {
+            case JArray parentRootArray when JsonPathValidator.IsIndex(leafToken):
+
+                return JTokenRemover.Remove(parentRootArray, leafToken);
+
+            case JObject parentRootObject when !JsonPathValidator.IsIndex(leafToken):
+                JToken? removed = parentRootObject[(string) leafToken.Value];
+
+                parentRootObject.Remove((string) leafToken.Value);
+
+                return removed;
+
+            default:
+                return null;
+        }
+    }
 }
