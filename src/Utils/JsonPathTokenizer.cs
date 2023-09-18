@@ -1,4 +1,4 @@
-﻿using JsonPathSerializer.Structs;
+using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Types.IndexSpan;
 using System.Text.RegularExpressions;
 
