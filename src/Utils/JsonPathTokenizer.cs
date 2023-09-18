@@ -1,4 +1,4 @@
-﻿using JsonPathSerializer.Structs;
+using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Types.IndexSpan;
 using System.Text.RegularExpressions;
 
@@ -172,12 +172,21 @@ namespace JsonPathSerializer.Utils
         /// <summary>
         /// Split the JsonPath into two parts: the parent path and the leaf token.
         /// </summary>
-        /// <param name="path">The complete JsonPath.</param>
+        /// <param name="jsonPath">The complete JsonPath.</param>
         /// <returns>A tuple, the first element being the parent path to the leaf,
         /// the second being the leaf formatted into a JsonPathToken.</returns>
-        public static (string, JsonPathToken) SplitPathAtLeaf(string path)
+        public static (string, JsonPathToken) SplitPathAtLeaf(string jsonPath)
         {
-            throw new NotImplementedException();
+            List<string> parsedTokenList = ParseJsonPath(jsonPath.Trim());
+
+            if (parsedTokenList.Count < 1)
+            {
+                return ("", new JsonPathToken("", JsonPathToken.TokenType.Property));
+            }
+
+            string parentPath = string.Join("", parsedTokenList.Take(parsedTokenList.Count - 1));
+
+            return (parentPath, Tokenize(parsedTokenList.Last())[0]);
         }
     }
 }
