@@ -169,7 +169,13 @@ namespace JsonPathSerializer.Utils
             return Math.Min(dotIndex, bracketIndex);
         }
 
-        public static string BuildPath(List<JsonPathToken> rootTokens)
+        /// <summary>
+        /// Split the JsonPath into two parts: the parent path and the leaf token.
+        /// </summary>
+        /// <param name="path">The complete JsonPath.</param>
+        /// <returns>A tuple, the first element being the parent path to the leaf,
+        /// the second being the leaf formatted into a JsonPathToken.</returns>
+        public static (string, JsonPathToken) SplitPathAtLeaf(string path)
         {
             throw new NotImplementedException();
         }

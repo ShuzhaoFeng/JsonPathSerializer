@@ -248,14 +248,12 @@ public class JsonPathManager : IJsonPathManager
         JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
 
         // Tokenize the JsonPath.
-        List<JsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
+        (string, JsonPathToken) splitPath = JsonPathTokenizer.SplitPathAtLeaf(path.Trim());
 
-        List<JsonPathToken> rootTokens = pathTokens.GetRange(0, pathTokens.Count - 1);
-        JsonPathToken leafToken = pathTokens[^1];
+        string parentPath = splitPath.Item1;
+        JsonPathToken leafToken = splitPath.Item2;
 
-        JToken? parentRoot = _root?.SelectToken(JsonPathTokenizer.BuildPath(rootTokens));
-
-        switch (parentRoot)
+        switch (_root?.SelectToken(parentPath))
         {
             case JArray parentRootArray when JsonPathValidator.IsIndex(leafToken):
 
