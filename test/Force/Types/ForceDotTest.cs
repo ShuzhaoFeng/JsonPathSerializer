@@ -24,7 +24,7 @@
         }
 
         [TestMethod]
-        public void CanForceKey()
+        public void CanForceProperty()
         {
             _emptyManager.Force("name", "Shuzhao Feng");
 
@@ -32,7 +32,7 @@
         }
 
         [TestMethod]
-        public void CanForceNestedKey()
+        public void CanForceNestedProperty()
         {
             _emptyManager.Force("name.first", "Shuzhao");
 
@@ -40,7 +40,7 @@
         }
 
         [TestMethod]
-        public void CanForceInsertKeyUnderExistingParentKey()
+        public void CanForceInsertPropertyUnderExistingParentProperty()
         {
             _loadedManager.Force("name.last", "Feng");
 
@@ -49,7 +49,7 @@
         }
 
         [TestMethod]
-        public void CanForceInsertValueToParentKey()
+        public void CanForceInsertValueToParentProperty()
         {
             _loadedManager.Force("name", "Shuzhao Feng");
 
@@ -77,13 +77,13 @@
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenForcingKeyWithDoubleDots()
+        public void ThrowsExceptionWhenForcingPropertyWithDoubleDots()
         {
             Assert.ThrowsException<ArgumentException>(() => _emptyManager.Force("name..last", "Feng"));
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenForcingKeyWithEndingDot()
+        public void ThrowsExceptionWhenForcingPropertyWithEndingDot()
         {
             Assert.ThrowsException<JsonException>(() => _emptyManager.Force("name.last.", "Feng"));
         }
