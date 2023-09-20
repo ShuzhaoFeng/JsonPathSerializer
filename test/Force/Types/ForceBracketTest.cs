@@ -24,7 +24,7 @@
         }
 
         [TestMethod]
-        public void CanForceKey()
+        public void CanForceProperty()
         {
             _emptyManager.Force("['name']", "Shuzhao Feng");
 
@@ -32,7 +32,7 @@
         }
 
         [TestMethod]
-        public void CanForceNestedKey()
+        public void CanForceNestedProperty()
         {
             _emptyManager.Force("name['first']", "Shuzhao");
 
@@ -40,7 +40,7 @@
         }
 
         [TestMethod]
-        public void CanForceNestedKeyWithMultipleBrackets()
+        public void CanForceNestedPropertyWithMultipleBrackets()
         {
             _emptyManager.Force("['name']['first']", "Shuzhao");
 
@@ -48,7 +48,7 @@
         }
 
         [TestMethod]
-        public void CanForceInsertKeyUnderExistingParentKey()
+        public void CanForceInsertPropertyUnderExistingParentProperty()
         {
             _loadedManager.Force("name['last']", "Feng");
 
@@ -57,7 +57,7 @@
         }
 
         [TestMethod]
-        public void CanForceInsertValueToParentKey()
+        public void CanForceInsertValueToParentProperty()
         {
             _loadedManager.Force("['name']", "Shuzhao Feng");
 
@@ -85,19 +85,19 @@
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenForcingKeyWithStringInBracketWithoutQuote()
+        public void ThrowsExceptionWhenForcingPropertyWithStringInBracketWithoutQuote()
         {
             Assert.ThrowsException<JsonException>(() => _emptyManager.Force("name[last]", "Feng"));
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenForcingKeyWithUnclosedBracket()
+        public void ThrowsExceptionWhenForcingPropertyWithUnclosedBracket()
         {
             Assert.ThrowsException<JsonException>(() => _emptyManager.Force("name['last'", "Feng"));
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenForceingKeyWithUnopenedBracket()
+        public void ThrowsExceptionWhenForceingPropertyWithUnopenedBracket()
         {
             Assert.ThrowsException<JsonException>(() => _emptyManager.Force("name'last']", "Feng"));
         }

@@ -24,7 +24,7 @@
         }
 
         [TestMethod]
-        public void CanAddKey()
+        public void CanAddProperty()
         {
             _emptyManager.Add("name", "Shuzhao Feng");
 
@@ -32,7 +32,7 @@
         }
 
         [TestMethod]
-        public void CanAddNestedKey()
+        public void CanAddNestedProperty()
         {
             _emptyManager.Add("name.first", "Shuzhao");
 
@@ -40,7 +40,7 @@
         }
 
         [TestMethod]
-        public void CanInsertKeyUnderExistingParentKey()
+        public void CanInsertPropertyUnderExistingParentProperty()
         {
             _loadedManager.Add("name.last", "Feng");
 
@@ -49,13 +49,13 @@
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenAddingKeyWithDoubleDots()
+        public void ThrowsExceptionWhenAddingPropertyWithDoubleDots()
         {
             Assert.ThrowsException<ArgumentException>(() => _emptyManager.Add("name..last", "Feng"));
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenAddingKeyWithEndingDot()
+        public void ThrowsExceptionWhenAddingPropertyWithEndingDot()
         {
             Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name.last.", "Feng"));
         }
@@ -67,7 +67,7 @@
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenInsertingValueToParentKey()
+        public void ThrowsExceptionWhenInsertingValueToParentProperty()
         {
             Assert.ThrowsException<ArgumentException>(() => _loadedManager.Add("name", "Shuzhao Feng"));
         }

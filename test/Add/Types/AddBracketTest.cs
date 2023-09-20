@@ -24,7 +24,7 @@
         }
 
         [TestMethod]
-        public void CanAddKey()
+        public void CanAddProperty()
         {
             _emptyManager.Add("['name']", "Shuzhao Feng");
 
@@ -32,7 +32,7 @@
         }
 
         [TestMethod]
-        public void CanAddNestedKey()
+        public void CanAddNestedProperty()
         {
             _emptyManager.Add("name['first']", "Shuzhao");
 
@@ -40,7 +40,7 @@
         }
 
         [TestMethod]
-        public void CanAddNestedKeyWithMultipleBrackets()
+        public void CanAddNestedPropertyWithMultipleBrackets()
         {
             _emptyManager.Add("['name']['first']", "Shuzhao");
 
@@ -48,7 +48,7 @@
         }
 
         [TestMethod]
-        public void CanInsertKeyUnderExistingParentKey()
+        public void CanInsertPropertyUnderExistingParentProperty()
         {
             _loadedManager.Add("name['last']", "Feng");
 
@@ -57,19 +57,19 @@
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenAddingKeyWithStringInBracketWithoutQuote()
+        public void ThrowsExceptionWhenAddingPropertyWithStringInBracketWithoutQuote()
         {
             Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[last]", "Feng"));
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenAddingKeyWithUnclosedBracket()
+        public void ThrowsExceptionWhenAddingPropertyWithUnclosedBracket()
         {
             Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name['last'", "Feng"));
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenAddingKeyWithUnopenedBracket()
+        public void ThrowsExceptionWhenAddingPropertyWithUnopenedBracket()
         {
             Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name'last']", "Feng"));
         }
@@ -81,7 +81,7 @@
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenInsertingValueToParentKey()
+        public void ThrowsExceptionWhenInsertingValueToParentProperty()
         {
             Assert.ThrowsException<ArgumentException>(() => _loadedManager.Add("['name']", "Shuzhao Feng"));
         }
