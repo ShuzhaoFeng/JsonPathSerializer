@@ -52,38 +52,23 @@ namespace JsonPathSerializer.Utils
 
                     for (int i = 0; i < parent.Count; i++)
                     {
-                        bool isInRange;
-
-                        switch (start >= 0, end >= 0)
+                        bool isInRange = (start >= 0, end >= 0) switch
                         {
-                            case (true, true) when start < end: // spans from start to end
-                                isInRange = i >= start && i <= end;
-                                break;
+                            (true, true) when start < end => // spans from start to end
+                                i >= start && i <= end,
+                            (true, true) => // spans from end to start
+                                i >= end && i <= start,
+                            (false, true) => // spans from 0 to end, then from start to Count - 1
+                                i >= 0 && i <= end || i >= parent.Count + start && i < parent.Count,
+                            (true, false) => // spans from 0 to start, then from end to Count - 1
+                                i >= 0 && i <= start || i >= parent.Count + end && i < parent.Count,
+                            (false, false) when start < end => // spans from start to end
+                                i >= parent.Count + start && i <= parent.Count + end,
+                            (false, false) => // spans from end to start
+                                i >= parent.Count + end && i <= parent.Count + start
+                        };
 
-                            case (true, true): // spans from end to start
-                                isInRange = i >= end && i <= start;
-                                break;
-
-                            case (false, true): // spans from 0 to end, then from start to Count - 1
-                                isInRange = i >= 0 && i <= end || i >= parent.Count + start && i < parent.Count;
-                                break;
-
-                            case (true, false): // spans from 0 to start, then from end to Count - 1
-                                isInRange = i >= 0 && i <= start || i >= parent.Count + end && i < parent.Count;
-                                break;
-
-                            case (false, false) when start < end: // spans from start to end
-                                isInRange = i >= parent.Count + start && i <= parent.Count + end;
-                                break;
-
-                            case (false, false): // spans from end to start
-                                isInRange = i >= parent.Count + end && i <= parent.Count + start;
-                                break;
-                        }
-                        
-
-
-                    if (isInRange)
+                        if (isInRange)
                         {
                             arrayToRemove.Add(parent[i]);
                         }
