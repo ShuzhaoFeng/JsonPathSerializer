@@ -13,8 +13,11 @@ namespace JsonPathSerializer.Utils
             switch (token.Type)
             {
                 case JsonPathToken.TokenType.Index:
-                    removed = parent[(int) token.Value];
-                    parent.RemoveAt((int) token.Value);
+                    int index = (int) token.Value;
+                    int positiveIndex = index >= 0 ? index : parent.Count + index;
+
+                    removed = parent[positiveIndex];
+                    parent.RemoveAt(positiveIndex);
                     break;
 
                 case JsonPathToken.TokenType.Indexes:
@@ -22,10 +25,10 @@ namespace JsonPathSerializer.Utils
                     JArray arrayToRemove = new JArray();
                     List<int> indexes = (List<int>) token.Value;
 
-                    for (int i = 0; i < indexes.Count; i++)
+                    for (int i = 0; i < parent.Count; i++)
                     {
                         // If the index is negative, it is relative to the end of the array.
-                        if (indexes.Contains(i) || indexes.Contains(i - indexes.Count))
+                        if (indexes.Contains(i) || indexes.Contains(i - parent.Count))
                         {
                             arrayToRemove.Add(parent[i]);
                         }
