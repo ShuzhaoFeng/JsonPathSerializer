@@ -85,10 +85,10 @@
         [TestMethod]
         public void CanRemoveIndexNestedInIndex()
         {
-            var initialValue0 = JToken.Parse(_loadedBigManager.Build())?["name"]?[0];
-            var initialValue1 = JToken.Parse(_loadedBigManager.Build())?["name"]?[1];
-            var initialValue2 = JToken.Parse(_loadedBigManager.Build())?["name"]?[2];
-            var initialValue4 = JToken.Parse(_loadedBigManager.Build())?["name"]?[4];
+            var initialValue0 = JToken.Parse(_loadedBigManager.Build())["name"]?[0];
+            var initialValue1 = JToken.Parse(_loadedBigManager.Build())["name"]?[1];
+            var initialValue2 = JToken.Parse(_loadedBigManager.Build())["name"]?[2];
+            var initialValue4 = JToken.Parse(_loadedBigManager.Build())["name"]?[4];
 
 
             var removed = _loadedBigManager.Remove("name[3][1]");
