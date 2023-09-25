@@ -41,7 +41,7 @@
         public void CanAddIndexAsRoot()
         {
             _emptyManager.Add("[0]", "Shuzhao Feng");
-            
+
             // index that should be affected
             Assert.AreEqual("Shuzhao Feng", _emptyManager.Value[0].ToString());
 
@@ -182,7 +182,7 @@
             // empty indexes added to fill the gap
             Assert.AreEqual("{}", _loadedManager.Value["name"][3].ToString());
             Assert.AreEqual("{}", _loadedManager.Value["name"][4].ToString());
-            
+
             // no extra indexes are added
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][5].ToString());
         }
