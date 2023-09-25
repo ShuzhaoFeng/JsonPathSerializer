@@ -6,6 +6,7 @@
         private JsonPathManager _emptyManager = new();
         private JsonPathManager _loadedManager = new();
         private JsonPathManager _propertyManager = new();
+        private JsonPathManager _loadedPropertyManager = new();
 
         [TestInitialize]
         public void Setup()
@@ -23,6 +24,23 @@
                 ""name"": {
                     ""first"": ""Shuzhao"",
                 },
+            }");
+            _loadedPropertyManager = new JsonPathManager(@"{
+                ""name"": [
+                    {
+                        ""first"": ""Shuzhao"",
+                        ""last"": ""Feng"",
+                    },
+                    {},
+                    {
+                        ""first"": ""John"",
+                        ""last"": ""Doe"",
+                    },
+                    {
+                        ""first"": ""Jane"",
+                        ""last"": ""Doa"",
+                    },
+                ],
             }");
         }
 
@@ -87,7 +105,7 @@
         }
 
         [TestMethod]
-        public void CanAddIndexesNestedInIndexes()
+        public void CanAddIndexSpanNestedInIndexSpan()
         {
             _emptyManager.Add("name[0:2][0:2]", "Shuzhao");
 
@@ -108,7 +126,7 @@
         }
 
         [TestMethod]
-        public void CanAddIndexToExistingArray()
+        public void CanAddIndexSpanToExistingArray()
         {
             _loadedManager.Add("name[0:2]", "John Doe");
 
@@ -125,7 +143,7 @@
         }
 
         [TestMethod]
-        public void CanAddIndexesToExistingArrayThatRequiresExpansion()
+        public void CanAddIndexSpanToExistingArrayThatRequiresExpansion()
         {
             _loadedManager.Add("name[1:5]", "John Doe");
 
@@ -141,6 +159,85 @@
 
             // no extra indexes are added
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][6].ToString());
+        }
+
+        [TestMethod]
+        public void CanAddPropertyNestedInIndexSpan()
+        {
+            _loadedPropertyManager.Add("name[1:3].middle", "A.");
+
+            // indexes that should be affected
+            Assert.AreEqual("A.", _loadedPropertyManager.Value["name"][1]["middle"].ToString());
+            Assert.AreEqual("A.", _loadedPropertyManager.Value["name"][2]["middle"].ToString());
+            Assert.AreEqual("A.", _loadedPropertyManager.Value["name"][3]["middle"].ToString());
+
+            // indexes that should not be affected
+            Assert.AreEqual("Shuzhao", _loadedPropertyManager.Value["name"][0]["first"].ToString());
+            Assert.AreEqual("Feng", _loadedPropertyManager.Value["name"][0]["last"].ToString());
+            Assert.ThrowsException<NullReferenceException>(() => _loadedPropertyManager.Value["name"][0]["middle"].ToString());
+
+            // other values in the same index should not be affected
+            Assert.AreEqual("John", _loadedPropertyManager.Value["name"][2]["first"].ToString());
+            Assert.AreEqual("Doe", _loadedPropertyManager.Value["name"][2]["last"].ToString());
+            Assert.AreEqual("Jane", _loadedPropertyManager.Value["name"][3]["first"].ToString());
+            Assert.AreEqual("Doa", _loadedPropertyManager.Value["name"][3]["last"].ToString());
+
+            // no extra properties are added
+            Assert.ThrowsException<NullReferenceException>(() => _loadedPropertyManager.Value["name"][1]["first"].ToString());
+            Assert.ThrowsException<NullReferenceException>(() => _loadedPropertyManager.Value["name"][1]["last"].ToString());
+
+            // no extra indexes are added
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedPropertyManager.Value["name"][4].ToString());
+        }
+
+        [TestMethod]
+        public void CanAddPropertyNestedInIndexSpanUnderExistingKey()
+        {
+            _loadedPropertyManager.Add("name[2:3].last", "Smith");
+
+            // indexes that should be affected
+            Assert.AreEqual("Smith", _loadedPropertyManager.Value["name"][2]["last"].ToString());
+            Assert.AreEqual("Smith", _loadedPropertyManager.Value["name"][3]["last"].ToString());
+
+            // indexes that should not be affected
+            Assert.AreEqual("Shuzhao", _loadedPropertyManager.Value["name"][0]["first"].ToString());
+            Assert.AreEqual("Feng", _loadedPropertyManager.Value["name"][0]["last"].ToString());
+
+            // other values in the same index should not be affected
+            Assert.AreEqual("John", _loadedPropertyManager.Value["name"][2]["first"].ToString());
+            Assert.AreEqual("Jane", _loadedPropertyManager.Value["name"][3]["first"].ToString());
+
+            // no extra properties are added
+            Assert.ThrowsException<NullReferenceException>(() => _loadedPropertyManager.Value["name"][1]["first"].ToString());
+            Assert.ThrowsException<NullReferenceException>(() => _loadedPropertyManager.Value["name"][1]["last"].ToString());
+
+            // no extra indexes are added
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedPropertyManager.Value["name"][4].ToString());
+        }
+
+        [TestMethod]
+        public void CanAddPropertyNestedInIndexSpanUnderNewAndExistingKey()
+        {
+            _loadedPropertyManager.Add("name[1:3].last", "Smith");
+
+            // indexes that should be affected
+            Assert.AreEqual("Smith", _loadedPropertyManager.Value["name"][1]["last"].ToString());
+            Assert.AreEqual("Smith", _loadedPropertyManager.Value["name"][2]["last"].ToString());
+            Assert.AreEqual("Smith", _loadedPropertyManager.Value["name"][3]["last"].ToString());
+
+            // indexes that should not be affected
+            Assert.AreEqual("Shuzhao", _loadedPropertyManager.Value["name"][0]["first"].ToString());
+            Assert.AreEqual("Feng", _loadedPropertyManager.Value["name"][0]["last"].ToString());
+
+            // other values in the same index should not be affected
+            Assert.AreEqual("John", _loadedPropertyManager.Value["name"][2]["first"].ToString());
+            Assert.AreEqual("Jane", _loadedPropertyManager.Value["name"][3]["first"].ToString());
+
+            // no extra properties are added
+            Assert.ThrowsException<NullReferenceException>(() => _loadedPropertyManager.Value["name"][1]["first"].ToString());
+
+            // no extra indexes are added
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedPropertyManager.Value["name"][4].ToString());
         }
 
         [TestMethod]
@@ -240,19 +337,19 @@
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenAddingIndexesWithInvalidSeparator()
+        public void ThrowsExceptionWhenAddingIndexSpanWithInvalidSeparator()
         {
             Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[0;:1]", "Shuzhao"));
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenAddingIndexesToExistingPropertyObject()
+        public void ThrowsExceptionWhenAddingIndexSpanToExistingPropertyObject()
         {
             Assert.ThrowsException<ArgumentException>(() => _propertyManager.Add("name[0:2]", "Shuzhao"));
         }
 
         [TestMethod]
-        public void ThrowsExceptionWhenIndexesAreNotInteger()
+        public void ThrowsExceptionWhenIndexSpanAreNotInteger()
         {
             Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[1.5:7/4]", "Shuzhao"));
         }

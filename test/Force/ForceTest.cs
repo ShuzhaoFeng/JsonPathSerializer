@@ -1,5 +1,6 @@
 ﻿namespace JsonPathSerializerTest.Force
 {
+    [TestClass]
     public class ForceTest
     {
         private JsonPathManager _emptyManager = new();
