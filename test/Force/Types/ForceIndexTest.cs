@@ -44,7 +44,7 @@
         public void CanForceIndexAsRoot()
         {
             _emptyManager.Force("[0]", "Shuzhao Feng");
-            
+
             // index that should be affected
             Assert.AreEqual("Shuzhao Feng", _emptyManager.Value[0].ToString());
 

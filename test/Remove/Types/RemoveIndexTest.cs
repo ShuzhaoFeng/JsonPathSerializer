@@ -97,10 +97,10 @@
             Assert.AreEqual("Feng", removed?.ToString());
 
             // unrelated indexes remain untouched
-            Assert.IsTrue(JToken.DeepEquals(initialValue0, JToken.Parse(_loadedBigManager.Build())?["name"]?[0]));
-            Assert.IsTrue(JToken.DeepEquals(initialValue1, JToken.Parse(_loadedBigManager.Build())?["name"]?[1]));
-            Assert.IsTrue(JToken.DeepEquals(initialValue2, JToken.Parse(_loadedBigManager.Build())?["name"]?[2]));
-            Assert.IsTrue(JToken.DeepEquals(initialValue4, JToken.Parse(_loadedBigManager.Build())?["name"]?[4]));
+            Assert.IsTrue(JToken.DeepEquals(initialValue0, JToken.Parse(_loadedBigManager.Build())["name"]?[0]));
+            Assert.IsTrue(JToken.DeepEquals(initialValue1, JToken.Parse(_loadedBigManager.Build())["name"]?[1]));
+            Assert.IsTrue(JToken.DeepEquals(initialValue2, JToken.Parse(_loadedBigManager.Build())["name"]?[2]));
+            Assert.IsTrue(JToken.DeepEquals(initialValue4, JToken.Parse(_loadedBigManager.Build())["name"]?[4]));
 
             // smaller indexes remain untouched
             Assert.AreEqual("Shuzhao", _loadedBigManager.Value["name"][3][0].ToString());

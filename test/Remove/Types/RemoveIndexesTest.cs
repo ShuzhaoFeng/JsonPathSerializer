@@ -35,8 +35,8 @@
             var removed = _loadedManager.Remove("name[1, 2]");
 
             // removed values are returned
-            Assert.AreEqual("Feng", removed?[0].ToString());
-            Assert.AreEqual("Shuzhao Feng", removed?[1].ToString());
+            Assert.AreEqual("Feng", removed?[0]?.ToString());
+            Assert.AreEqual("Shuzhao Feng", removed?[1]?.ToString());
 
             // smaller indexes remain untouched
             Assert.AreEqual("Shuzhao", _loadedManager.Value["name"][0].ToString());
@@ -85,7 +85,7 @@
         }
 
         [TestMethod]
-        public void CanRemoveExistingAndNonExistingIndexes()
+        public void CanRemoveExistingAndOutOfRangeIndexes()
         {
             var removed = _loadedManager.Remove("name[1, 5]");
 
@@ -121,10 +121,10 @@
             Assert.AreEqual("Shuzhao Feng", removed?[1]?.ToString());
 
             // unrelated indexes remain untouched
-            Assert.IsTrue(JToken.DeepEquals(initialValue0, JToken.Parse(_loadedBigManager.Build())?["name"]?[0]));
-            Assert.IsTrue(JToken.DeepEquals(initialValue1, JToken.Parse(_loadedBigManager.Build())?["name"]?[1]));
-            Assert.IsTrue(JToken.DeepEquals(initialValue2, JToken.Parse(_loadedBigManager.Build())?["name"]?[2]));
-            Assert.IsTrue(JToken.DeepEquals(initialValue3, JToken.Parse(_loadedBigManager.Build())?["name"]?[3]));
+            Assert.IsTrue(JToken.DeepEquals(initialValue0, JToken.Parse(_loadedBigManager.Build())["name"]?[0]));
+            Assert.IsTrue(JToken.DeepEquals(initialValue1, JToken.Parse(_loadedBigManager.Build())["name"]?[1]));
+            Assert.IsTrue(JToken.DeepEquals(initialValue2, JToken.Parse(_loadedBigManager.Build())["name"]?[2]));
+            Assert.IsTrue(JToken.DeepEquals(initialValue3, JToken.Parse(_loadedBigManager.Build())["name"]?[3]));
 
             // smaller indexes remain untouched
             Assert.AreEqual("Shuzhao", _loadedBigManager.Value["name"][4][0].ToString());

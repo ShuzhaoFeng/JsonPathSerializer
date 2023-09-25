@@ -168,7 +168,7 @@
         public void CanAddNegativeAndPositiveIndexSpan()
         {
             _emptyManager.Add("name[-5:2]", "Shuzhao");
-            
+
             // we need minimally 8 elements: 0, 1, 2, 3 (-5), 4 (-4), 5 (-3), 6 (-2) and 7 (-1)
             for (int i = 0; i < 8; i++)
             {

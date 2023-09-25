@@ -144,7 +144,7 @@
             // indexes that should not be affected
             Assert.AreEqual("Shuzhao", _loadedManager.Value["name"][0].ToString());
             Assert.AreEqual("Shuzhao Feng", _loadedManager.Value["name"][2].ToString());
-            
+
 
             // empty indexes added to fill the gap
             Assert.AreEqual("{}", _loadedManager.Value["name"][3].ToString());
