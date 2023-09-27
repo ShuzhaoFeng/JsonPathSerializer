@@ -8,6 +8,10 @@ namespace JsonPathSerializer
 
         void Add(string path, object value);
 
+        void Force(string path, object value);
+
+        void Remove(string path);
+
         string Build();
 
         void Clear();
