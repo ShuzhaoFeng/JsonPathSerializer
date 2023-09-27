@@ -10,7 +10,7 @@ namespace JsonPathSerializer
 
         void Force(string path, object value);
 
-        void Remove(string path);
+        JToken? Remove(string path);
 
         string Build();
 
