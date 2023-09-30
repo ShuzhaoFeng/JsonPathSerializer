@@ -1,4 +1,4 @@
-﻿using JsonPathSerializer.Structs.Types;
+using JsonPathSerializer.Structs.Types;
 
 namespace JsonPathSerializer.Structs.Path
 {
