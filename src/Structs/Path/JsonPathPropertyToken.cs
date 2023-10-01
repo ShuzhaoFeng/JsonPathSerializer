@@ -1,6 +1,6 @@
 ﻿namespace JsonPathSerializer.Structs.Path
 {
-    class JsonPathPropertyToken : NewJsonPathToken
+    class JsonPathPropertyToken : IJsonPathToken
     {
         public string Property { get; }
 
