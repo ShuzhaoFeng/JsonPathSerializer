@@ -2,7 +2,7 @@ using JsonPathSerializer.Structs.Types;
 
 namespace JsonPathSerializer.Structs.Path
 {
-    class JsonPathIndexToken : NewJsonPathToken
+    class JsonPathIndexToken : IJsonPathToken
     {
         public List<IValueContainer> Indexes { get; }
 
