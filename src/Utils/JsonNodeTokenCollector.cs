@@ -340,11 +340,33 @@ namespace JsonPathSerializer.Utils
                             }
                         }
 
+                        List<JsonNodeToken> newCurrentTokens = new();
+
                         // at each level of the tree, do the same check for each token.
-                        for (int i = 0; i < currentTokens.Count; i++)
+                        foreach (var currentToken in currentTokens)
                         {
-                            // TODO: finish this
+                            JToken jToken = currentToken.Token;
+
+
+                            if (currentToken.IsLastAvailableToken) // already identified as a last available token.
+                            {
+                                // leave the token as it is.
+                            }
+                            else if // Check whether the token's children contains the next element of the path.
+                            (
+                                jToken is JArray currentJArray
+                                && currentJArray.Count >= globalBound
+                            )
+                            {
+                                // TODO: Implement this.
+                            }
+                            else // This is the last available token.
+                            {
+                                newCurrentTokens.Add(currentToken.AsLastAvailable());
+                            }
                         }
+
+                        currentTokens = newCurrentTokens;
 
                         break;
 
