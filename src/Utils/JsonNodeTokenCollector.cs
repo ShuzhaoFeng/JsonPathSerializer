@@ -358,7 +358,14 @@ namespace JsonPathSerializer.Utils
                                 && currentJArray.Count >= globalBound
                             )
                             {
-                                // TODO: Implement this.
+                                foreach (JToken child in currentJArray)
+                                {
+                                    newCurrentTokens.Add(new JsonNodeToken
+                                        (
+                                            child ?? throw new NullReferenceException(),
+                                            currentToken.Index + 1
+                                        ));
+                                }
                             }
                             else // This is the last available token.
                             {
