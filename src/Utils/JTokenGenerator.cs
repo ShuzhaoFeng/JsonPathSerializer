@@ -1,4 +1,5 @@
 ﻿using JsonPathSerializer.Structs;
+using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Structs.Types.IndexSpan;
 using Newtonsoft.Json.Linq;
 
@@ -34,7 +35,7 @@ namespace JsonPathSerializer.Utils
             );
 
             JToken newToken = GenerateToken(unavailableTokens, value
-                            ?? throw new ArgumentNullException(nameof(value)));
+                                                               ?? throw new ArgumentNullException(nameof(value)));
 
             // merge the new JToken into the root copy using the split JsonPathToken.
             switch (splitToken.Type)
@@ -68,7 +69,7 @@ namespace JsonPathSerializer.Utils
 
                     int index = (int)splitToken.Value;
 
-                    int bound = index >= 0 ? index - lastJArray.Count + 1 : - index - lastJArray.Count;
+                    int bound = index >= 0 ? index - lastJArray.Count + 1 : -index - lastJArray.Count;
 
                     for (int i = 0; i < bound; i++)
                     {
@@ -203,7 +204,7 @@ namespace JsonPathSerializer.Utils
 
                         // if index is positive (e.g. [3]), then we need to insert {index} empty elements before inserting the value.
                         // if index is negative (e.g. [-3]), then we need to insert -{index} - 1 empty elements after inserting the value.
-                        int numOfEmptyElements = index >= 0 ? index : - index - 1;
+                        int numOfEmptyElements = index >= 0 ? index : -index - 1;
 
                         JArray jArray = new JArray(Enumerable.Repeat(new JObject(), numOfEmptyElements));
 
@@ -228,7 +229,7 @@ namespace JsonPathSerializer.Utils
                         // if index is positive (e.g. [3]), then the minimum index required is {index}
                         // if index is negative (e.g. [-3]), then the minimum index required -{index} - 1.
                         // the minimum index required for all indexes is thus the maximum of those.
-                        int bound = indexes.Select(ind => ind >= 0 ? ind : - ind - 1).Max();
+                        int bound = indexes.Select(ind => ind >= 0 ? ind : -ind - 1).Max();
 
                         // convert the list of indexes into positive indexes.
                         indexes = indexes.Select(ind => ind >= 0 ? ind : bound + ind).ToList();
@@ -288,6 +289,45 @@ namespace JsonPathSerializer.Utils
             }
 
             return jToken;
+        }
+
+        public static JToken GenerateNewRoot
+        (
+            JsonNodeToken lastAvailableToken,
+            List<IJsonPathToken> pathTokens,
+            JToken root,
+            object value
+        )
+        {
+            // identify the JsonPathToken on the split point.
+            IJsonPathToken splitToken = pathTokens[lastAvailableToken.Index];
+
+            // Generate a new JToken with all its child JsonPathTokens.
+
+            List<IJsonPathToken> unavailableTokens = pathTokens.GetRange
+            (
+                lastAvailableToken.Index + 1,
+                pathTokens.Count - lastAvailableToken.Index - 1
+            );
+
+            JToken newToken = GenerateToken(unavailableTokens, value
+                                                               ?? throw new ArgumentNullException(nameof(value)));
+
+            throw new NotImplementedException();
+        }
+
+        private static JToken GenerateToken(List<IJsonPathToken> jsonPathTokens, object value)
+        {
+            // Create leaf element with given value.
+            JToken jToken = JToken.FromObject(value);
+
+            // Build JToken bottom-up, starting from the leaf element.
+            for (int i = jsonPathTokens.Count; i > 0; i--)
+            {
+                IJsonPathToken jsonPathToken = jsonPathTokens[i - 1];
+            }
+
+            throw new NotImplementedException();
         }
     }
 }
