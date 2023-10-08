@@ -313,7 +313,25 @@ namespace JsonPathSerializer.Utils
             JToken newToken = GenerateToken(unavailableTokens, value
                                                                ?? throw new ArgumentNullException(nameof(value)));
 
-            throw new NotImplementedException();
+            // merge the new JToken into the root copy using the split JsonPathToken.
+            switch (splitToken)
+            {
+                case JsonPathPropertyToken propertyToken:
+                    JObject lastJObject = (JObject)lastAvailableToken.Token;
+                    lastJObject[propertyToken.Property] = newToken;
+
+                    break;
+                    break;
+
+                case JsonPathIndexToken indexToken:
+                    throw new NotImplementedException();
+                    break;
+
+                default:
+                    throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
+            }
+
+            return root;
         }
 
         private static JToken GenerateToken(List<IJsonPathToken> jsonPathTokens, object value)
