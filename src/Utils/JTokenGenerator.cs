@@ -321,7 +321,6 @@ namespace JsonPathSerializer.Utils
                     lastJObject[propertyToken.Property] = newToken;
 
                     break;
-                    break;
 
                 case JsonPathIndexToken indexToken:
                     throw new NotImplementedException();
