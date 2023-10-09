@@ -1,5 +1,7 @@
 ﻿using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Path;
+using JsonPathSerializer.Structs.Types;
+using JsonPathSerializer.Structs.Types.Index;
 using JsonPathSerializer.Structs.Types.IndexSpan;
 using Newtonsoft.Json.Linq;
 
@@ -102,12 +104,9 @@ namespace JsonPathSerializer.Utils
 
                     List<int> indexes = (List<int>)splitToken.Value;
 
-                    for (int i = 0; i <= indexes.Select(Math.Abs).Max(); i++)
+                    for (int i = lastJArray.Count; i <= indexes.Select(Math.Abs).Max(); i++)
                     {
-                        if (i >= lastJArray.Count)
-                        {
-                            lastJArray.Add(new JObject());
-                        }
+                        lastJArray.Add(new JObject());
                     }
 
                     foreach (int i in indexes.Select(i => i < 0 ? lastJArray.Count + i : i))
@@ -323,7 +322,49 @@ namespace JsonPathSerializer.Utils
                     break;
 
                 case JsonPathIndexToken indexToken:
-                    throw new NotImplementedException();
+                    JArray lastJArray;
+
+                    if (lastAvailableToken.Token.HasValues)
+                    {
+                        lastJArray = (JArray)lastAvailableToken.Token;
+                    }
+                    else // empty JObject
+                    {
+                        lastJArray = new JArray();
+
+                        if (lastAvailableToken.Index == 0)
+                        {
+                            root = lastJArray;
+                        }
+                        else if (lastAvailableToken.Token.Parent is not null)
+                        {
+                            lastAvailableToken.Token.Replace(lastJArray);
+                        }
+                    }
+
+                    // fill the JArray with empty elements up to the minimum index bound required.
+                    for (int i = lastJArray.Count; i <= indexToken.Bound; i++)
+                    {
+                        lastJArray.Add(new JObject());
+                    }
+
+                    foreach (IValueContainer container in indexToken.Indexes)
+                    {
+                        if (container is IndexValueContainer indexValueContainer)
+                        {
+                            int index = indexValueContainer.Index;
+
+                            lastJArray[index >= 0 ? index : lastJArray.Count + index] = newToken;
+                        }
+                        else if (container is IndexSpanValueContainer indexSpanValueContainer)
+                        {
+                            int start = indexSpanValueContainer.StartIndex;
+                            int end = indexSpanValueContainer.EndIndex ?? lastJArray.Count - 1;
+
+                            throw new NotImplementedException();
+                        }
+                    }
+
                     break;
 
                 default:
