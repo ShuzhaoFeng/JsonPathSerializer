@@ -308,36 +308,10 @@ namespace JsonPathSerializer.Utils
 
                     case JsonPathIndexToken indexToken:
 
-                        int globalBound = 0;
-
                         // calculate the minimum count required for the current level of the tree.
                         foreach (IValueContainer value in indexToken.Indexes)
                         {
-                            if (value is IndexValueContainer index)
-                            {
-                                // if a index x is positive (e.g. [3]), then we need at least x + 1 elements.
-                                // if a index x is negative (e.g. [-3]), then we need at least -x elements.
-                                int absoluteBound = index.Index < 0 ? - index.Index : index.Index + 1;
-
-                                globalBound = Math.Max(globalBound, absoluteBound);
-                            }
-                            else if (value is IndexSpanValueContainer indexSpan)
-                            {
-                                // same as index, but we consider both ends
-                                int absoluteStartBound = indexSpan.StartIndex < 0
-                                    ? - indexSpan.StartIndex : indexSpan.StartIndex + 1;
-
-                                globalBound = Math.Max(globalBound, absoluteStartBound);
-
-                                // if end index is null, whatever the current bound will be used
-                                if (indexSpan.EndIndex is not null)
-                                {
-                                    int endIndex = (int) indexSpan.EndIndex;
-                                    int absoluteEndBound = endIndex < 0 ? - endIndex : endIndex + 1;
-
-                                    globalBound = Math.Max(globalBound, absoluteEndBound);
-                                }
-                            }
+                            
                         }
 
                         List<JsonNodeToken> newCurrentTokens = new();
@@ -355,7 +329,7 @@ namespace JsonPathSerializer.Utils
                             else if // Check whether the token's children contains the next element of the path.
                             (
                                 jToken is JArray currentJArray
-                                && currentJArray.Count >= globalBound
+                                && currentJArray.Count >= indexToken.Bound
                             )
                             {
                                 foreach (JToken child in currentJArray)
