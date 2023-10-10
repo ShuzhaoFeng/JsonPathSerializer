@@ -1,5 +1,6 @@
-﻿using JsonPathSerializer.Structs;
-using JsonPathSerializer.Utils;
+﻿using JsonPathSerializer.Utils;
+using JsonPathSerializer.Structs;
+using JsonPathSerializer.Structs.Path;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -128,11 +129,11 @@ public class JsonPathManager : IJsonPathManager
         }
 
         // Tokenize the JsonPath.
-        List<JsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
+        List<IJsonPathToken> pathTokens = JsonPathTokenizer.NewTokenize(path.Trim());
 
         // Make a copy of root.
         JToken rootCopy = _root?.DeepClone()
-                          ?? (JsonPathValidator.IsIndex(pathTokens[0]) ? new JArray() : new JObject());
+                          ?? (pathTokens[0] is JsonPathIndexToken ? new JArray() : new JObject());
 
         // get the list of last available tokens that already exist within the root.
         foreach (JsonNodeToken lastAvailableToken in
@@ -153,14 +154,14 @@ public class JsonPathManager : IJsonPathManager
             {
                 switch (lastAvailableToken.Token)
                 {
-                    case JArray when !JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index]):
+                    case JArray when pathTokens[lastAvailableToken.Index] is not JsonPathIndexToken:
                         throw new ArgumentException
                         (
                             $"JSON element $.{lastAvailableToken.Token.Path} " +
                             "is a JArray, therefore cannot be taken as a JObject."
                         );
 
-                    case JObject when JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index]):
+                    case JObject when pathTokens[lastAvailableToken.Index] is JsonPathIndexToken:
                         throw new ArgumentException
                         (
                             $"JSON element $.{lastAvailableToken.Token.Path} " +
@@ -187,11 +188,11 @@ public class JsonPathManager : IJsonPathManager
         JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
 
         // Tokenize the JsonPath.
-        List<JsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
+        List<IJsonPathToken> pathTokens = JsonPathTokenizer.NewTokenize(path.Trim());
 
         // Make a copy of root.
         JToken rootCopy = _root?.DeepClone()
-                          ?? (JsonPathValidator.IsIndex(pathTokens[0]) ? new JArray() : new JObject());
+                          ?? (pathTokens[0] is JsonPathIndexToken ? new JArray() : new JObject());
 
         // get the list of last available tokens that already exist within the root.
         foreach (JsonNodeToken lastAvailableToken in
@@ -199,7 +200,7 @@ public class JsonPathManager : IJsonPathManager
         {
             if (lastAvailableToken.Token is not JContainer)
             {
-                JContainer emptyContainer = JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index])
+                JContainer emptyContainer = pathTokens[lastAvailableToken.Index] is JsonPathIndexToken
                     ? new JArray() : new JObject();
 
                 lastAvailableToken.Token.Replace(emptyContainer);
@@ -211,7 +212,7 @@ public class JsonPathManager : IJsonPathManager
             {
                 switch (lastAvailableToken.Token)
                 {
-                    case JArray when !JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index]):
+                    case JArray when pathTokens[lastAvailableToken.Index] is not JsonPathIndexToken:
 
                         // replace the parent with a JObject and thus clearing all its children.
                         JObject emptyJObject = new();
@@ -220,7 +221,7 @@ public class JsonPathManager : IJsonPathManager
 
                         break;
 
-                    case JObject when JsonPathValidator.IsIndex(pathTokens[lastAvailableToken.Index]):
+                    case JObject when pathTokens[lastAvailableToken.Index] is not JsonPathIndexToken:
 
                         // replace the parent with a JArray and thus clearing all its children.
                         JArray emptyJArray = new();
