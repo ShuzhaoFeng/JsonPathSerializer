@@ -343,7 +343,7 @@ namespace JsonPathSerializer.Utils
                     }
 
                     // fill the JArray with empty elements up to the minimum index bound required.
-                    for (int i = lastJArray.Count; i <= indexToken.Bound; i++)
+                    for (int i = lastJArray.Count; i < indexToken.Bound; i++)
                     {
                         lastJArray.Add(new JObject());
                     }
@@ -390,9 +390,56 @@ namespace JsonPathSerializer.Utils
             for (int i = jsonPathTokens.Count; i > 0; i--)
             {
                 IJsonPathToken jsonPathToken = jsonPathTokens[i - 1];
+
+                switch (jsonPathToken)
+                {
+                    case JsonPathPropertyToken propertyToken:
+                        jToken = new JObject { [propertyToken.Property] = jToken };
+
+                        break;
+
+                    case JsonPathIndexToken indexToken:
+                        JArray jArray = new JArray();
+
+                        // fill the JArray with empty elements up to the minimum index bound required.
+                        for (int j = 0; j < indexToken.Bound; j++)
+                        {
+                            jArray.Add(new JObject());
+                        }
+
+                        foreach (IValueContainer container in indexToken.Indexes)
+                        {
+                            if (container is IndexValueContainer indexValueContainer)
+                            {
+                                int index = indexValueContainer.Index;
+
+                                jArray[index >= 0 ? index : jArray.Count + index] = jToken;
+                            }
+                            else if (container is IndexSpanValueContainer indexSpanValueContainer)
+                            {
+                                int start = indexSpanValueContainer.StartIndex;
+                                int end = indexSpanValueContainer.EndIndex ?? jArray.Count - 1;
+
+                                int min = Math.Min(start, end);
+                                int max = Math.Max(start, end);
+
+                                for (int j = min; j <= max; j++)
+                                {
+                                    jArray[j >= 0 ? j : jArray.Count + j] = jToken;
+                                }
+                            }
+                        }
+
+                        jToken = jArray;
+
+                        break;
+
+                    default:
+                        throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
+                }
             }
 
-            throw new NotImplementedException();
+            return jToken;
         }
     }
 }
