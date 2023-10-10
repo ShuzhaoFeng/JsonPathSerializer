@@ -221,7 +221,7 @@ public class JsonPathManager : IJsonPathManager
 
                         break;
 
-                    case JObject when pathTokens[lastAvailableToken.Index] is not JsonPathIndexToken:
+                    case JObject when pathTokens[lastAvailableToken.Index] is JsonPathIndexToken:
 
                         // replace the parent with a JArray and thus clearing all its children.
                         JArray emptyJArray = new();
