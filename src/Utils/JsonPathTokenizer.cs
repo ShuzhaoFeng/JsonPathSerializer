@@ -173,21 +173,40 @@ namespace JsonPathSerializer.Utils
                 }
                 else // v 0.2.0 - only option left is a property
                 {
-                    Match propertyMatch = SerializerGlobals.JsonPathRegex.NEW_PROPERTY.Match(token);
-
-                    if (propertyMatch.Success)
+                    // guard against a first property without a dot, which should be allowed.
+                    if (parsedTokenList.IndexOf(token) == 0 && !token.StartsWith('.') && !token.StartsWith('['))
                     {
-                        pathTokens.Add(new JsonPathPropertyToken
-                        (
-                            propertyMatch.Groups
-                                // dot notation match to Groups[1], bracket notation match to Groups[2]
-                                [propertyMatch.Groups[2].Value == "" ? 1 : 2]
-                                .Value
-                        ));
+                        Match propertyDotMatch = SerializerGlobals.JsonPathRegex.NEW_PROPERTY.Match('.' + token);
+
+                        if (propertyDotMatch.Success)
+                        {
+                            pathTokens.Add(new JsonPathPropertyToken
+                            (
+                                propertyDotMatch.Groups
+                                        // dot notation match to Groups[1], bracket notation match to Groups[2]
+                                        [propertyDotMatch.Groups[2].Value == "" ? 1 : 2]
+                                    .Value
+                            ));
+                        }
                     }
                     else
                     {
-                        throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
+                        Match propertyMatch = SerializerGlobals.JsonPathRegex.NEW_PROPERTY.Match(token);
+
+                        if (propertyMatch.Success)
+                        {
+                            pathTokens.Add(new JsonPathPropertyToken
+                            (
+                                propertyMatch.Groups
+                                        // dot notation match to Groups[1], bracket notation match to Groups[2]
+                                        [propertyMatch.Groups[2].Value == "" ? 1 : 2]
+                                    .Value
+                            ));
+                        }
+                        else
+                        {
+                            throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
+                        }
                     }
                 }
             }
