@@ -361,7 +361,14 @@ namespace JsonPathSerializer.Utils
                             int start = indexSpanValueContainer.StartIndex;
                             int end = indexSpanValueContainer.EndIndex ?? lastJArray.Count - 1;
 
-                            throw new NotImplementedException();
+                            
+                            int min = Math.Min(start, end);
+                            int max = Math.Max(start, end);
+
+                            for (int i = min; i <= max; i++)
+                            {
+                                lastJArray[i >= 0 ? i : lastJArray.Count + i] = newToken;
+                            }
                         }
                     }
 
