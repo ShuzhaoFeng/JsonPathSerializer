@@ -266,14 +266,14 @@
         {
             _emptyManager.Force("name[-5:2]", "Shuzhao");
 
-            // we need minimally 8 elements: 0, 1, 2, 3 (-5), 4 (-4), 5 (-3), 6 (-2) and 7 (-1)
-            for (int i = 0; i < 8; i++)
+            // we need minimally 5 elements: 0 (-5), 1 (-4), 2 (-3), 3 (-2) and 4 (-1)
+            for (int i = 0; i < 5; i++)
             {
                 Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][i].ToString());
             }
 
             // no extra indexes are forced
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][8].ToString());
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][5].ToString());
         }
 
         [TestMethod]
@@ -323,17 +323,17 @@
         {
             _emptyManager.Force("name[2:-5]", "Shuzhao");
 
-            // we need minimally 8 elements: 0, 1, 2, 3 (-5), 4 (-4), 5 (-3), 6 (-2) and 7 (-1)
+            // we need minimally 5 elements: 0 (-5), 1 (-4), 2 (-3), 3 (-2) and 4 (-1)
 
             // indexes that should be affected
             // reduce 8 assertions to a for loop
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 5; i++)
             {
                 Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][i].ToString());
             }
 
             // no extra indexes are forced
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][8].ToString());
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][5].ToString());
         }
 
         [TestMethod]
