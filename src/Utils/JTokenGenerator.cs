@@ -359,9 +359,9 @@ namespace JsonPathSerializer.Utils
                         else if (container is IndexSpanValueContainer indexSpanValueContainer)
                         {
                             int start = indexSpanValueContainer.StartIndex;
-                            int end = indexSpanValueContainer.EndIndex ?? lastJArray.Count - 1;
+                            int end = indexSpanValueContainer.EndIndex ??
+                                      (start < 0 ? -1 : lastJArray.Count - 1);
 
-                            
                             int min = Math.Min(start, end);
                             int max = Math.Max(start, end);
 
@@ -418,7 +418,8 @@ namespace JsonPathSerializer.Utils
                             else if (container is IndexSpanValueContainer indexSpanValueContainer)
                             {
                                 int start = indexSpanValueContainer.StartIndex;
-                                int end = indexSpanValueContainer.EndIndex ?? jArray.Count - 1;
+                                int end = indexSpanValueContainer.EndIndex ??
+                                          (start < 0 ? -1 : jArray.Count - 1);
 
                                 int min = Math.Min(start, end);
                                 int max = Math.Max(start, end);
