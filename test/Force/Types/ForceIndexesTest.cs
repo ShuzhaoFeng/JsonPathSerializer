@@ -254,13 +254,13 @@
         [TestMethod]
         public void CanForceNegativeIndexes()
         {
-            _emptyManager.Force("name[-1, 2]", "Shuzhao");
+            _emptyManager.Force("name[-2, 2]", "Shuzhao");
 
             // empty indexes forced to fill the gap
             Assert.AreEqual("{}", _emptyManager.Value["name"][0].ToString());
 
             // indexes that should be affected
-            // C# array doesn't allow negative index value (but we do), so -1 is converted to 1.
+            // C# array doesn't allow negative index value (but we do), so -2 is converted to 1.
             Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][1].ToString());
             Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][2].ToString());
 
