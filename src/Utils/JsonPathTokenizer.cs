@@ -285,5 +285,25 @@ namespace JsonPathSerializer.Utils
 
             return (parentPath, Tokenize(parsedTokenList.Last())[0]);
         }
+
+        /// <summary>
+        /// Split the JsonPath into two parts: the parent path and the leaf token.
+        /// </summary>
+        /// <param name="jsonPath">The complete JsonPath.</param>
+        /// <returns>A tuple, the first element being the parent path to the leaf,
+        /// the second being the leaf formatted into a JsonPathToken.</returns>
+        public static (string, IJsonPathToken) NewSplitPathAtLeaf(string jsonPath)
+        {
+            List<string> parsedTokenList = ParseJsonPath(jsonPath.Trim());
+
+            if (parsedTokenList.Count < 1)
+            {
+                return ("", new JsonPathPropertyToken(""));
+            }
+
+            string parentPath = string.Join("", parsedTokenList.Take(parsedTokenList.Count - 1));
+
+            return (parentPath, NewTokenize(parsedTokenList.Last())[0]);
+        }
     }
 }

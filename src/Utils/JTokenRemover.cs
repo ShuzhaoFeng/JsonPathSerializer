@@ -1,4 +1,5 @@
 ﻿using JsonPathSerializer.Structs;
+using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Structs.Types.IndexSpan;
 using Newtonsoft.Json.Linq;
 
@@ -92,6 +93,13 @@ namespace JsonPathSerializer.Utils
             }
 
             return removed;
+        }
+
+        public static JToken? Remove(JArray parent, IJsonPathToken token)
+        {
+            JToken? removed;
+
+            throw new NotImplementedException();
         }
     }
 }
