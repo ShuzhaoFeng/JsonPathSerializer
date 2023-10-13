@@ -1,5 +1,7 @@
 ﻿using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Path;
+using JsonPathSerializer.Structs.Types.Index;
+using JsonPathSerializer.Structs.Types;
 using JsonPathSerializer.Structs.Types.IndexSpan;
 using Newtonsoft.Json.Linq;
 
@@ -95,11 +97,31 @@ namespace JsonPathSerializer.Utils
             return removed;
         }
 
-        public static JToken? Remove(JArray parent, IJsonPathToken token)
+        public static JToken? Remove(JArray parent, JsonPathIndexToken token)
         {
-            JToken? removed;
+            JArray arrayToKeep = new JArray();
+            JArray arrayToRemove = new JArray();
 
-            throw new NotImplementedException();
+            for (int i = 0; i < parent.Count; i++)
+            {
+                if (JsonPathValidator.ArrayContainsIndex(token, i, parent.Count))
+                {
+                    arrayToRemove.Add(parent[i]);
+                }
+                else
+                {
+                    arrayToKeep.Add(parent[i]);
+                }
+            }
+
+            parent.Replace(arrayToKeep);
+
+            if (arrayToRemove.Count > 0)
+            {
+                return arrayToRemove;
+            }
+            
+            return null;
         }
     }
 }

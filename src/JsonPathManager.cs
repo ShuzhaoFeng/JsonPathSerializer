@@ -249,21 +249,21 @@ public class JsonPathManager : IJsonPathManager
         JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
 
         // Tokenize the JsonPath.
-        (string, JsonPathToken) splitPath = JsonPathTokenizer.SplitPathAtLeaf(path.Trim());
+        (string, IJsonPathToken) splitPath = JsonPathTokenizer.NewSplitPathAtLeaf(path.Trim());
 
         string parentPath = splitPath.Item1;
-        JsonPathToken leafToken = splitPath.Item2;
+        IJsonPathToken leafToken = splitPath.Item2;
 
         switch (_root?.SelectToken(parentPath))
         {
-            case JArray parentRootArray when JsonPathValidator.IsIndex(leafToken):
+            case JArray parentRootArray when leafToken is JsonPathIndexToken indexToken:
 
-                return JTokenRemover.Remove(parentRootArray, leafToken);
+                return JTokenRemover.Remove(parentRootArray, indexToken);
 
-            case JObject parentRootObject when !JsonPathValidator.IsIndex(leafToken):
-                JToken? removed = parentRootObject[(string) leafToken.Value];
+            case JObject parentRootObject when leafToken is JsonPathPropertyToken propertyToken:
+                JToken? removed = parentRootObject[propertyToken.Property];
 
-                parentRootObject.Remove((string) leafToken.Value);
+                parentRootObject.Remove(propertyToken.Property);
 
                 return removed;
 

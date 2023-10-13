@@ -1,4 +1,7 @@
-﻿using JsonPathSerializer.Structs;
+﻿using JsonPathSerializer.Structs.Path;
+using JsonPathSerializer.Structs.Types.Index;
+using JsonPathSerializer.Structs.Types.IndexSpan;
+using JsonPathSerializer.Structs.Types;
 using Newtonsoft.Json.Linq;
 
 namespace JsonPathSerializer.Utils
@@ -28,22 +31,81 @@ namespace JsonPathSerializer.Utils
             new JObject().SelectToken(path);
         }
 
-        /// <summary>
-        /// Check if a JsonPathToken has array type, i.e. it will contain indexed values.
-        /// </summary>
-        /// <param name="token">The JsonPathToken to check.</param>
-        /// <returns>True if the token is an array type, false otherwise.</returns>
-        public static bool IsIndex(JsonPathToken token)
+        public static bool ArrayContainsIndex(JsonPathIndexToken token, int i, int count)
         {
-            switch (token.Type)
+            foreach (IValueContainer index in token.Indexes)
             {
-                case JsonPathToken.TokenType.Index:
-                case JsonPathToken.TokenType.Indexes:
-                case JsonPathToken.TokenType.IndexSpan:
-                    return true;
-                default:
-                    return false;
+                if (index is IndexValueContainer indexValueContainer)
+                {
+                    if (indexValueContainer.Index >= 0)
+                    {
+                        if (indexValueContainer.Index == i)
+                        {
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        if (indexValueContainer.Index + count == i)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else if (index is IndexSpanValueContainer indexSpanValueContainer)
+                {
+                    int start = indexSpanValueContainer.StartIndex;
+                    int end = indexSpanValueContainer.EndIndex ??
+                              (start < 0 ? -1 : count - 1);
+
+                    int min = Math.Min(start, end);
+                    int max = Math.Max(start, end);
+
+                    // if start >= 0 and end >= 0
+                    // then the acceptable range is [min, max]
+                    if (min >= 0)
+                    {
+                        if (i >= min && i <= max)
+                        {
+                            return true;
+                        }
+                    }
+
+                    // if start < 0 and end < 0
+                    // then the acceptable range is [count + min, count + max]
+                    if (max < 0)
+                    {
+                        if (i >= count + min && i <= count + max)
+                        {
+                            return true;
+                        }
+                    }
+
+                    // if start < 0 and end >= 0
+                    // then the acceptable range is [count + start, count - 1]
+                    // and [0, end]
+                    if (start < 0 && end >= 0)
+                    {
+                        if (i >= count + start || i <= end)
+                        {
+                            return true;
+                        }
+                    }
+
+                    // if start >= 0 and end < 0
+                    // then the acceptable range is [0, start]
+                    // and [count + end, count - 1]
+                    if (start >= 0 && end < 0)
+                    {
+                        if (i <= start || i >= count + end)
+                        {
+                            return true;
+                        }
+                    }
+                }
             }
+
+            return false;
         }
     }
 }
