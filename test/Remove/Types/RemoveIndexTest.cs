@@ -35,7 +35,7 @@
             var removed = _loadedManager.Remove("name[1]");
 
             // removed value is returned
-            Assert.AreEqual("Feng", removed?.ToString());
+            Assert.AreEqual("Feng", removed?[0]?.ToString());
 
             // smaller indexes remain untouched
             Assert.AreEqual("Shuzhao", _loadedManager.Value["name"][0].ToString());
@@ -54,7 +54,7 @@
             var removed = _loadedManager.Remove("name[0]");
 
             // removed value is returned
-            Assert.AreEqual("Shuzhao", removed?.ToString());
+            Assert.AreEqual("Shuzhao", removed?[0]?.ToString());
 
             // greater indexes are shifted
             Assert.AreEqual("Feng", _loadedManager.Value["name"][0].ToString());
@@ -71,7 +71,7 @@
             var removed = _loadedManager.Remove("name[3]");
 
             // removed value is returned
-            Assert.AreEqual("SF", removed?.ToString());
+            Assert.AreEqual("SF", removed?[0]?.ToString());
 
             // smaller indexes remain untouched
             Assert.AreEqual("Shuzhao", _loadedManager.Value["name"][0].ToString());
@@ -94,7 +94,7 @@
             var removed = _loadedBigManager.Remove("name[3][1]");
 
             // removed value is returned
-            Assert.AreEqual("Feng", removed?.ToString());
+            Assert.AreEqual("Feng", removed?[0]?.ToString());
 
             // unrelated indexes remain untouched
             Assert.IsTrue(JToken.DeepEquals(initialValue0, JToken.Parse(_loadedBigManager.Build())["name"]?[0]));
@@ -119,7 +119,7 @@
             var removed = _loadedManager.Remove("name[-2]");
 
             // removed value is returned
-            Assert.AreEqual("Shuzhao Feng", removed?.ToString());
+            Assert.AreEqual("Shuzhao Feng", removed?[0]?.ToString());
 
             // smaller indexes remain untouched
             Assert.AreEqual("Shuzhao", _loadedManager.Value["name"][0].ToString());
