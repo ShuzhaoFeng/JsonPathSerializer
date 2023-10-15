@@ -1,6 +1,6 @@
-﻿using JsonPathSerializer.Utils;
-using JsonPathSerializer.Structs;
+﻿using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Path;
+using JsonPathSerializer.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -129,7 +129,7 @@ public class JsonPathManager : IJsonPathManager
         }
 
         // Tokenize the JsonPath.
-        List<IJsonPathToken> pathTokens = JsonPathTokenizer.NewTokenize(path.Trim());
+        List<IJsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
 
         // Make a copy of root.
         JToken rootCopy = _root?.DeepClone()
@@ -188,7 +188,7 @@ public class JsonPathManager : IJsonPathManager
         JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
 
         // Tokenize the JsonPath.
-        List<IJsonPathToken> pathTokens = JsonPathTokenizer.NewTokenize(path.Trim());
+        List<IJsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
 
         // Make a copy of root.
         JToken rootCopy = _root?.DeepClone()
@@ -249,7 +249,7 @@ public class JsonPathManager : IJsonPathManager
         JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
 
         // Tokenize the JsonPath.
-        (string, IJsonPathToken) splitPath = JsonPathTokenizer.NewSplitPathAtLeaf(path.Trim());
+        (string, IJsonPathToken) splitPath = JsonPathTokenizer.SplitPathAtLeaf(path.Trim());
 
         string parentPath = splitPath.Item1;
         IJsonPathToken leafToken = splitPath.Item2;
