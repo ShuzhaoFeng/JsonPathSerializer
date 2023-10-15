@@ -1,8 +1,5 @@
 ﻿using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Path;
-using JsonPathSerializer.Structs.Types;
-using JsonPathSerializer.Structs.Types.Index;
-using JsonPathSerializer.Structs.Types.IndexSpan;
 using Newtonsoft.Json.Linq;
 
 namespace JsonPathSerializer.Utils
@@ -41,7 +38,7 @@ namespace JsonPathSerializer.Utils
                             JsonNodeToken currentToken = currentTokens[i];
                             JToken jToken = currentToken.Token;
 
-                            
+
                             if (currentToken.IsLastAvailableToken) // already identified as a last available token.
                             {
                                 // leave the token as it is.

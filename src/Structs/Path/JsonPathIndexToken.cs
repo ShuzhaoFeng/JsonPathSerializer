@@ -25,7 +25,7 @@ namespace JsonPathSerializer.Structs.Path
             {
                 // if a index x is positive (e.g. [3]), then we need at least x + 1 elements.
                 // if a index x is negative (e.g. [-3]), then we need at least -x elements.
-                int absoluteBound = index.Index < 0 ? - index.Index : index.Index + 1;
+                int absoluteBound = index.Index < 0 ? -index.Index : index.Index + 1;
 
                 Bound = Math.Max(Bound, absoluteBound);
             }
@@ -33,7 +33,7 @@ namespace JsonPathSerializer.Structs.Path
             {
                 // same as index, but we consider both ends
                 int absoluteStartBound = indexSpan.StartIndex < 0
-                    ? - indexSpan.StartIndex : indexSpan.StartIndex + 1;
+                    ? -indexSpan.StartIndex : indexSpan.StartIndex + 1;
 
                 Bound = Math.Max(Bound, absoluteStartBound);
 
@@ -41,7 +41,7 @@ namespace JsonPathSerializer.Structs.Path
                 if (indexSpan.EndIndex is not null)
                 {
                     int endIndex = (int)indexSpan.EndIndex;
-                    int absoluteEndBound = endIndex < 0 ? - endIndex : endIndex + 1;
+                    int absoluteEndBound = endIndex < 0 ? -endIndex : endIndex + 1;
 
                     Bound = Math.Max(Bound, absoluteEndBound);
                 }

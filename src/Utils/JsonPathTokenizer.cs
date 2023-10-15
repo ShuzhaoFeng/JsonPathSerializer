@@ -1,8 +1,7 @@
-using JsonPathSerializer.Structs;
-using JsonPathSerializer.Structs.Types.IndexSpan;
-using System.Text.RegularExpressions;
 using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Structs.Types.Index;
+using JsonPathSerializer.Structs.Types.IndexSpan;
+using System.Text.RegularExpressions;
 
 namespace JsonPathSerializer.Utils
 {
@@ -13,113 +12,7 @@ namespace JsonPathSerializer.Utils
         /// </summary>
         /// <param name="jsonPath">The JsonPath to tokenize.</param>
         /// <returns>A list of JsonPathTokens from the entire JsonPath.</returns>
-        public static List<JsonPathToken> Tokenize(string jsonPath)
-        {
-            List<JsonPathToken> pathTokens = new();
-
-            // Parse the JsonPath into strings of tokens.
-            List<string> parsedTokenList = ParseJsonPath(jsonPath.Trim());
-
-
-            foreach (string pathToken in parsedTokenList)
-            {
-                // Ignore root token
-                if ("$.".Contains(pathToken))
-                {
-                    continue;
-                }
-
-                // Try match the token into a known type.
-
-                Match indexSpanMatch = SerializerGlobals.JsonPathRegex.INDEX_SPAN.Match(pathToken);
-
-                if (indexSpanMatch.Success)
-                {
-
-                    pathTokens.Add(new JsonPathToken(
-                        new IndexSpanValueContainer
-                        (
-                            indexSpanMatch.Groups[1].Value == ""
-                                ? 0
-                                : int.Parse(indexSpanMatch.Groups[1].Value),
-                            indexSpanMatch.Groups[2].Value == ""
-                                ? null
-                                : int.Parse(indexSpanMatch.Groups[2].Value)
-                        ),
-                        JsonPathToken.TokenType.IndexSpan
-                    ));
-
-                    continue;
-                }
-
-                Match indexListMatch = SerializerGlobals.JsonPathRegex.INDEXES.Match(pathToken);
-
-                if (indexListMatch.Success)
-                {
-                    pathTokens.Add(new JsonPathToken(
-                        new Regex(@"-?\d+").Matches(indexListMatch.Value)
-                            .Select(index => int.Parse(index.Value)).ToList(),
-                        JsonPathToken.TokenType.Indexes
-                    ));
-
-                    continue;
-                }
-
-                Match indexMatch = SerializerGlobals.JsonPathRegex.INDEX.Match(pathToken);
-
-                if (indexMatch.Success)
-                {
-                    pathTokens.Add(new JsonPathToken(int.Parse(indexMatch.Groups[1].Value),
-                        JsonPathToken.TokenType.Index));
-                    continue;
-                }
-
-                Match propertyBracketMatch = SerializerGlobals.JsonPathRegex.PROPERTY_BRACKET.Match(pathToken);
-
-                if (propertyBracketMatch.Success)
-                {
-                    pathTokens.Add(new JsonPathToken(propertyBracketMatch.Groups[1].Value,
-                        JsonPathToken.TokenType.Property));
-                    continue;
-                }
-
-                // guard against a first property without a dot, which should be allowed.
-                if (parsedTokenList.IndexOf(pathToken) == 0 && !pathToken.StartsWith('.'))
-                {
-                    Match propertyDotMatch = SerializerGlobals.JsonPathRegex.PROPERTY_DOT.Match('.' + pathToken);
-
-                    if (propertyDotMatch.Success)
-                    {
-                        pathTokens.Add(
-                            new JsonPathToken(propertyDotMatch.Groups[1].Value, JsonPathToken.TokenType.Property));
-                        continue;
-                    }
-                }
-                else
-                {
-                    Match propertyDotMatch = SerializerGlobals.JsonPathRegex.PROPERTY_DOT.Match(pathToken);
-
-                    if (propertyDotMatch.Success)
-                    {
-                        pathTokens.Add(
-                            new JsonPathToken(propertyDotMatch.Groups[1].Value, JsonPathToken.TokenType.Property));
-                        continue;
-                    }
-                }
-
-                // If any token is not a known type, stop the process.
-                throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
-            }
-
-            if (pathTokens.Count < 1)
-            {
-                throw new ArgumentException("There is no valid JsonPath element in the string.");
-            }
-
-            return pathTokens;
-        }
-
-        public static List<IJsonPathToken> NewTokenize(string jsonPath)
+        public static List<IJsonPathToken> Tokenize(string jsonPath)
         {
             List<IJsonPathToken> pathTokens = new();
 
@@ -137,10 +30,10 @@ namespace JsonPathSerializer.Utils
                 // Try match the token into a known type.
 
                 // match to indexes
-                if (SerializerGlobals.JsonPathRegex.NEW_INDEX.IsMatch(token))
+                if (SerializerGlobals.JsonPathRegex.INDEX.IsMatch(token))
                 {
                     // match the token into a collection of indexes or index spans
-                    MatchCollection matches = SerializerGlobals.JsonPathRegex.NEW_INDEX_TOKEN.Matches(token);
+                    MatchCollection matches = SerializerGlobals.JsonPathRegex.INDEX_TOKEN.Matches(token);
 
                     JsonPathIndexToken indexToken = new();
 
@@ -149,7 +42,7 @@ namespace JsonPathSerializer.Utils
                         string tokenString = match.Groups[0].Value;
 
                         // try matching the token to a index span
-                        Match indexSpanMatch = SerializerGlobals.JsonPathRegex.NEW_INDEX_SPAN.Match(tokenString);
+                        Match indexSpanMatch = SerializerGlobals.JsonPathRegex.INDEX_SPAN.Match(tokenString);
 
                         if (indexSpanMatch.Success)
                         {
@@ -176,7 +69,7 @@ namespace JsonPathSerializer.Utils
                     // guard against a first property without a dot, which should be allowed.
                     if (parsedTokenList.IndexOf(token) == 0 && !token.StartsWith('.') && !token.StartsWith('['))
                     {
-                        Match propertyDotMatch = SerializerGlobals.JsonPathRegex.NEW_PROPERTY.Match('.' + token);
+                        Match propertyDotMatch = SerializerGlobals.JsonPathRegex.PROPERTY.Match('.' + token);
 
                         if (propertyDotMatch.Success)
                         {
@@ -191,7 +84,7 @@ namespace JsonPathSerializer.Utils
                     }
                     else
                     {
-                        Match propertyMatch = SerializerGlobals.JsonPathRegex.NEW_PROPERTY.Match(token);
+                        Match propertyMatch = SerializerGlobals.JsonPathRegex.PROPERTY.Match(token);
 
                         if (propertyMatch.Success)
                         {
@@ -272,27 +165,7 @@ namespace JsonPathSerializer.Utils
         /// <param name="jsonPath">The complete JsonPath.</param>
         /// <returns>A tuple, the first element being the parent path to the leaf,
         /// the second being the leaf formatted into a JsonPathToken.</returns>
-        public static (string, JsonPathToken) SplitPathAtLeaf(string jsonPath)
-        {
-            List<string> parsedTokenList = ParseJsonPath(jsonPath.Trim());
-
-            if (parsedTokenList.Count < 1)
-            {
-                return ("", new JsonPathToken("", JsonPathToken.TokenType.Property));
-            }
-
-            string parentPath = string.Join("", parsedTokenList.Take(parsedTokenList.Count - 1));
-
-            return (parentPath, Tokenize(parsedTokenList.Last())[0]);
-        }
-
-        /// <summary>
-        /// Split the JsonPath into two parts: the parent path and the leaf token.
-        /// </summary>
-        /// <param name="jsonPath">The complete JsonPath.</param>
-        /// <returns>A tuple, the first element being the parent path to the leaf,
-        /// the second being the leaf formatted into a JsonPathToken.</returns>
-        public static (string, IJsonPathToken) NewSplitPathAtLeaf(string jsonPath)
+        public static (string, IJsonPathToken) SplitPathAtLeaf(string jsonPath)
         {
             List<string> parsedTokenList = ParseJsonPath(jsonPath.Trim());
 
@@ -303,7 +176,7 @@ namespace JsonPathSerializer.Utils
 
             string parentPath = string.Join("", parsedTokenList.Take(parsedTokenList.Count - 1));
 
-            return (parentPath, NewTokenize(parsedTokenList.Last())[0]);
+            return (parentPath, Tokenize(parsedTokenList.Last())[0]);
         }
     }
 }
