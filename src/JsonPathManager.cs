@@ -177,6 +177,34 @@ public class JsonPathManager : IJsonPathManager
         _root = rootCopy;
     }
 
+    public void Append(string path, object value)
+    {
+        // Verify the path is a valid JsonPath for the operation.
+        JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
+
+        try
+        {
+            var result = _root?.SelectTokens(path);
+
+            if (result != null)
+            {
+                foreach (var resultView in result)
+                {
+                    if (resultView is not JArray) // the target is not a JArray, therefore cannot append.
+                    {
+                        throw new ArgumentException($"JSON element {path} is not a JArray, therefore cannot append.");
+                    }
+                }
+            }
+        }
+        catch (ArgumentOutOfRangeException) // indicates a negative index, which SelectTokens can't handle
+        {
+            // TODO: find a way to validate negative index
+        }
+
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// Force add a value to the JsonPathManager root, regardless of whether existing values will be overriden.
     /// </summary>
