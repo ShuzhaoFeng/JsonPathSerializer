@@ -2,8 +2,19 @@
 
 namespace JsonPathSerializer
 {
-    internal class SerializerGlobals
+    public class Globals
     {
+        // Public global variables
+
+        public enum Priority
+        {
+            Low,
+            Normal,
+            High
+        }
+
+        // Internal global variables
+
         internal static readonly Uri JSON_PATH_SERIALIZER_REPOSITORY_URL =
             new("https://github.com/ShuzhaoFeng/JsonPathSerializer");
 

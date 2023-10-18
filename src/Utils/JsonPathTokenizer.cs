@@ -30,10 +30,10 @@ namespace JsonPathSerializer.Utils
                 // Try match the token into a known type.
 
                 // match to indexes
-                if (SerializerGlobals.JsonPathRegex.INDEX.IsMatch(token))
+                if (Globals.JsonPathRegex.INDEX.IsMatch(token))
                 {
                     // match the token into a collection of indexes or index spans
-                    MatchCollection matches = SerializerGlobals.JsonPathRegex.INDEX_TOKEN.Matches(token);
+                    MatchCollection matches = Globals.JsonPathRegex.INDEX_TOKEN.Matches(token);
 
                     JsonPathIndexToken indexToken = new();
 
@@ -42,7 +42,7 @@ namespace JsonPathSerializer.Utils
                         string tokenString = match.Groups[0].Value;
 
                         // try matching the token to a index span
-                        Match indexSpanMatch = SerializerGlobals.JsonPathRegex.INDEX_SPAN.Match(tokenString);
+                        Match indexSpanMatch = Globals.JsonPathRegex.INDEX_SPAN.Match(tokenString);
 
                         if (indexSpanMatch.Success)
                         {
@@ -69,7 +69,7 @@ namespace JsonPathSerializer.Utils
                     // guard against a first property without a dot, which should be allowed.
                     if (parsedTokenList.IndexOf(token) == 0 && !token.StartsWith('.') && !token.StartsWith('['))
                     {
-                        Match propertyDotMatch = SerializerGlobals.JsonPathRegex.PROPERTY.Match('.' + token);
+                        Match propertyDotMatch = Globals.JsonPathRegex.PROPERTY.Match('.' + token);
 
                         if (propertyDotMatch.Success)
                         {
@@ -84,7 +84,7 @@ namespace JsonPathSerializer.Utils
                     }
                     else
                     {
-                        Match propertyMatch = SerializerGlobals.JsonPathRegex.PROPERTY.Match(token);
+                        Match propertyMatch = Globals.JsonPathRegex.PROPERTY.Match(token);
 
                         if (propertyMatch.Success)
                         {
@@ -98,7 +98,7 @@ namespace JsonPathSerializer.Utils
                         }
                         else
                         {
-                            throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
+                            throw new NotSupportedException(Globals.ErrorMessage.UNSUPPORTED_TOKEN);
                         }
                     }
                 }
