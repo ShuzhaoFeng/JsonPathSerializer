@@ -108,7 +108,7 @@ namespace JsonPathSerializer.Utils
                         break;
 
                     default:
-                        throw new NotSupportedException(SerializerGlobals.ErrorMessage.UNSUPPORTED_TOKEN);
+                        throw new NotSupportedException(Globals.ErrorMessage.UNSUPPORTED_TOKEN);
 
                 }
 
