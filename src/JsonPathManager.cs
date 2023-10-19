@@ -107,6 +107,9 @@ public class JsonPathManager : IJsonPathManager
         // Verify the path is a valid JsonPath for the operation.
         JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
 
+        // Tokenize the JsonPath.
+        List<IJsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
+
         try
         {
             var result = _root?.SelectTokens(path);
@@ -125,11 +128,8 @@ public class JsonPathManager : IJsonPathManager
         }
         catch (ArgumentOutOfRangeException) // indicates a negative index, which SelectTokens can't handle
         {
-            // TODO: find a way to validate negative index
+            // TODO: deprecated and moved to JTokenGenerator.cs. Waiting for priority adding to be implemented.
         }
-
-        // Tokenize the JsonPath.
-        List<IJsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
 
         // Make a copy of root.
         JToken rootCopy = _root?.DeepClone()

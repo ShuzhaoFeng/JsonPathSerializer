@@ -38,17 +38,32 @@ namespace JsonPathSerializer.Utils
 
             JToken newToken = GenerateToken(unavailableTokens, value
                                                                ?? throw new ArgumentNullException(nameof(value)));
-
+            
             // merge the new JToken into the root copy using the split JsonPathToken.
             switch (splitToken)
             {
                 case JsonPathPropertyToken propertyToken:
+                    if (unavailableTokens.Count == 0
+                        && (lastAvailableToken.Token[propertyToken.Property] is JObject
+                            || lastAvailableToken.Token[propertyToken.Property] is JArray))
+                    {
+                        // TODO: throw an exception when priority adding is implemented.
+                    }
+
                     JObject lastJObject = (JObject)lastAvailableToken.Token;
                     lastJObject[propertyToken.Property] = newToken;
 
                     break;
 
                 case JsonPathIndexToken indexToken:
+
+
+                    if (unavailableTokens.Count == 0)
+                    {
+
+                        // TODO: throw an exception when priority adding is implemented.
+                    }
+
                     JArray lastJArray;
 
                     if (lastAvailableToken.Token.HasValues)
@@ -66,6 +81,19 @@ namespace JsonPathSerializer.Utils
                         else if (lastAvailableToken.Token.Parent is not null)
                         {
                             lastAvailableToken.Token.Replace(lastJArray);
+                        }
+                    }
+
+                    if (unavailableTokens.Count == 0)
+                    {
+                        for (int i = 0; i < lastJArray.Count; i++)
+                        {
+                            if (JsonPathValidator.ArrayContainsIndex(indexToken, i, lastJArray.Count)
+                                    && (lastAvailableToken.Token[i] is JObject
+                                        || lastAvailableToken.Token[i] is JArray))
+                            {
+                                // TODO: throw an exception when priority adding is implemented.
+                            }
                         }
                     }
 
