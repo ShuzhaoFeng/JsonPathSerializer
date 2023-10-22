@@ -1,19 +1,18 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace JsonPathSerializer
+namespace JsonPathSerializer;
+
+internal interface IJsonPathManager
 {
-    internal interface IJsonPathManager
-    {
-        public IJEnumerable<JToken> Value { get; }
+    public IJEnumerable<JToken> Value { get; }
 
-        void Add(string path, object value);
+    void Add(string path, object value);
 
-        void Force(string path, object value);
+    void Force(string path, object value);
 
-        JToken? Remove(string path);
+    JToken? Remove(string path);
 
-        string Build();
+    string Build();
 
-        void Clear();
-    }
+    void Clear();
 }

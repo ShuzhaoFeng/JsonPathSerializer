@@ -1,71 +1,70 @@
-namespace JsonPathSerializerTest
+namespace JsonPathSerializerTest;
+
+[TestClass]
+public class CreateManagerTest
 {
-    [TestClass]
-    public class CreateManagerTest
+    [TestMethod]
+    public void CanCreateEmptyManager()
     {
-        [TestMethod]
-        public void CanCreateEmptyManager()
-        {
-            var manager = new JsonPathManager();
-            Assert.IsNotNull(manager);
-        }
+        var manager = new JsonPathManager();
+        Assert.IsNotNull(manager);
+    }
 
-        [TestMethod]
-        public void CanCreateManagerWithEmptyJsonString()
-        {
-            var manager = new JsonPathManager("{}");
-            Assert.IsNotNull(manager);
-        }
+    [TestMethod]
+    public void CanCreateManagerWithEmptyJsonString()
+    {
+        var manager = new JsonPathManager("{}");
+        Assert.IsNotNull(manager);
+    }
 
-        [TestMethod]
-        public void CanCreateManagerWithEmptyJsonToken()
-        {
-            var token = JToken.Parse("{}");
-            var manager = new JsonPathManager(token);
-            Assert.IsNotNull(manager);
-        }
+    [TestMethod]
+    public void CanCreateManagerWithEmptyJsonToken()
+    {
+        var token = JToken.Parse("{}");
+        var manager = new JsonPathManager(token);
+        Assert.IsNotNull(manager);
+    }
 
-        [TestMethod]
-        public void CanCreateManagerWithLoadedJsonString()
-        {
-            string json = @"{
+    [TestMethod]
+    public void CanCreateManagerWithLoadedJsonString()
+    {
+        var json = @"{
                 ""name"": ""John Doe"",
             }";
 
-            var manager = new JsonPathManager(json);
-            Assert.IsNotNull(manager);
+        var manager = new JsonPathManager(json);
+        Assert.IsNotNull(manager);
 
-            var expected = JToken.Parse(json);
-            var actual = JToken.Parse(manager.Build());
+        var expected = JToken.Parse(json);
+        var actual = JToken.Parse(manager.Build());
 
-            Assert.IsTrue(JToken.DeepEquals(expected, actual));
-        }
+        Assert.IsTrue(JToken.DeepEquals(expected, actual));
+    }
 
-        [TestMethod]
-        public void CanCreateManagerWithLoadedJsonToken()
-        {
-            string json = @"{
+    [TestMethod]
+    public void CanCreateManagerWithLoadedJsonToken()
+    {
+        var json = @"{
                 ""name"": ""John Doe"",
             }";
 
-            var token = JToken.Parse(json);
-            var manager = new JsonPathManager(token);
-            Assert.IsNotNull(manager);
+        var token = JToken.Parse(json);
+        var manager = new JsonPathManager(token);
+        Assert.IsNotNull(manager);
 
-            var expected = JToken.Parse(json);
-            var actual = JToken.Parse(manager.Build());
+        var expected = JToken.Parse(json);
+        var actual = JToken.Parse(manager.Build());
 
-            Assert.IsTrue(JToken.DeepEquals(expected, actual));
-        }
+        Assert.IsTrue(JToken.DeepEquals(expected, actual));
+    }
 
-        [TestMethod]
-        public void ThrowsExceptionWhenCreatingManagerWithInvalidJsonString()
-        {
-            string json = @"{
+    [TestMethod]
+    public void ThrowsExceptionWhenCreatingManagerWithInvalidJsonString()
+    {
+        var json = @"{
                 ""name"": ""John Doe"",
             ";
 
-            Assert.ThrowsException<Newtonsoft.Json.JsonReaderException>(() => new JsonPathManager(json));
-        }
+        Assert.ThrowsException<JsonReaderException>(() => new JsonPathManager(json));
     }
 }

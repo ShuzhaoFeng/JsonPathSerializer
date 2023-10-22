@@ -1,37 +1,36 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace JsonPathSerializer.Structs
+namespace JsonPathSerializer.Structs;
+
+internal class JsonNodeToken
 {
-    class JsonNodeToken
+    public JsonNodeToken(JToken token, int index)
     {
-        /// <summary>
-        /// Json node.
-        /// </summary>
-        public JToken Token { get; set; }
+        Token = token;
+        Index = index;
+    }
 
-        /// <summary>
-        /// Depth of the Json node.
-        /// </summary>
-        public int Index { get; }
+    /// <summary>
+    ///     Json node.
+    /// </summary>
+    public JToken Token { get; set; }
 
-        /// <summary>
-        /// Specify whether the token is the last node that already exists in the root.
-        /// </summary>
-        public bool IsLastAvailableToken { get; private set; } = false;
+    /// <summary>
+    ///     Depth of the Json node.
+    /// </summary>
+    public int Index { get; }
 
-        public JsonNodeToken(JToken token, int index)
-        {
-            Token = token;
-            Index = index;
-        }
+    /// <summary>
+    ///     Specify whether the token is the last node that already exists in the root.
+    /// </summary>
+    public bool IsLastAvailableToken { get; private set; }
 
-        /// <summary>
-        /// Set the token to the last node that already exists in the root.
-        /// </summary>
-        public JsonNodeToken AsLastAvailable()
-        {
-            IsLastAvailableToken = true;
-            return this;
-        }
+    /// <summary>
+    ///     Set the token to the last node that already exists in the root.
+    /// </summary>
+    public JsonNodeToken AsLastAvailable()
+    {
+        IsLastAvailableToken = true;
+        return this;
     }
 }

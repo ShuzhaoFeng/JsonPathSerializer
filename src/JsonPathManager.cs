@@ -9,60 +9,19 @@ namespace JsonPathSerializer;
 public class JsonPathManager : IJsonPathManager
 {
     /// <summary>
-    /// The root Json object.
+    ///     The root Json object.
     /// </summary>
     private JToken? _root;
 
     /// <summary>
-    /// Returns a read-only instance of root.
-    /// </summary>
-    public IJEnumerable<JToken> Value => _root ?? new JObject();
-
-    /// <summary>
-    /// Serialize a list of path-value pairs into a Json string.
-    /// </summary>
-    /// <param name="jsonPathToValues">The list of path-value pair to serialize.</param>
-    /// <returns>The serialized string.</returns>
-    public static string SerializeAll(IEnumerable<(string, object)> jsonPathToValues)
-    {
-        JsonPathManager manager = new();
-
-        foreach ((string, object) jsonPathToValue in jsonPathToValues
-                                                     ?? throw new ArgumentNullException(nameof(jsonPathToValues)))
-        {
-            manager.Add(jsonPathToValue.Item1, jsonPathToValue.Item2);
-        }
-
-        return manager.Build();
-    }
-
-    /// <summary>
-    /// Serialize a collection of key-value pairs into a Json string.
-    /// </summary>
-    /// <param name="jsonPathToValues">The key-value pairs to serialize.</param>
-    /// <returns>The serialized string.</returns>
-    public static string SerializeAll(IEnumerable<KeyValuePair<string, object>> jsonPathToValues)
-    {
-        JsonPathManager manager = new();
-
-        foreach (KeyValuePair<string, object> jsonPathToValue in jsonPathToValues
-                ?? throw new ArgumentNullException(nameof(jsonPathToValues)))
-        {
-            manager.Add(jsonPathToValue.Key, jsonPathToValue.Value);
-        }
-
-        return manager.Build();
-    }
-
-    /// <summary>
-    /// Create a new JsonPathManager instance with an empty root.
+    ///     Create a new JsonPathManager instance with an empty root.
     /// </summary>
     public JsonPathManager()
     {
     }
 
     /// <summary>
-    /// Create a new JsonPathManager instance with the input token as root.
+    ///     Create a new JsonPathManager instance with the input token as root.
     /// </summary>
     /// <param name="root">The root token.</param>
     public JsonPathManager(JToken root)
@@ -71,8 +30,8 @@ public class JsonPathManager : IJsonPathManager
     }
 
     /// <summary>
-    /// Create a new JsonPathManager instance with the input string as root.
-    /// Will throw an exception if the root string is not a valid Json string.
+    ///     Create a new JsonPathManager instance with the input string as root.
+    ///     Will throw an exception if the root string is not a valid Json string.
     /// </summary>
     /// <param name="root">The root string.</param>
     public JsonPathManager(string root)
@@ -81,7 +40,12 @@ public class JsonPathManager : IJsonPathManager
     }
 
     /// <summary>
-    /// Clear the JsonPathManager root.
+    ///     Returns a read-only instance of root.
+    /// </summary>
+    public IJEnumerable<JToken> Value => _root ?? new JObject();
+
+    /// <summary>
+    ///     Clear the JsonPathManager root.
     /// </summary>
     public void Clear()
     {
@@ -89,7 +53,7 @@ public class JsonPathManager : IJsonPathManager
     }
 
     /// <summary>
-    /// Build the Json string from the JsonPathManager root.
+    ///     Build the Json string from the JsonPathManager root.
     /// </summary>
     /// <returns>A Json string representing the root.</returns>
     public string Build()
@@ -98,7 +62,7 @@ public class JsonPathManager : IJsonPathManager
     }
 
     /// <summary>
-    /// Add a value to the JsonPathManager root.
+    ///     Add a value to the JsonPathManager root.
     /// </summary>
     /// <param name="path">The path where to add the value.</param>
     /// <param name="value">The value to be added.</param>
@@ -115,16 +79,10 @@ public class JsonPathManager : IJsonPathManager
             var result = _root?.SelectTokens(path);
 
             if (result != null)
-            {
                 foreach (var resultView in result)
-                {
                     if (resultView is JContainer) // there exists a JSON child at the location that will be overriden.
-                    {
                         throw new ArgumentException($"JSON element {path} contains a JSON child element," +
                                                     $"therefore cannot contain a value.");
-                    }
-                }
-            }
         }
         catch (ArgumentOutOfRangeException) // indicates a negative index, which SelectTokens can't handle
         {
@@ -142,16 +100,13 @@ public class JsonPathManager : IJsonPathManager
             // Check for conflicting types.
 
             if (lastAvailableToken.Token is not JContainer)
-            {
                 throw new ArgumentException
                 (
                     $"JSON element $.{lastAvailableToken.Token.Path} " +
                     "contains a value, therefore cannot contain other child elements."
                 );
-            }
 
             if (lastAvailableToken.Token.HasValues)
-            {
                 switch (lastAvailableToken.Token)
                 {
                     case JArray when pathTokens[lastAvailableToken.Index] is not JsonPathIndexToken:
@@ -168,7 +123,6 @@ public class JsonPathManager : IJsonPathManager
                             "is a JObject, therefore cannot be taken as a JArray."
                         );
                 }
-            }
 
             rootCopy = JTokenGenerator.GenerateNewRoot(lastAvailableToken, pathTokens, rootCopy, value);
         }
@@ -178,7 +132,7 @@ public class JsonPathManager : IJsonPathManager
     }
 
     /// <summary>
-    /// Force add a value to the JsonPathManager root, regardless of whether existing values will be overriden.
+    ///     Force add a value to the JsonPathManager root, regardless of whether existing values will be overriden.
     /// </summary>
     /// <param name="path">The path where to add the value.</param>
     /// <param name="value">The value to be added.</param>
@@ -201,7 +155,8 @@ public class JsonPathManager : IJsonPathManager
             if (lastAvailableToken.Token is not JContainer)
             {
                 JContainer emptyContainer = pathTokens[lastAvailableToken.Index] is JsonPathIndexToken
-                    ? new JArray() : new JObject();
+                    ? new JArray()
+                    : new JObject();
 
                 lastAvailableToken.Token.Replace(emptyContainer);
 
@@ -209,7 +164,6 @@ public class JsonPathManager : IJsonPathManager
             }
 
             if (lastAvailableToken.Token.HasValues)
-            {
                 switch (lastAvailableToken.Token)
                 {
                     case JArray when pathTokens[lastAvailableToken.Index] is not JsonPathIndexToken:
@@ -229,7 +183,6 @@ public class JsonPathManager : IJsonPathManager
                         lastAvailableToken.Token = emptyJArray;
                         break;
                 }
-            }
 
             rootCopy = JTokenGenerator.GenerateNewRoot(lastAvailableToken, pathTokens, rootCopy, value);
         }
@@ -239,7 +192,7 @@ public class JsonPathManager : IJsonPathManager
     }
 
     /// <summary>
-    /// Remove a value or child from the JsonPathManager root and return it.
+    ///     Remove a value or child from the JsonPathManager root and return it.
     /// </summary>
     /// <param name="path">The path where to remove the value or child.</param>
     /// <returns>The removed value or child.</returns>
@@ -270,5 +223,38 @@ public class JsonPathManager : IJsonPathManager
             default:
                 return null;
         }
+    }
+
+    /// <summary>
+    ///     Serialize a list of path-value pairs into a Json string.
+    /// </summary>
+    /// <param name="jsonPathToValues">The list of path-value pair to serialize.</param>
+    /// <returns>The serialized string.</returns>
+    public static string SerializeAll(IEnumerable<(string, object)> jsonPathToValues)
+    {
+        JsonPathManager manager = new();
+
+        foreach ((string, object) jsonPathToValue in jsonPathToValues
+                                                     ?? throw new ArgumentNullException(nameof(jsonPathToValues)))
+            manager.Add(jsonPathToValue.Item1, jsonPathToValue.Item2);
+
+        return manager.Build();
+    }
+
+    /// <summary>
+    ///     Serialize a collection of key-value pairs into a Json string.
+    /// </summary>
+    /// <param name="jsonPathToValues">The key-value pairs to serialize.</param>
+    /// <returns>The serialized string.</returns>
+    public static string SerializeAll(IEnumerable<KeyValuePair<string, object>> jsonPathToValues)
+    {
+        JsonPathManager manager = new();
+
+        foreach (KeyValuePair<string, object> jsonPathToValue in jsonPathToValues
+                                                                 ?? throw new ArgumentNullException(
+                                                                     nameof(jsonPathToValues)))
+            manager.Add(jsonPathToValue.Key, jsonPathToValue.Value);
+
+        return manager.Build();
     }
 }
