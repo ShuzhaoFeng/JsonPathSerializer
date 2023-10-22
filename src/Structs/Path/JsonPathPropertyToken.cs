@@ -1,12 +1,11 @@
-﻿namespace JsonPathSerializer.Structs.Path
-{
-    class JsonPathPropertyToken : IJsonPathToken
-    {
-        public string Property { get; }
+﻿namespace JsonPathSerializer.Structs.Path;
 
-        public JsonPathPropertyToken(string property)
-        {
-            Property = property;
-        }
+internal class JsonPathPropertyToken : IJsonPathToken
+{
+    public JsonPathPropertyToken(string property)
+    {
+        Property = property;
     }
+
+    public string Property { get; }
 }

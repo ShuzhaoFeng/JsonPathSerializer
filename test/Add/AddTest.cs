@@ -1,77 +1,76 @@
-﻿namespace JsonPathSerializerTest.Add
+﻿namespace JsonPathSerializerTest.Add;
+
+[TestClass]
+public class AddTest
 {
-    [TestClass]
-    public class AddTest
+    private JsonPathManager _emptyManager = new();
+    private JsonPathManager _loadedManager = new();
+
+    [TestInitialize]
+    public void Initialize()
     {
-        private JsonPathManager _emptyManager = new();
-        private JsonPathManager _loadedManager = new();
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            _emptyManager = new JsonPathManager();
-            _loadedManager = new JsonPathManager(@"{
+        _emptyManager = new JsonPathManager();
+        _loadedManager = new JsonPathManager(@"{
                 ""name"": ""John Doe"",
             }");
-        }
+    }
 
-        [TestMethod]
-        public void CanAddKeyValuePairToEmptyManager()
-        {
-            _emptyManager.Add("name", "John Doe");
+    [TestMethod]
+    public void CanAddKeyValuePairToEmptyManager()
+    {
+        _emptyManager.Add("name", "John Doe");
 
-            var expected = JToken.Parse(@"{
+        var expected = JToken.Parse(@"{
                 ""name"": ""John Doe"",
             }");
-            var actual = JToken.Parse(_emptyManager.Build());
+        var actual = JToken.Parse(_emptyManager.Build());
 
-            Assert.IsTrue(JToken.DeepEquals(expected, actual));
-        }
+        Assert.IsTrue(JToken.DeepEquals(expected, actual));
+    }
 
-        [TestMethod]
-        public void CanAddKeyValuePairToLoadedManager()
-        {
-            _loadedManager.Add("age", 42);
+    [TestMethod]
+    public void CanAddKeyValuePairToLoadedManager()
+    {
+        _loadedManager.Add("age", 42);
 
-            var expected = JToken.Parse(@"{
+        var expected = JToken.Parse(@"{
                 ""name"": ""John Doe"",
                 ""age"": 42
             }");
-            var actual = JToken.Parse(_loadedManager.Build());
+        var actual = JToken.Parse(_loadedManager.Build());
 
-            Assert.IsTrue(JToken.DeepEquals(expected, actual));
-        }
+        Assert.IsTrue(JToken.DeepEquals(expected, actual));
+    }
 
-        [TestMethod]
-        public void CanAddKeyValuePairToLoadedManagerWithExistingKey()
-        {
-            _loadedManager.Add("name", "Jane Doe");
+    [TestMethod]
+    public void CanAddKeyValuePairToLoadedManagerWithExistingKey()
+    {
+        _loadedManager.Add("name", "Jane Doe");
 
-            var expected = JToken.Parse(@"{
+        var expected = JToken.Parse(@"{
                 ""name"": ""Jane Doe"",
             }");
-            var actual = JToken.Parse(_loadedManager.Build());
+        var actual = JToken.Parse(_loadedManager.Build());
 
-            Assert.IsTrue(JToken.DeepEquals(expected, actual));
-        }
+        Assert.IsTrue(JToken.DeepEquals(expected, actual));
+    }
 
-        [TestMethod]
-        public void CanAddKeyValuePairToLoadedManagerWithExistingKeyAndValue()
-        {
-            _loadedManager.Add("name", "John Doe");
+    [TestMethod]
+    public void CanAddKeyValuePairToLoadedManagerWithExistingKeyAndValue()
+    {
+        _loadedManager.Add("name", "John Doe");
 
-            var expected = JToken.Parse(@"{
+        var expected = JToken.Parse(@"{
                 ""name"": ""John Doe"",
             }");
-            var actual = JToken.Parse(_loadedManager.Build());
+        var actual = JToken.Parse(_loadedManager.Build());
 
-            Assert.IsTrue(JToken.DeepEquals(expected, actual));
-        }
+        Assert.IsTrue(JToken.DeepEquals(expected, actual));
+    }
 
-        [TestMethod]
-        public void ThrowsExceptionWhenAddingNullValueToManager()
-        {
-            Assert.ThrowsException<ArgumentNullException>(() => _emptyManager.Add("name", null));
-        }
+    [TestMethod]
+    public void ThrowsExceptionWhenAddingNullValueToManager()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _emptyManager.Add("name", null));
     }
 }

@@ -1,182 +1,161 @@
+using System.Text.RegularExpressions;
 using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Structs.Types.Index;
 using JsonPathSerializer.Structs.Types.IndexSpan;
-using System.Text.RegularExpressions;
 
-namespace JsonPathSerializer.Utils
+namespace JsonPathSerializer.Utils;
+
+internal class JsonPathTokenizer
 {
-    class JsonPathTokenizer
+    /// <summary>
+    ///     Split a JsonPath into a list of JsonPathTokens.
+    /// </summary>
+    /// <param name="jsonPath">The JsonPath to tokenize.</param>
+    /// <returns>A list of JsonPathTokens from the entire JsonPath.</returns>
+    public static List<IJsonPathToken> Tokenize(string jsonPath)
     {
-        /// <summary>
-        /// Split a JsonPath into a list of JsonPathTokens.
-        /// </summary>
-        /// <param name="jsonPath">The JsonPath to tokenize.</param>
-        /// <returns>A list of JsonPathTokens from the entire JsonPath.</returns>
-        public static List<IJsonPathToken> Tokenize(string jsonPath)
+        List<IJsonPathToken> pathTokens = new();
+
+        // Parse the JsonPath into strings of tokens.
+        List<string> parsedTokenList = ParseJsonPath(jsonPath.Trim());
+
+        foreach (string token in parsedTokenList)
         {
-            List<IJsonPathToken> pathTokens = new();
+            // ignore root token
+            if ("$.".Contains(token)) continue;
 
-            // Parse the JsonPath into strings of tokens.
-            List<string> parsedTokenList = ParseJsonPath(jsonPath.Trim());
+            // Try match the token into a known type.
 
-            foreach (string token in parsedTokenList)
+            // match to indexes
+            if (Globals.JsonPathRegex.INDEX.IsMatch(token))
             {
-                // ignore root token
-                if ("$.".Contains(token))
+                // match the token into a collection of indexes or index spans
+                MatchCollection matches = Globals.JsonPathRegex.INDEX_TOKEN.Matches(token);
+
+                JsonPathIndexToken indexToken = new();
+
+                foreach (Match match in matches)
                 {
-                    continue;
+                    string tokenString = match.Groups[0].Value;
+
+                    // try matching the token to a index span
+                    Match indexSpanMatch = Globals.JsonPathRegex.INDEX_SPAN.Match(tokenString);
+
+                    if (indexSpanMatch.Success)
+                        indexToken.Add(new IndexSpanValueContainer
+                        (
+                            indexSpanMatch.Groups[1].Value == ""
+                                ? 0
+                                : int.Parse(indexSpanMatch.Groups[1].Value),
+                            indexSpanMatch.Groups[2].Value == ""
+                                ? null
+                                : int.Parse(indexSpanMatch.Groups[2].Value)
+                        ));
+                    else // not a index span, thus a single index
+                        indexToken.Add(new IndexValueContainer(int.Parse(tokenString)));
                 }
 
-                // Try match the token into a known type.
-
-                // match to indexes
-                if (Globals.JsonPathRegex.INDEX.IsMatch(token))
+                pathTokens.Add(indexToken);
+            }
+            else // v 0.2.0 - only option left is a property
+            {
+                // guard against a first property without a dot, which should be allowed.
+                if (parsedTokenList.IndexOf(token) == 0 && !token.StartsWith('.') && !token.StartsWith('['))
                 {
-                    // match the token into a collection of indexes or index spans
-                    MatchCollection matches = Globals.JsonPathRegex.INDEX_TOKEN.Matches(token);
+                    Match propertyDotMatch = Globals.JsonPathRegex.PROPERTY.Match('.' + token);
 
-                    JsonPathIndexToken indexToken = new();
-
-                    foreach (Match match in matches)
-                    {
-                        string tokenString = match.Groups[0].Value;
-
-                        // try matching the token to a index span
-                        Match indexSpanMatch = Globals.JsonPathRegex.INDEX_SPAN.Match(tokenString);
-
-                        if (indexSpanMatch.Success)
-                        {
-                            indexToken.Add(new IndexSpanValueContainer
-                            (
-                                indexSpanMatch.Groups[1].Value == ""
-                                    ? 0
-                                    : int.Parse(indexSpanMatch.Groups[1].Value),
-                                indexSpanMatch.Groups[2].Value == ""
-                                    ? null
-                                    : int.Parse(indexSpanMatch.Groups[2].Value)
-                            ));
-                        }
-                        else // not a index span, thus a single index
-                        {
-                            indexToken.Add(new IndexValueContainer(int.Parse(tokenString)));
-                        }
-                    }
-
-                    pathTokens.Add(indexToken);
+                    if (propertyDotMatch.Success)
+                        pathTokens.Add(new JsonPathPropertyToken
+                        (
+                            propertyDotMatch.Groups
+                                    // dot notation match to Groups[1], bracket notation match to Groups[2]
+                                    [propertyDotMatch.Groups[2].Value == "" ? 1 : 2]
+                                .Value
+                        ));
                 }
-                else // v 0.2.0 - only option left is a property
+                else
                 {
-                    // guard against a first property without a dot, which should be allowed.
-                    if (parsedTokenList.IndexOf(token) == 0 && !token.StartsWith('.') && !token.StartsWith('['))
-                    {
-                        Match propertyDotMatch = Globals.JsonPathRegex.PROPERTY.Match('.' + token);
+                    Match propertyMatch = Globals.JsonPathRegex.PROPERTY.Match(token);
 
-                        if (propertyDotMatch.Success)
-                        {
-                            pathTokens.Add(new JsonPathPropertyToken
-                            (
-                                propertyDotMatch.Groups
-                                        // dot notation match to Groups[1], bracket notation match to Groups[2]
-                                        [propertyDotMatch.Groups[2].Value == "" ? 1 : 2]
-                                    .Value
-                            ));
-                        }
-                    }
+                    if (propertyMatch.Success)
+                        pathTokens.Add(new JsonPathPropertyToken
+                        (
+                            propertyMatch.Groups
+                                    // dot notation match to Groups[1], bracket notation match to Groups[2]
+                                    [propertyMatch.Groups[2].Value == "" ? 1 : 2]
+                                .Value
+                        ));
                     else
-                    {
-                        Match propertyMatch = Globals.JsonPathRegex.PROPERTY.Match(token);
-
-                        if (propertyMatch.Success)
-                        {
-                            pathTokens.Add(new JsonPathPropertyToken
-                            (
-                                propertyMatch.Groups
-                                        // dot notation match to Groups[1], bracket notation match to Groups[2]
-                                        [propertyMatch.Groups[2].Value == "" ? 1 : 2]
-                                    .Value
-                            ));
-                        }
-                        else
-                        {
-                            throw new NotSupportedException(Globals.ErrorMessage.UNSUPPORTED_TOKEN);
-                        }
-                    }
+                        throw new NotSupportedException(Globals.ErrorMessage.UNSUPPORTED_TOKEN);
                 }
             }
-
-            return pathTokens;
         }
 
-        /// <summary>
-        /// Parse the JsonPath into a list of string, each represents a token of the path.
-        /// </summary>
-        /// <param name="path">The JsonPath to tokenize.</param>
-        /// <returns>A list of strings, each represents a token of the path.</returns>
-        private static List<string> ParseJsonPath(string path)
+        return pathTokens;
+    }
+
+    /// <summary>
+    ///     Parse the JsonPath into a list of string, each represents a token of the path.
+    /// </summary>
+    /// <param name="path">The JsonPath to tokenize.</param>
+    /// <returns>A list of strings, each represents a token of the path.</returns>
+    private static List<string> ParseJsonPath(string path)
+    {
+        List<string> paths = new();
+
+        int index = 0;
+
+        // Iteratively parse the string up to the last index
+        while (index >= 0 && index < path.Length)
         {
-            List<string> paths = new();
+            int newIndex = path[index].Equals('[')
+                ? path.IndexOf(']', index) + 1 // Bracket notation
+                : FindNextDotOrOpenBracket(path, index + 1); // Dot notation
 
-            int index = 0;
-
-            // Iteratively parse the string up to the last index
-            while (index >= 0 && index < path.Length)
-            {
-                int newIndex = path[index].Equals('[')
-                    ? path.IndexOf(']', index) + 1 // Bracket notation
-                    : FindNextDotOrOpenBracket(path, index + 1); // Dot notation
-
-                paths.Add(newIndex > 0 ? path.Substring(index, newIndex - index) : path.Substring(index));
-                index = newIndex;
-            }
-
-            return paths;
+            paths.Add(newIndex > 0 ? path.Substring(index, newIndex - index) : path.Substring(index));
+            index = newIndex;
         }
 
-        /// <summary>
-        /// Locates the next dot or open bracket character in a JsonPath string.
-        /// </summary>
-        /// <param name="path">The JsonPath string.</param>
-        /// <param name="index">Start index on the path.</param>
-        /// <returns>
-        /// An integer representing the index position of the next dot or open bracket,
-        /// -1 if none found after the starting index.
-        /// </returns>
-        private static int FindNextDotOrOpenBracket(string path, int index)
-        {
-            int dotIndex = path.IndexOf('.', index);
-            int bracketIndex = path.IndexOf('[', index);
+        return paths;
+    }
 
-            if (dotIndex == -1)
-            {
-                return bracketIndex;
-            }
+    /// <summary>
+    ///     Locates the next dot or open bracket character in a JsonPath string.
+    /// </summary>
+    /// <param name="path">The JsonPath string.</param>
+    /// <param name="index">Start index on the path.</param>
+    /// <returns>
+    ///     An integer representing the index position of the next dot or open bracket,
+    ///     -1 if none found after the starting index.
+    /// </returns>
+    private static int FindNextDotOrOpenBracket(string path, int index)
+    {
+        int dotIndex = path.IndexOf('.', index);
+        int bracketIndex = path.IndexOf('[', index);
 
-            if (bracketIndex == -1)
-            {
-                return dotIndex;
-            }
+        if (dotIndex == -1) return bracketIndex;
 
-            return Math.Min(dotIndex, bracketIndex);
-        }
+        if (bracketIndex == -1) return dotIndex;
 
-        /// <summary>
-        /// Split the JsonPath into two parts: the parent path and the leaf token.
-        /// </summary>
-        /// <param name="jsonPath">The complete JsonPath.</param>
-        /// <returns>A tuple, the first element being the parent path to the leaf,
-        /// the second being the leaf formatted into a JsonPathToken.</returns>
-        public static (string, IJsonPathToken) SplitPathAtLeaf(string jsonPath)
-        {
-            List<string> parsedTokenList = ParseJsonPath(jsonPath.Trim());
+        return Math.Min(dotIndex, bracketIndex);
+    }
 
-            if (parsedTokenList.Count < 1)
-            {
-                return ("", new JsonPathPropertyToken(""));
-            }
+    /// <summary>
+    ///     Split the JsonPath into two parts: the parent path and the leaf token.
+    /// </summary>
+    /// <param name="jsonPath">The complete JsonPath.</param>
+    /// <returns>
+    ///     A tuple, the first element being the parent path to the leaf,
+    ///     the second being the leaf formatted into a JsonPathToken.
+    /// </returns>
+    public static (string, IJsonPathToken) SplitPathAtLeaf(string jsonPath)
+    {
+        List<string> parsedTokenList = ParseJsonPath(jsonPath.Trim());
 
-            string parentPath = string.Join("", parsedTokenList.Take(parsedTokenList.Count - 1));
+        if (parsedTokenList.Count < 1) return ("", new JsonPathPropertyToken(""));
 
-            return (parentPath, Tokenize(parsedTokenList.Last())[0]);
-        }
+        string parentPath = string.Join("", parsedTokenList.Take(parsedTokenList.Count - 1));
+
+        return (parentPath, Tokenize(parsedTokenList.Last())[0]);
     }
 }

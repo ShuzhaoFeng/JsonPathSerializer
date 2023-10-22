@@ -1,16 +1,14 @@
-﻿namespace JsonPathSerializer.Structs.Types.Index
+﻿namespace JsonPathSerializer.Structs.Types.Index;
+
+internal class IndexValueContainer : IValueContainer
 {
-    class IndexValueContainer : IValueContainer
+    public IndexValueContainer(int index)
     {
-        /// <summary>
-        /// Index.
-        /// </summary>
-        public int Index { get; }
-
-        public IndexValueContainer(int index)
-        {
-            Index = index;
-        }
+        Index = index;
     }
-}
 
+    /// <summary>
+    ///     Index.
+    /// </summary>
+    public int Index { get; }
+}
