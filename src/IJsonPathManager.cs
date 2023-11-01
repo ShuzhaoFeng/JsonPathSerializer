@@ -2,6 +2,9 @@
 
 namespace JsonPathSerializer;
 
+/// <summary>
+///     Describes the entity that is the root manager for all JsonPathSerializer operations.
+/// </summary>
 internal interface IJsonPathManager
 {
     public IJEnumerable<JToken> Value { get; }

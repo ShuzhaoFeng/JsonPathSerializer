@@ -2,6 +2,9 @@
 
 namespace JsonPathSerializer;
 
+/// <summary>
+///     Global variables and constants for JsonPathSerializer.
+/// </summary>
 public class Globals
 {
     // Public global variables
