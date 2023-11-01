@@ -6,6 +6,9 @@ using Newtonsoft.Json.Linq;
 
 namespace JsonPathSerializer;
 
+/// <summary>
+///     Entity that is the root manager for all JsonPathSerializer operations.
+/// </summary>
 public class JsonPathManager : IJsonPathManager
 {
     /// <summary>
@@ -211,9 +214,12 @@ public class JsonPathManager : IJsonPathManager
         {
             case JArray parentRootArray when leafToken is JsonPathIndexToken indexToken:
 
+                // use a helper method to remove the value.
                 return JTokenRemover.Remove(parentRootArray, indexToken);
 
             case JObject parentRootObject when leafToken is JsonPathPropertyToken propertyToken:
+
+                // operation is simpler. Can directly remove
                 JToken? removed = parentRootObject[propertyToken.Property];
 
                 parentRootObject.Remove(propertyToken.Property);
