@@ -6,6 +6,9 @@ using Newtonsoft.Json.Linq;
 
 namespace JsonPathSerializer.Utils;
 
+/// <summary>
+///     Collection of helper methods to validate a JsonPathSerializer element.
+/// </summary>
 internal class JsonPathValidator
 {
     /// <summary>
@@ -24,6 +27,13 @@ internal class JsonPathValidator
         new JObject().SelectToken(path);
     }
 
+    /// <summary>
+    ///     Check if a index range definition contains a given index.
+    /// </summary>
+    /// <param name="token">The token that contains the index range definitions.</param>
+    /// <param name="i"> The current index to validate.</param>
+    /// <param name="count">The length of the JArray. Used to compute the array bound.</param>
+    /// <returns></returns>
     public static bool ArrayContainsIndex(JsonPathIndexToken token, int i, int count)
     {
         foreach (IValueContainer index in token.Indexes)

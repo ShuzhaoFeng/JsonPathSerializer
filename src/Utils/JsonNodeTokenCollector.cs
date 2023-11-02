@@ -4,6 +4,9 @@ using Newtonsoft.Json.Linq;
 
 namespace JsonPathSerializer.Utils;
 
+/// <summary>
+///     Collection of helper methods for collecting JsonNodeTokens from the root, with the given path.
+/// </summary>
 internal class JsonNodeTokenCollector
 {
     /// <summary>
@@ -65,6 +68,8 @@ internal class JsonNodeTokenCollector
 
                 case JsonPathIndexToken indexToken:
 
+                    // due to index tokens may increase the number of current tokens
+                    // user a new list to store the new tokens to simplify code development.
                     List<JsonNodeToken> newCurrentTokens = new();
 
                     // at each level of the tree, do the same check for each token.
@@ -83,7 +88,8 @@ internal class JsonNodeTokenCollector
                             && currentJArray.Count >= indexToken.Bound
                         )
                         {
-                            for (int i = 0; i < currentJArray.Count; i++)
+                            for (int i = 0; i < currentJArray.Count; i++) // iterate through each index.
+                                // Check whether the index specified by the path contains the index.
                                 if (JsonPathValidator.ArrayContainsIndex(indexToken, i, currentJArray.Count))
                                     newCurrentTokens.Add(new JsonNodeToken
                                     (
@@ -97,6 +103,7 @@ internal class JsonNodeTokenCollector
                         }
                     }
 
+                    // replace the current tokens with the new ones.
                     currentTokens = newCurrentTokens;
 
                     break;
@@ -105,6 +112,7 @@ internal class JsonNodeTokenCollector
                     throw new NotSupportedException(Globals.ErrorMessage.UNSUPPORTED_TOKEN);
             }
 
+            // if all tokens are the last available, no need to search further down.
             if (currentTokens.Any(x => !x.IsLastAvailableToken))
                 pathIndex++;
             else

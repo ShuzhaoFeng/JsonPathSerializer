@@ -5,6 +5,9 @@ using JsonPathSerializer.Structs.Types.IndexSpan;
 
 namespace JsonPathSerializer.Utils;
 
+/// <summary>
+///     Collection of helper methods to convert a JsonPath string into JsonPathTokens.
+/// </summary>
 internal class JsonPathTokenizer
 {
     /// <summary>
@@ -95,6 +98,25 @@ internal class JsonPathTokenizer
     }
 
     /// <summary>
+    ///     Split the JsonPath into two parts: the parent path and the leaf token.
+    /// </summary>
+    /// <param name="jsonPath">The complete JsonPath.</param>
+    /// <returns>
+    ///     A tuple, the first element being the parent path to the leaf,
+    ///     the second being the leaf formatted into a JsonPathToken.
+    /// </returns>
+    public static (string, IJsonPathToken) SplitPathAtLeaf(string jsonPath)
+    {
+        List<string> parsedTokenList = ParseJsonPath(jsonPath.Trim());
+
+        if (parsedTokenList.Count < 1) return ("", new JsonPathPropertyToken(""));
+
+        string parentPath = string.Join("", parsedTokenList.Take(parsedTokenList.Count - 1));
+
+        return (parentPath, Tokenize(parsedTokenList.Last())[0]);
+    }
+
+    /// <summary>
     ///     Parse the JsonPath into a list of string, each represents a token of the path.
     /// </summary>
     /// <param name="path">The JsonPath to tokenize.</param>
@@ -138,24 +160,5 @@ internal class JsonPathTokenizer
         if (bracketIndex == -1) return dotIndex;
 
         return Math.Min(dotIndex, bracketIndex);
-    }
-
-    /// <summary>
-    ///     Split the JsonPath into two parts: the parent path and the leaf token.
-    /// </summary>
-    /// <param name="jsonPath">The complete JsonPath.</param>
-    /// <returns>
-    ///     A tuple, the first element being the parent path to the leaf,
-    ///     the second being the leaf formatted into a JsonPathToken.
-    /// </returns>
-    public static (string, IJsonPathToken) SplitPathAtLeaf(string jsonPath)
-    {
-        List<string> parsedTokenList = ParseJsonPath(jsonPath.Trim());
-
-        if (parsedTokenList.Count < 1) return ("", new JsonPathPropertyToken(""));
-
-        string parentPath = string.Join("", parsedTokenList.Take(parsedTokenList.Count - 1));
-
-        return (parentPath, Tokenize(parsedTokenList.Last())[0]);
     }
 }
