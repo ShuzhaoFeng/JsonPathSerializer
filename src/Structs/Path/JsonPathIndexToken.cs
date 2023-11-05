@@ -4,6 +4,9 @@ using JsonPathSerializer.Structs.Types.IndexSpan;
 
 namespace JsonPathSerializer.Structs.Path;
 
+/// <summary>
+///     JsonPathToken that contains indexes and index spans of an array.
+/// </summary>
 internal class JsonPathIndexToken : IJsonPathToken
 {
     /// <summary>
@@ -16,6 +19,10 @@ internal class JsonPathIndexToken : IJsonPathToken
     /// </summary>
     public int Bound { get; private set; }
 
+    /// <summary>
+    ///    Add a new index or index span to the token, and update the bound.
+    /// </summary>
+    /// <param name="container"></param>
     public void Add(IValueContainer container)
     {
         Indexes.Add(container);
