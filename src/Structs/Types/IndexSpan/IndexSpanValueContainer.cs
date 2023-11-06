@@ -1,5 +1,8 @@
 ﻿namespace JsonPathSerializer.Structs.Types.IndexSpan;
 
+/// <summary>
+///     Contains a index span value from a JsonPath token.
+/// </summary>
 internal class IndexSpanValueContainer : IValueContainer
 {
     public IndexSpanValueContainer(int startIndex, int? endIndex)
