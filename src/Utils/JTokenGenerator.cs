@@ -7,6 +7,9 @@ using Newtonsoft.Json.Linq;
 
 namespace JsonPathSerializer.Utils;
 
+/// <summary>
+///     Collection of helper methods to generate a new JToken from a given path and value.
+/// </summary>
 internal class JTokenGenerator
 {
     /// <summary>
@@ -43,6 +46,9 @@ internal class JTokenGenerator
         switch (splitToken)
         {
             case JsonPathPropertyToken propertyToken:
+                // check if the corresponding location to add a value contains child elements,
+                // which would be overwritten by the new value.
+
                 if (unavailableTokens.Count == 0
                     && (lastAvailableToken.Token[propertyToken.Property] is JObject
                         || lastAvailableToken.Token[propertyToken.Property] is JArray))
@@ -56,30 +62,26 @@ internal class JTokenGenerator
                 break;
 
             case JsonPathIndexToken indexToken:
-
-
-                if (unavailableTokens.Count == 0)
-                {
-                    // TODO: throw an exception when priority adding is implemented.
-                }
-
                 JArray lastJArray;
 
                 if (lastAvailableToken.Token.HasValues)
                 {
                     lastJArray = (JArray)lastAvailableToken.Token;
                 }
-                else // empty JObject
+                else // empty JObject that has been added as placeholder.
                 {
                     lastJArray = new JArray();
 
-                    if (lastAvailableToken.Index == 0)
+                    if (lastAvailableToken.Index == 0) // if at root level, directly replace the root.
                         root = lastJArray;
                     else if (lastAvailableToken.Token.Parent is not null) lastAvailableToken.Token.Replace(lastJArray);
                 }
 
                 if (unavailableTokens.Count == 0)
                     for (int i = 0; i < lastJArray.Count; i++)
+
+                        // check if the corresponding location to add a value contains child elements,
+                        // which would be overwritten by the new value.
                         if (JsonPathValidator.ArrayContainsIndex(indexToken, i, lastJArray.Count)
                             && (lastAvailableToken.Token[i] is JObject
                                 || lastAvailableToken.Token[i] is JArray))
@@ -91,21 +93,27 @@ internal class JTokenGenerator
                 for (int i = lastJArray.Count; i < indexToken.Bound; i++) lastJArray.Add(new JObject());
 
                 foreach (IValueContainer container in indexToken.Indexes)
+                    // replace the element at the specified index/index span with the new value.
+
                     if (container is IndexValueContainer indexValueContainer)
                     {
                         int index = indexValueContainer.Index;
 
+                        // if the index is negative, count the index from the end of the array.
                         lastJArray[index >= 0 ? index : lastJArray.Count + index] = newToken;
                     }
                     else if (container is IndexSpanValueContainer indexSpanValueContainer)
                     {
                         int start = indexSpanValueContainer.StartIndex;
+
+                        // if the end index is not specified, it is defaulted the last index of the array.
                         int end = indexSpanValueContainer.EndIndex ??
                                   (start < 0 ? -1 : lastJArray.Count - 1);
 
                         int min = Math.Min(start, end);
                         int max = Math.Max(start, end);
 
+                        // replace the value across the span.
                         for (int i = min; i <= max; i++) lastJArray[i >= 0 ? i : lastJArray.Count + i] = newToken;
                     }
 
@@ -152,17 +160,21 @@ internal class JTokenGenerator
                         {
                             int index = indexValueContainer.Index;
 
+                            // if the index is negative, count the index from the end of the array.
                             jArray[index >= 0 ? index : jArray.Count + index] = jToken;
                         }
                         else if (container is IndexSpanValueContainer indexSpanValueContainer)
                         {
                             int start = indexSpanValueContainer.StartIndex;
+
+                            // if the end index is not specified, it is defaulted the last index of the array.
                             int end = indexSpanValueContainer.EndIndex ??
                                       (start < 0 ? -1 : jArray.Count - 1);
 
                             int min = Math.Min(start, end);
                             int max = Math.Max(start, end);
 
+                            // replace the value across the span.
                             for (int j = min; j <= max; j++) jArray[j >= 0 ? j : jArray.Count + j] = jToken;
                         }
 
