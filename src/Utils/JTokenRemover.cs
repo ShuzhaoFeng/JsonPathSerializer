@@ -3,9 +3,18 @@ using Newtonsoft.Json.Linq;
 
 namespace JsonPathSerializer.Utils;
 
+/// <summary>
+///     Collection of methods to remove JToken from a Json object
+/// </summary>
 internal class JTokenRemover
 {
-    public static JToken? Remove(JArray parent, JsonPathIndexToken token)
+    /// <summary>
+    ///     Removes children from a JArray, based on the given token.
+    /// </summary>
+    /// <param name="parent">The parent JArray.</param>
+    /// <param name="token">Specifies the children to remove.</param>
+    /// <returns></returns>
+    public static JArray? Remove(JArray parent, JsonPathIndexToken token)
     {
         JArray arrayToKeep = new JArray();
         JArray arrayToRemove = new JArray();
