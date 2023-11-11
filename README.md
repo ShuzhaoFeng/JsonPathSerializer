@@ -117,30 +117,36 @@ Or:
 * Multiple indexes, e.g. `[1,2]`, `[-2, 3, 1]`
 * Index span, e.g. `[1:3]`, `[-1:]`, `[:2]`
 
-For more use case information, please consult the [wiki](./wiki).
+For more use case information, please consult the [wiki](https://github.com/ShuzhaoFeng/JsonPathSerializer/wiki).
 
 ## Constaints
 
 There are several important known issues and limitations for **JsonPathSerializer**:
 
-* The library currently cannot handle an JsonPath token with a combination of indexes and index span.
 * The library is missing a validation method on type conflict in case the path contains a negative value.
 * Supports for wildcard will be implemented in the future.
 * Supports for JSON path operators will be gradually implemented.
 
 ## Release Notes
 
-### 0.2.0 (future release)
+### 0.2.0
 
-* Revisit the current interpretation of a index span.
-* Supports for a combination of indexes and index span.
-* Add feature `JsonPathManager.Append(path, value)` that allows appending a value to an array at the specified path, without specifying the index.
-* Add validation for JSON path type conflict for negative index.
+See [v0.2.0 Changelog](https://github.com/ShuzhaoFeng/JsonPathSerializer/wiki/v0.2.0-Changelog).
 
 ### 0.1.2
 
-* Added features `JsonPathManager.Force(path, value)` and `JsonPathManager.Remove(path)`.
+See [v0.1.2 Changelog](https://github.com/ShuzhaoFeng/JsonPathSerializer/wiki/v0.1.2-Changelog).
 
-### 0.1.0
+### 0.1.0 (Unstable)
 
 * Initial release.
+
+## Future Plans for v0.3.0
+
+* Implement a priority mechanism to handle conflicts when adding a value, effectively replacing the `Force()` method.
+There will be 3 levels of priority: `Low`, `Medium`, and `High`, with `Medium` being the default equivalent to the current `Add()`,
+`High` being equivalent to the current `Force()`, and `Low` to be implemented.
+
+* Implement an `Append()` method that allows user to append a value at the end of the array specified by the path.
+
+* Implement a validation method on type conflict in case the path contains a negative value.
