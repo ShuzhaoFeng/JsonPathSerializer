@@ -3,6 +3,9 @@ using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Structs.Types.Index;
 using JsonPathSerializer.Structs.Types.IndexSpan;
 
+using static JsonPathSerializer.Globals;
+using static JsonPathSerializer.Globals.JsonPathRegex;
+
 namespace JsonPathSerializer.Utils;
 
 /// <summary>
@@ -33,7 +36,7 @@ internal class JsonPathTokenizer
             if (Globals.JsonPathRegex.INDEX.IsMatch(token))
             {
                 // match the token into a collection of indexes or index spans
-                MatchCollection matches = Globals.JsonPathRegex.INDEX_TOKEN.Matches(token);
+                MatchCollection matches = INDEX_TOKEN.Matches(token);
 
                 JsonPathIndexToken indexToken = new();
 
@@ -42,7 +45,7 @@ internal class JsonPathTokenizer
                     string tokenString = match.Groups[0].Value;
 
                     // try matching the token to a index span
-                    Match indexSpanMatch = Globals.JsonPathRegex.INDEX_SPAN.Match(tokenString);
+                    Match indexSpanMatch = INDEX_SPAN.Match(tokenString);
 
                     if (indexSpanMatch.Success)
                         indexToken.Add(new IndexSpanValueContainer
@@ -65,7 +68,7 @@ internal class JsonPathTokenizer
                 // guard against a first property without a dot, which should be allowed.
                 if (parsedTokenList.IndexOf(token) == 0 && !token.StartsWith('.') && !token.StartsWith('['))
                 {
-                    Match propertyDotMatch = Globals.JsonPathRegex.PROPERTY.Match('.' + token);
+                    Match propertyDotMatch = PROPERTY.Match('.' + token);
 
                     if (propertyDotMatch.Success)
                         pathTokens.Add(new JsonPathPropertyToken
@@ -78,7 +81,7 @@ internal class JsonPathTokenizer
                 }
                 else
                 {
-                    Match propertyMatch = Globals.JsonPathRegex.PROPERTY.Match(token);
+                    Match propertyMatch = PROPERTY.Match(token);
 
                     if (propertyMatch.Success)
                         pathTokens.Add(new JsonPathPropertyToken
@@ -89,7 +92,7 @@ internal class JsonPathTokenizer
                                 .Value
                         ));
                     else
-                        throw new NotSupportedException(Globals.ErrorMessage.UNSUPPORTED_TOKEN);
+                        throw new NotSupportedException(ErrorMessage.UNSUPPORTED_TOKEN);
                 }
             }
         }

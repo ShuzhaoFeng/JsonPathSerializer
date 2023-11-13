@@ -3,6 +3,7 @@ using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using static JsonPathSerializer.Globals;
 
 namespace JsonPathSerializer;
 
@@ -128,6 +129,29 @@ public class JsonPathManager : IJsonPathManager
                 }
 
             rootCopy = JTokenGenerator.GenerateNewRoot(lastAvailableToken, pathTokens, rootCopy, value);
+        }
+
+        // assign root copy back to root.
+        _root = rootCopy;
+    }
+
+    public void Add(string path, object value, Priority priority)
+    {
+        // Verify the path is a valid JsonPath for the operation.
+        JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
+
+        // Tokenize the JsonPath.
+        List<IJsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
+
+        // Make a copy of root.
+        JToken rootCopy = _root?.DeepClone()
+                          ?? (pathTokens[0] is JsonPathIndexToken ? new JArray() : new JObject());
+
+        // get the list of last available tokens that already exist within the root.
+        foreach (JsonNodeToken lastAvailableToken in
+                 JsonNodeTokenCollector.CollectLastAvailableTokens(rootCopy, pathTokens, priority))
+        {
+            rootCopy = JTokenGenerator.GenerateNewRoot(lastAvailableToken, pathTokens, rootCopy, value, priority);
         }
 
         // assign root copy back to root.

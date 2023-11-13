@@ -1,6 +1,7 @@
 ﻿using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Path;
 using Newtonsoft.Json.Linq;
+using static JsonPathSerializer.Globals;
 
 namespace JsonPathSerializer.Utils;
 
@@ -109,7 +110,7 @@ internal class JsonNodeTokenCollector
                     break;
 
                 default:
-                    throw new NotSupportedException(Globals.ErrorMessage.UNSUPPORTED_TOKEN);
+                    throw new NotSupportedException(ErrorMessage.UNSUPPORTED_TOKEN);
             }
 
             // if all tokens are the last available, no need to search further down.
@@ -118,5 +119,14 @@ internal class JsonNodeTokenCollector
             else
                 return currentTokens;
         }
+    }
+
+    public static List<JsonNodeToken> CollectLastAvailableTokens(
+        JToken json,
+        List<IJsonPathToken> pathTokens,
+        Priority priority
+    )
+    {
+        throw new NotImplementedException();
     }
 }

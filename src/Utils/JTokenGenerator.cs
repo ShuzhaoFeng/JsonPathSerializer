@@ -4,6 +4,7 @@ using JsonPathSerializer.Structs.Types;
 using JsonPathSerializer.Structs.Types.Index;
 using JsonPathSerializer.Structs.Types.IndexSpan;
 using Newtonsoft.Json.Linq;
+using static JsonPathSerializer.Globals;
 
 namespace JsonPathSerializer.Utils;
 
@@ -120,7 +121,7 @@ internal class JTokenGenerator
                 break;
 
             default:
-                throw new NotSupportedException(Globals.ErrorMessage.UNSUPPORTED_TOKEN);
+                throw new NotSupportedException(ErrorMessage.UNSUPPORTED_TOKEN);
         }
 
         return root;
@@ -183,10 +184,22 @@ internal class JTokenGenerator
                     break;
 
                 default:
-                    throw new NotSupportedException(Globals.ErrorMessage.UNSUPPORTED_TOKEN);
+                    throw new NotSupportedException(ErrorMessage.UNSUPPORTED_TOKEN);
             }
         }
 
         return jToken;
+    }
+
+    public static JToken GenerateNewRoot
+    (
+        JsonNodeToken lastAvailableToken,
+        List<IJsonPathToken> pathTokens,
+        JToken root,
+        object value,
+        Priority priority
+    )
+    {
+        throw new NotImplementedException();
     }
 }
