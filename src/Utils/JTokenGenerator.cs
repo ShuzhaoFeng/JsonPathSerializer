@@ -218,9 +218,25 @@ internal class JTokenGenerator
         switch (splitToken)
         {
             case JsonPathPropertyToken propertyToken:
+
+                // check if the split token is not a JObject,
+                // which would fail the operation.
+                if (lastAvailableToken.Token is not JObject)
+                {
+                    if (priority < Priority.High)
+                    {
+                        throw new ArgumentException("JSON element $." +
+                                                    $"{lastAvailableToken.Token.Path} contains a value," +
+                                                    "therefore cannot contain child elements.");
+                    }
+
+                    JObject emptyJObject = new();
+                    lastAvailableToken.Token.Replace(emptyJObject);
+                    lastAvailableToken.Token = emptyJObject;
+                }
+
                 // check if the corresponding location to add a value contains child elements,
                 // which would be overwritten by the new value.
-
                 if (unavailableTokens.Count == 0)
                 {
                     // replacing a value that contains child elements
@@ -228,8 +244,8 @@ internal class JTokenGenerator
                         && lastAvailableToken.Token[propertyToken.Property] is JContainer jContainer)
                     {
                         throw new ArgumentException("JSON element $." +
-                            $"{jContainer.Path} contains a child element," +
-                            "therefore cannot be replaced.");
+                                                    $"{jContainer.Path} contains a child element," +
+                                                    "therefore cannot be replaced.");
                     }
 
                     // replacing an existing value
@@ -248,6 +264,22 @@ internal class JTokenGenerator
                 break;
 
             case JsonPathIndexToken indexToken:
+                // check if the split token is not a JArray,
+                // which would fail the operation.
+                if (lastAvailableToken.Token is not JArray)
+                {
+                    if (priority < Priority.High)
+                    {
+                        throw new ArgumentException("JSON element $." +
+                                                    $"{lastAvailableToken.Token.Path} contains a value," +
+                                                    "therefore cannot contain child elements.");
+                    }
+
+                    JArray emptyJArray = new();
+                    lastAvailableToken.Token.Replace(emptyJArray);
+                    lastAvailableToken.Token = emptyJArray;
+                }
+
                 JArray lastJArray;
 
                 if (lastAvailableToken.Token.HasValues)
@@ -264,6 +296,7 @@ internal class JTokenGenerator
                 }
 
                 if (unavailableTokens.Count == 0)
+
                     for (int i = 0; i < lastJArray.Count; i++) {
                         bool arrayContainsIndex = JsonPathValidator.ArrayContainsIndex(indexToken, i, lastJArray.Count);
                         
