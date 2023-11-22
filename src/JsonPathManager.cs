@@ -72,67 +72,7 @@ public class JsonPathManager : IJsonPathManager
     /// <param name="value">The value to be added.</param>
     public void Add(string path, object value)
     {
-        // Verify the path is a valid JsonPath for the operation.
-        JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
-
-        // Tokenize the JsonPath.
-        List<IJsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
-
-        try
-        {
-            var result = _root?.SelectTokens(path);
-
-            if (result != null)
-                foreach (var resultView in result)
-                    if (resultView is JContainer) // there exists a JSON child at the location that will be overriden.
-                        throw new ArgumentException($"JSON element {path} contains a JSON child element," +
-                                                    $"therefore cannot contain a value.");
-        }
-        catch (ArgumentOutOfRangeException) // indicates a negative index, which SelectTokens can't handle
-        {
-            // TODO: deprecated and moved to JTokenGenerator.cs. Waiting for priority adding to be implemented.
-        }
-
-        // Make a copy of root.
-        JToken rootCopy = _root?.DeepClone()
-                          ?? (pathTokens[0] is JsonPathIndexToken ? new JArray() : new JObject());
-
-        // get the list of last available tokens that already exist within the root.
-        foreach (JsonNodeToken lastAvailableToken in
-                 JsonNodeTokenCollector.CollectLastAvailableTokens(rootCopy, pathTokens))
-        {
-            // Check for conflicting types.
-
-            if (lastAvailableToken.Token is not JContainer)
-                throw new ArgumentException
-                (
-                    $"JSON element $.{lastAvailableToken.Token.Path} " +
-                    "contains a value, therefore cannot contain other child elements."
-                );
-
-            if (lastAvailableToken.Token.HasValues)
-                switch (lastAvailableToken.Token)
-                {
-                    case JArray when pathTokens[lastAvailableToken.Index] is not JsonPathIndexToken:
-                        throw new ArgumentException
-                        (
-                            $"JSON element $.{lastAvailableToken.Token.Path} " +
-                            "is a JArray, therefore cannot be taken as a JObject."
-                        );
-
-                    case JObject when pathTokens[lastAvailableToken.Index] is JsonPathIndexToken:
-                        throw new ArgumentException
-                        (
-                            $"JSON element $.{lastAvailableToken.Token.Path} " +
-                            "is a JObject, therefore cannot be taken as a JArray."
-                        );
-                }
-
-            rootCopy = JTokenGenerator.GenerateNewRoot(lastAvailableToken, pathTokens, rootCopy, value);
-        }
-
-        // assign root copy back to root.
-        _root = rootCopy;
+        Add(path, value, Priority.Normal);
     }
 
     public void Add(string path, object value, Priority priority)
@@ -160,62 +100,15 @@ public class JsonPathManager : IJsonPathManager
 
     /// <summary>
     ///     Force add a value to the JsonPathManager root, regardless of whether existing values will be overriden.
+    ///     This method is obsolete. Use Add(string, object, Priority.High) instead.
     /// </summary>
     /// <param name="path">The path where to add the value.</param>
     /// <param name="value">The value to be added.</param>
+
+    [Obsolete("This method is obsolete. Use Add(string, object, Priority.High) instead.")]
     public void Force(string path, object value)
     {
-        // Verify the path is a valid JsonPath for the operation.
-        JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
-
-        // Tokenize the JsonPath.
-        List<IJsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
-
-        // Make a copy of root.
-        JToken rootCopy = _root?.DeepClone()
-                          ?? (pathTokens[0] is JsonPathIndexToken ? new JArray() : new JObject());
-
-        // get the list of last available tokens that already exist within the root.
-        foreach (JsonNodeToken lastAvailableToken in
-                 JsonNodeTokenCollector.CollectLastAvailableTokens(rootCopy, pathTokens))
-        {
-            if (lastAvailableToken.Token is not JContainer)
-            {
-                JContainer emptyContainer = pathTokens[lastAvailableToken.Index] is JsonPathIndexToken
-                    ? new JArray()
-                    : new JObject();
-
-                lastAvailableToken.Token.Replace(emptyContainer);
-
-                lastAvailableToken.Token = emptyContainer;
-            }
-
-            if (lastAvailableToken.Token.HasValues)
-                switch (lastAvailableToken.Token)
-                {
-                    case JArray when pathTokens[lastAvailableToken.Index] is not JsonPathIndexToken:
-
-                        // replace the parent with a JObject and thus clearing all its children.
-                        JObject emptyJObject = new();
-                        lastAvailableToken.Token.Replace(emptyJObject);
-                        lastAvailableToken.Token = emptyJObject;
-
-                        break;
-
-                    case JObject when pathTokens[lastAvailableToken.Index] is JsonPathIndexToken:
-
-                        // replace the parent with a JArray and thus clearing all its children.
-                        JArray emptyJArray = new();
-                        lastAvailableToken.Token.Replace(emptyJArray);
-                        lastAvailableToken.Token = emptyJArray;
-                        break;
-                }
-
-            rootCopy = JTokenGenerator.GenerateNewRoot(lastAvailableToken, pathTokens, rootCopy, value);
-        }
-
-        // assign root copy back to root.
-        _root = rootCopy;
+        Add(path, value, Priority.High);
     }
 
     /// <summary>

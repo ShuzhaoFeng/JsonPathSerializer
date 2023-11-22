@@ -1,8 +1,7 @@
-using System.Text.RegularExpressions;
 using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Structs.Types.Index;
 using JsonPathSerializer.Structs.Types.IndexSpan;
-
+using System.Text.RegularExpressions;
 using static JsonPathSerializer.Globals;
 using static JsonPathSerializer.Globals.JsonPathRegex;
 
