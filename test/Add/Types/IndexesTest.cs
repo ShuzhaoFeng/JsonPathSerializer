@@ -1,7 +1,7 @@
 ﻿namespace JsonPathSerializerTest.Add.Types;
 
 [TestClass]
-public class AddIndexSpanTest
+public class IndexesTest
 {
     private JsonPathManager _emptyManager = new();
     private JsonPathManager _loadedManager = new();
@@ -17,7 +17,6 @@ public class AddIndexSpanTest
                     ""Shuzhao"",
                     ""Feng"",
                     ""Shuzhao Feng"",
-                    ""SF"",
                 ],
             }");
         _propertyManager = new JsonPathManager(@"{
@@ -45,123 +44,138 @@ public class AddIndexSpanTest
     }
 
     [TestMethod]
-    public void CanAddIndexSpan()
+    public void CanAddIndexes()
     {
-        _emptyManager.Add("name[0:2]", "Shuzhao");
+        _emptyManager.Add("name[0,1]", "Shuzhao", Priority.Normal);
 
         // indexes that should be affected
         Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0].ToString());
         Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][1].ToString());
-        Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][2].ToString());
 
         // no extra indexes are added
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][3].ToString());
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][2].ToString());
     }
 
     [TestMethod]
-    public void CanAddIndexSpanAsRoot()
+    public void CanAddIndexesAsRoot()
     {
-        _emptyManager.Add("[0:2]", "Shuzhao Feng");
+        _emptyManager.Add("[0,1]", "Shuzhao Feng", Priority.Normal);
 
         // indexes that should be affected
         Assert.AreEqual("Shuzhao Feng", _emptyManager.Value[0].ToString());
         Assert.AreEqual("Shuzhao Feng", _emptyManager.Value[1].ToString());
-        Assert.AreEqual("Shuzhao Feng", _emptyManager.Value[2].ToString());
 
         // no extra indexes are added
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value[3].ToString());
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value[2].ToString());
     }
 
     [TestMethod]
-    public void CanAddIndexSpanNestedInIndex()
+    public void CanAddIndexesNestedInIndex()
     {
-        _emptyManager.Add("name[0][0:2]", "Shuzhao");
+        _emptyManager.Add("name[0][0,1]", "Shuzhao", Priority.Normal);
 
         // indexes that should be affected
         Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0][0].ToString());
         Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0][1].ToString());
-        Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0][2].ToString());
 
         // no extra indexes are added
         Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][1].ToString());
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][0][3].ToString());
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][0][2].ToString());
     }
 
     [TestMethod]
-    public void CanAddIndexNestedInIndexSpan()
+    public void CanAddIndexNestedInIndexes()
     {
-        _emptyManager.Add("name[0:2][0]", "Shuzhao");
+        _emptyManager.Add("name[0,1][0]", "Shuzhao", Priority.Normal);
 
         // indexes that should be affected
         Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0][0].ToString());
         Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][1][0].ToString());
-        Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][2][0].ToString());
 
         // no extra indexes are added
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][3].ToString());
         Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][0][1].ToString());
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][0][2].ToString());
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][0][3].ToString());
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][1][1].ToString());
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][2].ToString());
     }
 
     [TestMethod]
-    public void CanAddIndexSpanNestedInIndexSpan()
+    public void CanAddIndexesNestedInIndexes()
     {
-        _emptyManager.Add("name[0:2][0:2]", "Shuzhao");
+        _emptyManager.Add("name[0,1][0,1]", "Shuzhao", Priority.Normal);
 
         // indexes that should be affected
-        // reduce 9 assertions to a for loop
-        for (var i = 0; i < 3; i++)
-        {
-            Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][i][0].ToString());
-            Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][i][1].ToString());
-            Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][i][2].ToString());
-        }
+        Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0][0].ToString());
+        Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0][1].ToString());
+        Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][1][0].ToString());
+        Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][1][1].ToString());
 
         // no extra indexes are added
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][3].ToString());
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][0][3].ToString());
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][1][3].ToString());
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][2][3].ToString());
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][0][2].ToString());
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][1][2].ToString());
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][2].ToString());
     }
 
     [TestMethod]
-    public void CanAddIndexSpanToExistingArray()
+    public void CanAddIndexesThatRequiresExpansion()
     {
-        _loadedManager.Add("name[0:2]", "John Doe");
+        _emptyManager.Add("name[1,5]", "John Doe", Priority.Normal);
+
+        // indexes that should be affected
+        Assert.AreEqual("John Doe", _emptyManager.Value["name"][1].ToString());
+        Assert.AreEqual("John Doe", _emptyManager.Value["name"][5].ToString());
+
+        // empty indexes added to fill the gap
+        Assert.AreEqual("{}", _emptyManager.Value["name"][0].ToString());
+        Assert.AreEqual("{}", _emptyManager.Value["name"][2].ToString());
+        Assert.AreEqual("{}", _emptyManager.Value["name"][3].ToString());
+        Assert.AreEqual("{}", _emptyManager.Value["name"][4].ToString());
+
+        // no extra indexes are added
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][6].ToString());
+    }
+
+    [TestMethod]
+    public void CanAddIndexToExistingArray()
+    {
+        _loadedManager.Add("name[0,1]", "John Doe", Priority.Normal);
 
         // indexes that should be affected
         Assert.AreEqual("John Doe", _loadedManager.Value["name"][0].ToString());
         Assert.AreEqual("John Doe", _loadedManager.Value["name"][1].ToString());
-        Assert.AreEqual("John Doe", _loadedManager.Value["name"][2].ToString());
 
         // indexes that should not be affected
-        Assert.AreEqual("SF", _loadedManager.Value["name"][3].ToString());
+        Assert.AreEqual("Shuzhao Feng", _loadedManager.Value["name"][2].ToString());
 
         // no extra indexes are added
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][4].ToString());
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][3].ToString());
     }
 
     [TestMethod]
-    public void CanAddIndexSpanToExistingArrayThatRequiresExpansion()
+    public void CanAddIndexesToExistingArrayThatRequiresExpansion()
     {
-        _loadedManager.Add("name[1:5]", "John Doe");
+        _loadedManager.Add("name[1,5]", "John Doe", Priority.Normal);
 
         // indexes that should be affected
-        // reduce 9 assertions to a for loop
-        for (var i = 1; i < 6; i++) Assert.AreEqual("John Doe", _loadedManager.Value["name"][i].ToString());
+        Assert.AreEqual("John Doe", _loadedManager.Value["name"][1].ToString());
+        Assert.AreEqual("John Doe", _loadedManager.Value["name"][5].ToString());
 
         // indexes that should not be affected
         Assert.AreEqual("Shuzhao", _loadedManager.Value["name"][0].ToString());
+        Assert.AreEqual("Shuzhao Feng", _loadedManager.Value["name"][2].ToString());
+
+
+        // empty indexes added to fill the gap
+        Assert.AreEqual("{}", _loadedManager.Value["name"][3].ToString());
+        Assert.AreEqual("{}", _loadedManager.Value["name"][4].ToString());
 
         // no extra indexes are added
         Assert.ThrowsException<ArgumentOutOfRangeException>(() => _loadedManager.Value["name"][6].ToString());
     }
 
     [TestMethod]
-    public void CanAddPropertyNestedInIndexSpan()
+    public void CanAddPropertyNestedInIndexes()
     {
-        _loadedPropertyManager.Add("name[1:3].middle", "A.");
+        _loadedPropertyManager.Add("name[1, 2, 3].middle", "A.", Priority.Normal);
 
         // indexes that should be affected
         Assert.AreEqual("A.", _loadedPropertyManager.Value["name"][1]["middle"].ToString());
@@ -191,9 +205,9 @@ public class AddIndexSpanTest
     }
 
     [TestMethod]
-    public void CanAddPropertyNestedInIndexSpanUnderExistingKey()
+    public void CanAddPropertyNestedInIndexesUnderExistingKey()
     {
-        _loadedPropertyManager.Add("name[2:3].last", "Smith");
+        _loadedPropertyManager.Add("name[2, 3].last", "Smith", Priority.Normal);
 
         // indexes that should be affected
         Assert.AreEqual("Smith", _loadedPropertyManager.Value["name"][2]["last"].ToString());
@@ -218,9 +232,9 @@ public class AddIndexSpanTest
     }
 
     [TestMethod]
-    public void CanAddPropertyNestedInIndexSpanUnderNewAndExistingKey()
+    public void CanAddPropertyNestedInIndexesUnderNewAndExistingKey()
     {
-        _loadedPropertyManager.Add("name[1:3].last", "Smith");
+        _loadedPropertyManager.Add("name[1, 2, 3].last", "Smith", Priority.Normal);
 
         // indexes that should be affected
         Assert.AreEqual("Smith", _loadedPropertyManager.Value["name"][1]["last"].ToString());
@@ -244,104 +258,37 @@ public class AddIndexSpanTest
     }
 
     [TestMethod]
-    public void CanAddNegativeIndexSpan()
+    public void CanAddNegativeIndexes()
     {
-        _emptyManager.Add("name[-5:-3]", "Shuzhao");
-
-        // we need minimally 5 elements: 0 (-5), 1 (-4), 2 (-3), 3 (-2) and 4 (-1)
-
-        // indexes that should be affected
-        // C# array doesn't allow negative index value (but we do), so -5 is converted to 0 and -3 to 2.
-        Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0].ToString());
-        Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][1].ToString());
-        Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][2].ToString());
-
-        // empty indexes added to fill the gap
-        Assert.AreEqual("{}", _emptyManager.Value["name"][3].ToString());
-        Assert.AreEqual("{}", _emptyManager.Value["name"][4].ToString());
-
-        // no extra indexes are added
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][5].ToString());
-    }
-
-    [TestMethod]
-    public void CanAddNegativeAndPositiveIndexSpan()
-    {
-        _emptyManager.Add("name[-5:2]", "Shuzhao");
-
-        // we need minimally 5 elements: 0 (-5), 1 (-4), 2 (-3), 3 (-2) and 4 (-1)
-        for (var i = 0; i < 5; i++) Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][i].ToString());
-
-        // no extra indexes are added
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][5].ToString());
-    }
-
-    [TestMethod]
-    public void CanAddReverseIndexSpan()
-    {
-        _emptyManager.Add("name[5:2]", "Shuzhao");
+        _emptyManager.Add("name[-2, 2]", "Shuzhao", Priority.Normal);
 
         // empty indexes added to fill the gap
         Assert.AreEqual("{}", _emptyManager.Value["name"][0].ToString());
-        Assert.AreEqual("{}", _emptyManager.Value["name"][1].ToString());
 
         // indexes that should be affected
-        // reduce 4 assertions to a for loop
-        for (var i = 2; i < 6; i++) Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][i].ToString());
+        // C# array doesn't allow negative index value (but we do), so -2 is converted to 1.
+        Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][1].ToString());
+        Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][2].ToString());
 
         // no extra indexes are added
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][6].ToString());
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][3].ToString());
     }
 
     [TestMethod]
-    public void CanAddReverseNegativeIndexSpan()
+    public void ThrowsExceptionWhenAddingIndexesWithInvalidSeparator()
     {
-        _emptyManager.Add("name[-2:-5]", "Shuzhao");
-
-        // we need minimally 5 elements: 0 (-5), 1 (-4), 2 (-3), 3 (-2) and 4 (-1)
-
-        // indexes that should be affected
-        // C# array doesn't allow negative index value (but we do), so -5 is converted to 0 and etc.
-        // reduce 4 assertions to a for loop
-        for (var i = 0; i < 4; i++) Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][i].ToString());
-
-        // empty indexes added to fill the gap
-        Assert.AreEqual("{}", _emptyManager.Value["name"][4].ToString());
-
-        // no extra indexes are added
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][5].ToString());
+        Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[0 1]", "Shuzhao", Priority.Normal));
     }
 
     [TestMethod]
-    public void CanAddReversePositiveAndNegativeIndexSpan()
+    public void ThrowsExceptionWhenAddingIndexesToExistingPropertyObject()
     {
-        _emptyManager.Add("name[2:-5]", "Shuzhao");
-
-        // we need minimally 5 elements: 0 (-5), 1 (-4), 2 (-3), 3 (-2) and 4 (-1)
-
-        // indexes that should be affected
-        // reduce 8 assertions to a for loop
-        for (var i = 0; i < 5; i++) Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][i].ToString());
-
-        // no extra indexes are added
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _emptyManager.Value["name"][5].ToString());
+        Assert.ThrowsException<ArgumentException>(() => _propertyManager.Add("name[0, 1]", "Shuzhao", Priority.Normal));
     }
 
     [TestMethod]
-    public void ThrowsExceptionWhenAddingIndexSpanWithInvalidSeparator()
+    public void ThrowsExceptionWhenIndexesAreNotInteger()
     {
-        Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[0;:1]", "Shuzhao"));
-    }
-
-    [TestMethod]
-    public void ThrowsExceptionWhenAddingIndexSpanToExistingPropertyObject()
-    {
-        Assert.ThrowsException<ArgumentException>(() => _propertyManager.Add("name[0:2]", "Shuzhao"));
-    }
-
-    [TestMethod]
-    public void ThrowsExceptionWhenIndexSpanAreNotInteger()
-    {
-        Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[1.5:7/4]", "Shuzhao"));
+        Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[1.5, 7/4]", "Shuzhao", Priority.Normal));
     }
 }

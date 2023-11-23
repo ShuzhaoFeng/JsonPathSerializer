@@ -1,7 +1,7 @@
 ﻿namespace JsonPathSerializerTest.Add.Types;
 
 [TestClass]
-public class AddDotTest
+public class DotTest
 {
     private JsonPathManager _emptyManager = new();
     private JsonPathManager _indexedManager = new();
@@ -26,7 +26,7 @@ public class AddDotTest
     [TestMethod]
     public void CanAddProperty()
     {
-        _emptyManager.Add("name", "Shuzhao Feng");
+        _emptyManager.Add("name", "Shuzhao Feng", Priority.Normal);
 
         Assert.AreEqual("Shuzhao Feng", _emptyManager.Value["name"].ToString());
     }
@@ -34,7 +34,7 @@ public class AddDotTest
     [TestMethod]
     public void CanAddNestedProperty()
     {
-        _emptyManager.Add("name.first", "Shuzhao");
+        _emptyManager.Add("name.first", "Shuzhao", Priority.Normal);
 
         Assert.AreEqual("Shuzhao", _emptyManager.Value["name"]["first"].ToString());
     }
@@ -42,7 +42,7 @@ public class AddDotTest
     [TestMethod]
     public void CanInsertPropertyUnderExistingParentProperty()
     {
-        _loadedManager.Add("name.last", "Feng");
+        _loadedManager.Add("name.last", "Feng", Priority.Normal);
 
         Assert.AreEqual("Shuzhao", _loadedManager.Value["name"]["first"].ToString());
         Assert.AreEqual("Feng", _loadedManager.Value["name"]["last"].ToString());
@@ -51,30 +51,30 @@ public class AddDotTest
     [TestMethod]
     public void ThrowsExceptionWhenAddingPropertyWithDoubleDots()
     {
-        Assert.ThrowsException<ArgumentException>(() => _emptyManager.Add("name..last", "Feng"));
+        Assert.ThrowsException<ArgumentException>(() => _emptyManager.Add("name..last", "Feng", Priority.Normal));
     }
 
     [TestMethod]
     public void ThrowsExceptionWhenAddingPropertyWithEndingDot()
     {
-        Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name.last.", "Feng"));
+        Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name.last.", "Feng", Priority.Normal));
     }
 
     [TestMethod]
     public void ThrowsExceptionWhenInsertingValueToArray()
     {
-        Assert.ThrowsException<ArgumentException>(() => _indexedManager.Add("name.last", "Feng"));
+        Assert.ThrowsException<ArgumentException>(() => _indexedManager.Add("name.last", "Feng", Priority.Normal));
     }
 
     [TestMethod]
     public void ThrowsExceptionWhenInsertingValueToParentProperty()
     {
-        Assert.ThrowsException<ArgumentException>(() => _loadedManager.Add("name", "Shuzhao Feng"));
+        Assert.ThrowsException<ArgumentException>(() => _loadedManager.Add("name", "Shuzhao Feng", Priority.Normal));
     }
 
     [TestMethod]
     public void ThrowsExceptionWhenInsertingValueAsChildUnderExistingValue()
     {
-        Assert.ThrowsException<ArgumentException>(() => _loadedManager.Add("name.first.English", "Shuzhao"));
+        Assert.ThrowsException<ArgumentException>(() => _loadedManager.Add("name.first.English", "Shuzhao", Priority.Normal));
     }
 }

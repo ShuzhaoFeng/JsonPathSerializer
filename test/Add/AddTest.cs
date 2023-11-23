@@ -18,7 +18,7 @@ public class AddTest
     [TestMethod]
     public void CanAddKeyValuePairToEmptyManager()
     {
-        _emptyManager.Add("name", "John Doe");
+        _emptyManager.Add("name", "John Doe", Priority.Normal);
 
         var expected = JToken.Parse(@"{
                 ""name"": ""John Doe"",
@@ -31,7 +31,7 @@ public class AddTest
     [TestMethod]
     public void CanAddKeyValuePairToLoadedManager()
     {
-        _loadedManager.Add("age", 42);
+        _loadedManager.Add("age", 42, Priority.Normal);
 
         var expected = JToken.Parse(@"{
                 ""name"": ""John Doe"",
@@ -45,7 +45,7 @@ public class AddTest
     [TestMethod]
     public void CanAddKeyValuePairToLoadedManagerWithExistingKey()
     {
-        _loadedManager.Add("name", "Jane Doe");
+        _loadedManager.Add("name", "Jane Doe", Priority.Normal);
 
         var expected = JToken.Parse(@"{
                 ""name"": ""Jane Doe"",
@@ -58,7 +58,7 @@ public class AddTest
     [TestMethod]
     public void CanAddKeyValuePairToLoadedManagerWithExistingKeyAndValue()
     {
-        _loadedManager.Add("name", "John Doe");
+        _loadedManager.Add("name", "John Doe", Priority.Normal);
 
         var expected = JToken.Parse(@"{
                 ""name"": ""John Doe"",
@@ -71,6 +71,6 @@ public class AddTest
     [TestMethod]
     public void ThrowsExceptionWhenAddingNullValueToManager()
     {
-        Assert.ThrowsException<ArgumentNullException>(() => _emptyManager.Add("name", null));
+        Assert.ThrowsException<ArgumentNullException>(() => _emptyManager.Add("name", null, Priority.Normal));
     }
 }
