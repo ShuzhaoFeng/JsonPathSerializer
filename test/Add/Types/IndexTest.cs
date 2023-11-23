@@ -1,7 +1,7 @@
 ﻿namespace JsonPathSerializerTest.Add.Types;
 
 [TestClass]
-public class AddIndexTest
+public class IndexTest
 {
     private JsonPathManager _emptyManager = new();
     private JsonPathManager _loadedManager = new();
@@ -28,7 +28,7 @@ public class AddIndexTest
     [TestMethod]
     public void CanAddIndex()
     {
-        _emptyManager.Add("name[0]", "Shuzhao");
+        _emptyManager.Add("name[0]", "Shuzhao", Priority.Normal);
 
         // index that should be affected
         Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0].ToString());
@@ -40,7 +40,7 @@ public class AddIndexTest
     [TestMethod]
     public void CanAddIndexAsRoot()
     {
-        _emptyManager.Add("[0]", "Shuzhao Feng");
+        _emptyManager.Add("[0]", "Shuzhao Feng", Priority.Normal);
 
         // index that should be affected
         Assert.AreEqual("Shuzhao Feng", _emptyManager.Value[0].ToString());
@@ -52,7 +52,7 @@ public class AddIndexTest
     [TestMethod]
     public void CanAddIndexNestedInIndex()
     {
-        _emptyManager.Add("name[0][0]", "Shuzhao");
+        _emptyManager.Add("name[0][0]", "Shuzhao", Priority.Normal);
 
         // index that should be affected
         Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0][0].ToString());
@@ -65,7 +65,7 @@ public class AddIndexTest
     [TestMethod]
     public void CanAddIndexToExistingArray()
     {
-        _loadedManager.Add("name[0]", "John Doe");
+        _loadedManager.Add("name[0]", "John Doe", Priority.Normal);
 
         // index that should be affected
         Assert.AreEqual("John Doe", _loadedManager.Value["name"][0].ToString());
@@ -81,7 +81,7 @@ public class AddIndexTest
     [TestMethod]
     public void CanAddIndexToExistingArrayToLastPosition()
     {
-        _loadedManager.Add("name[2]", "John Doe");
+        _loadedManager.Add("name[2]", "John Doe", Priority.Normal);
 
         // indexes that should not be affected
         Assert.AreEqual("Shuzhao", _loadedManager.Value["name"][0].ToString());
@@ -97,7 +97,7 @@ public class AddIndexTest
     [TestMethod]
     public void CanAddIndexToExistingArrayThatRequiresExpansion()
     {
-        _loadedManager.Add("name[5]", "John Doe");
+        _loadedManager.Add("name[5]", "John Doe", Priority.Normal);
 
         // indexes that should not be affected
         Assert.AreEqual("Shuzhao", _loadedManager.Value["name"][0].ToString());
@@ -118,7 +118,7 @@ public class AddIndexTest
     [TestMethod]
     public void CanAddIndexToExistingArrayThatRequiresLargeExpansion()
     {
-        _loadedManager.Add("name[123]", "John Doe");
+        _loadedManager.Add("name[123]", "John Doe", Priority.Normal);
 
         // indexes that should not be affected
         Assert.AreEqual("Shuzhao", _loadedManager.Value["name"][0].ToString());
@@ -139,7 +139,7 @@ public class AddIndexTest
     [TestMethod]
     public void CanAddNegativeIndex()
     {
-        _emptyManager.Add("name[-1]", "Shuzhao");
+        _emptyManager.Add("name[-1]", "Shuzhao", Priority.Normal);
 
         // index that should be affected
         // C# array doesn't allow negative index value (but we do), so -1 is converted to 0.
@@ -152,7 +152,7 @@ public class AddIndexTest
     [TestMethod]
     public void CanAddNegativeIndexToExistingArray()
     {
-        _loadedManager.Add("name[-1]", "John Doe");
+        _loadedManager.Add("name[-1]", "John Doe", Priority.Normal);
 
         // indexes that should not be affected
         Assert.AreEqual("Shuzhao", _loadedManager.Value["name"][0].ToString());
@@ -169,7 +169,7 @@ public class AddIndexTest
     [TestMethod]
     public void CanAddNegativeIndexToExistingArrayThatRequiresExpansion()
     {
-        _loadedManager.Add("name[-5]", "John Doe");
+        _loadedManager.Add("name[-5]", "John Doe", Priority.Normal);
 
         // index that should be affected
         // C# array doesn't allow negative index value (but we do), so -5 is converted to 0.
@@ -190,7 +190,7 @@ public class AddIndexTest
     [TestMethod]
     public void CanAddNegativeIndexToExistingArrayThatRequiresLargeExpansion()
     {
-        _loadedManager.Add("name[-123]", "John Doe");
+        _loadedManager.Add("name[-123]", "John Doe", Priority.Normal);
 
         // index that should be affected
         // C# array doesn't allow negative index value (but we do), so -5 is converted to 0.
@@ -211,7 +211,7 @@ public class AddIndexTest
     [TestMethod]
     public void CanAddPropertyNestedInIndex()
     {
-        _emptyManager.Add("name[0].first", "Shuzhao");
+        _emptyManager.Add("name[0].first", "Shuzhao", Priority.Normal);
 
         // index that should be affected
         Assert.AreEqual("Shuzhao", _emptyManager.Value["name"][0]["first"].ToString());
@@ -223,18 +223,18 @@ public class AddIndexTest
     [TestMethod]
     public void ThrowsExceptionWhenAddingIndexToExistingPropertyObject()
     {
-        Assert.ThrowsException<ArgumentException>(() => _propertyManager.Add("name[0]", "Shuzhao"));
+        Assert.ThrowsException<ArgumentException>(() => _propertyManager.Add("name[0]", "Shuzhao", Priority.Normal));
     }
 
     [TestMethod]
     public void ThrowsExceptionWhenIndexIsNotInteger()
     {
-        Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[1.5]", "Shuzhao"));
+        Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[1.5]", "Shuzhao", Priority.Normal));
     }
 
     [TestMethod]
     public void ThrowsExceptionWhenBracketIsEmpty()
     {
-        Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[]", "Shuzhao"));
+        Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name[]", "Shuzhao", Priority.Normal));
     }
 }
