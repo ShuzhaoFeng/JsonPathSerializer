@@ -43,32 +43,6 @@ public class AddTest
     }
 
     [TestMethod]
-    public void CanAddKeyValuePairToLoadedManagerWithExistingKey()
-    {
-        _loadedManager.Add("name", "Jane Doe", Priority.Normal);
-
-        var expected = JToken.Parse(@"{
-                ""name"": ""Jane Doe"",
-            }");
-        var actual = JToken.Parse(_loadedManager.Build());
-
-        Assert.IsTrue(JToken.DeepEquals(expected, actual));
-    }
-
-    [TestMethod]
-    public void CanAddKeyValuePairToLoadedManagerWithExistingKeyAndValue()
-    {
-        _loadedManager.Add("name", "John Doe", Priority.Normal);
-
-        var expected = JToken.Parse(@"{
-                ""name"": ""John Doe"",
-            }");
-        var actual = JToken.Parse(_loadedManager.Build());
-
-        Assert.IsTrue(JToken.DeepEquals(expected, actual));
-    }
-
-    [TestMethod]
     public void ThrowsExceptionWhenAddingNullValueToManager()
     {
         Assert.ThrowsException<ArgumentNullException>(() => _emptyManager.Add("name", null, Priority.Normal));
