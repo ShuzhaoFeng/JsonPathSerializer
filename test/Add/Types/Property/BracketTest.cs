@@ -1,10 +1,9 @@
-﻿namespace JsonPathSerializerTest.Add.Types;
+﻿namespace JsonPathSerializerTest.Add.Types.Property;
 
 [TestClass]
 public class BracketTest
 {
     private JsonPathManager _emptyManager = new();
-    private JsonPathManager _indexedManager = new();
     private JsonPathManager _loadedManager = new();
 
     [TestInitialize]
@@ -15,11 +14,6 @@ public class BracketTest
                 ""name"": {
                     ""first"": ""Shuzhao"",
                 },
-            }");
-        _indexedManager = new JsonPathManager(@"{
-                ""name"": [
-                    ""Shuzhao"",
-                ],
             }");
     }
 
@@ -34,21 +28,13 @@ public class BracketTest
     [TestMethod]
     public void CanAddNestedProperty()
     {
-        _emptyManager.Add("name['first']", "Shuzhao", Priority.Normal);
-
-        Assert.AreEqual("Shuzhao", _emptyManager.Value["name"]["first"].ToString());
-    }
-
-    [TestMethod]
-    public void CanAddNestedPropertyWithMultipleBrackets()
-    {
         _emptyManager.Add("['name']['first']", "Shuzhao", Priority.Normal);
 
         Assert.AreEqual("Shuzhao", _emptyManager.Value["name"]["first"].ToString());
     }
 
     [TestMethod]
-    public void CanInsertPropertyUnderExistingParentProperty()
+    public void CanAddPropertyUnderExistingObject()
     {
         _loadedManager.Add("name['last']", "Feng", Priority.Normal);
 
@@ -72,23 +58,5 @@ public class BracketTest
     public void ThrowsExceptionWhenAddingPropertyWithUnopenedBracket()
     {
         Assert.ThrowsException<JsonException>(() => _emptyManager.Add("name'last']", "Feng", Priority.Normal));
-    }
-
-    [TestMethod]
-    public void ThrowsExceptionWhenInsertingValueToArray()
-    {
-        Assert.ThrowsException<ArgumentException>(() => _indexedManager.Add("name['last']", "Feng", Priority.Normal));
-    }
-
-    [TestMethod]
-    public void ThrowsExceptionWhenInsertingValueToParentProperty()
-    {
-        Assert.ThrowsException<ArgumentException>(() => _loadedManager.Add("['name']", "Shuzhao Feng", Priority.Normal));
-    }
-
-    [TestMethod]
-    public void ThrowsExceptionWhenInsertingValueAsChildUnderExistingValue()
-    {
-        Assert.ThrowsException<ArgumentException>(() => _loadedManager.Add("name.first['English']", "Shuzhao", Priority.Normal));
     }
 }
