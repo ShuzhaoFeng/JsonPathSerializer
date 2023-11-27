@@ -20,7 +20,7 @@ internal class JTokenRemover
         JArray arrayToRemove = new JArray();
 
         for (int i = 0; i < parent.Count; i++)
-            if (JsonPathValidator.ArrayContainsIndex(token, i, parent.Count))
+            if (JsonValidator.ArrayContainsIndex(token, i, parent.Count))
                 arrayToRemove.Add(parent[i]);
             else
                 arrayToKeep.Add(parent[i]);

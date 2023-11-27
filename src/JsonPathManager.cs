@@ -78,7 +78,7 @@ public class JsonPathManager : IJsonPathManager
     public void Add(string path, object value, Priority priority)
     {
         // Verify the path is a valid JsonPath for the operation.
-        JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
+        JsonValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
 
         // Tokenize the JsonPath.
         List<IJsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
@@ -119,7 +119,7 @@ public class JsonPathManager : IJsonPathManager
     public JToken? Remove(string path)
     {
         // Verify the path is a valid JsonPath for the operation.
-        JsonPathValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
+        JsonValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
 
         // Tokenize the JsonPath.
         (string, IJsonPathToken) splitPath = JsonPathTokenizer.SplitPathAtLeaf(path.Trim());

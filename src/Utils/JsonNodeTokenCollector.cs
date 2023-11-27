@@ -114,7 +114,7 @@ internal class JsonNodeTokenCollector
                             {
                                 for (int j = 0; j < currentJArray.Count; j++) // iterate through each index.
                                     // Check whether the index specified by the path contains the index.
-                                    if (JsonPathValidator.ArrayContainsIndex(indexToken, j, currentJArray.Count))
+                                    if (JsonValidator.ArrayContainsIndex(indexToken, j, currentJArray.Count))
                                         newCurrentTokens.Add(new JsonNodeToken
                                         (
                                             currentJArray[j] ?? throw new NullReferenceException(),
