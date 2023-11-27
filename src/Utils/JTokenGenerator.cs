@@ -130,7 +130,7 @@ internal class JTokenGenerator
 
                     for (int i = 0; i < lastJArray.Count; i++)
                     {
-                        bool arrayContainsIndex = JsonPathValidator.ArrayContainsIndex(indexToken, i, lastJArray.Count);
+                        bool arrayContainsIndex = JsonValidator.ArrayContainsIndex(indexToken, i, lastJArray.Count);
 
                         // check if the corresponding location to add a value contains child elements,
                         // which would be overwritten by the new value.
@@ -144,7 +144,7 @@ internal class JTokenGenerator
 
                         if (priority < Priority.Normal && arrayContainsIndex
                                                        && lastAvailableToken.Token[i] is not null
-                                                       && lastAvailableToken.Token[i]!.HasValues)
+                                                       && !JsonValidator.IsEmpty(lastAvailableToken.Token[i]!))
                         {
                             throw new ArgumentException("JSON element $." +
                                 $"{lastAvailableToken.Token.Path}[{i}] contains an element," +

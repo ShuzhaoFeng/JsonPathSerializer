@@ -9,7 +9,7 @@ namespace JsonPathSerializer.Utils;
 /// <summary>
 ///     Collection of helper methods to validate a JsonPathSerializer element.
 /// </summary>
-internal class JsonPathValidator
+internal class JsonValidator
 {
     /// <summary>
     ///     Validate a JsonPath string and throws an exception whenever the string is invalid for the operation.
@@ -85,5 +85,18 @@ internal class JsonPathValidator
             }
 
         return false;
+    }
+
+    /// <summary>
+    ///     Check if a JToken is empty.
+    /// </summary>
+    /// <param name="token">The JToken.</param>
+    /// <returns>true if the JToken is empty, false otherwise.</returns>
+    public static bool IsEmpty(JToken token)
+    {
+        return token is { Type: JTokenType.Array, HasValues: false } ||
+               token is { Type: JTokenType.Object, HasValues: false } ||
+               (token.Type == JTokenType.String && token.ToString() == string.Empty) ||
+               token.Type == JTokenType.Null;
     }
 }
