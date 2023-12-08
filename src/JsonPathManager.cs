@@ -75,6 +75,12 @@ public class JsonPathManager : IJsonPathManager
         Add(path, value, Priority.Normal);
     }
 
+    /// <summary>
+    ///     Add a value to the JsonPathManager root.
+    /// </summary>
+    /// <param name="path">The path where to add the value.</param>
+    /// <param name="value">The value to be added.</param>
+    /// <param name="priority">The priority of the operation.</param>
     public void Add(string path, object value, Priority priority)
     {
         // Verify the path is a valid JsonPath for the operation.
@@ -109,6 +115,45 @@ public class JsonPathManager : IJsonPathManager
     public void Force(string path, object value)
     {
         Add(path, value, Priority.High);
+    }
+
+    /// <summary>
+    ///     Append a value to the end of an array in the JsonPathManager root.
+    /// </summary>
+    /// <param name="path">The path of the array(s) where to append the value.</param>
+    /// <param name="value">The value to be appended at the end of the array.</param>
+    /// <param name="priority">The priority of the operation.</param>
+    public void Append(string path, object value, Priority priority)
+    {
+        // Verify the path is a valid JsonPath for the operation.
+        JsonValidator.ValidateJsonPath((path ?? throw new ArgumentNullException(nameof(path))).Trim());
+
+        // Tokenize the JsonPath.
+        List<IJsonPathToken> pathTokens = JsonPathTokenizer.Tokenize(path.Trim());
+
+        // Make a copy of root.
+        JToken rootCopy = _root?.DeepClone()
+                          ?? (pathTokens[0] is JsonPathIndexToken ? new JArray() : new JObject());
+
+        // get the list of last available tokens that already exist within the root.
+        foreach (JsonNodeToken lastAvailableToken in
+                 JsonNodeTokenCollector.CollectLastAvailableTokens(rootCopy, pathTokens, priority))
+        {
+            foreach (JToken token in JsonNodeTokenCollector.GetExactTokens(lastAvailableToken.Token, pathTokens.Last()))
+            {
+                if (token is JArray array)
+                {
+                    array.Add(value);
+                }
+                else
+                {
+                    throw new ArgumentException("Cannot append to a non-array value.");
+                }
+            }
+        }
+
+        // assign root copy back to root.
+        _root = rootCopy;
     }
 
     /// <summary>
