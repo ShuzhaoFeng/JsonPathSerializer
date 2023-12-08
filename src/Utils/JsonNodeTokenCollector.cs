@@ -1,5 +1,8 @@
 ﻿using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Path;
+using JsonPathSerializer.Structs.Types.Index;
+using JsonPathSerializer.Structs.Types.IndexSpan;
+using JsonPathSerializer.Structs.Types;
 using Newtonsoft.Json.Linq;
 using static JsonPathSerializer.Globals;
 
@@ -159,6 +162,58 @@ internal class JsonNodeTokenCollector
                 pathIndex++;
             else
                 return currentTokens;
+        }
+    }
+
+    public static List<JToken> GetExactTokens(
+        JToken json,
+        IJsonPathToken pathToken
+    )
+    {
+        switch (pathToken)
+        {
+            case JsonPathPropertyToken propertyToken:
+
+                return new List<JToken>
+                {
+                    json[propertyToken.Property] ?? throw new ArgumentException()
+                };
+
+            case JsonPathIndexToken indexToken:
+                JArray jArray = json as JArray
+                                ?? throw new ArgumentException();
+
+                List<JToken> tokens = new();
+
+                foreach (IValueContainer container in indexToken.Indexes)
+                    // replace the element at the specified index/index span with the new value.
+
+                    if (container is IndexValueContainer indexValueContainer)
+                    {
+                        int index = indexValueContainer.Index;
+
+                        // if the index is negative, count the index from the end of the array.
+                        tokens.Add(jArray[index >= 0 ? index : jArray.Count + index]);
+                    }
+                    else if (container is IndexSpanValueContainer indexSpanValueContainer)
+                    {
+                        int start = indexSpanValueContainer.StartIndex;
+
+                        // if the end index is not specified, it is defaulted the last index of the array.
+                        int end = indexSpanValueContainer.EndIndex ??
+                                  (start < 0 ? -1 : jArray.Count - 1);
+
+                        int min = Math.Min(start, end);
+                        int max = Math.Max(start, end);
+
+                        // replace the value across the span.
+                        for (int i = min; i <= max; i++) tokens.Add(jArray[i >= 0 ? i : jArray.Count + i]);
+                    }
+
+                return tokens;
+
+            default:
+                throw new NotSupportedException(ErrorMessage.UNSUPPORTED_TOKEN);
         }
     }
 }
