@@ -1,4 +1,6 @@
 ﻿namespace JsonPathSerializerTest.Add.Types;
+
+[TestClass]
 public class IntegrationTest
 {
     private JsonPathManager _manager = new();
