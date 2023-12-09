@@ -1,5 +1,6 @@
 ﻿namespace JsonPathSerializerTest.Add.Types.Property;
 
+[TestClass]
 public class IntegrationTest
 {
     private JsonPathManager _emptyManager = new();
