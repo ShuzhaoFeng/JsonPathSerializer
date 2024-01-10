@@ -34,5 +34,29 @@ public class AppendTest
 
         Assert.AreEqual("John Smith", _manager.Value["name"][4].ToString());
     }
+
+    [TestMethod]
+    public void CanAppendToExistingObjectIfHighPriority()
+    {
+
+        _manager.Append("name[0]", "John Smith", Priority.High);
+
+        Assert.AreEqual("John Smith", _manager.Value["name"][0][0].ToString());
+    }
+
+    [TestMethod]
+    public void ThrowsExceptionWhenAppendToExistingObjectIfNotHighPriority()
+    {
+        Assert.ThrowsException<ArgumentException>(() => _manager.Append("name[0]", "John Smith", Priority.Normal));
+    }
+
+    [TestMethod]
+    public void CanAppendToExistingValueIfHighPriority()
+    {
+
+        _manager.Append("name.first[0]", "John Smith", Priority.High);
+
+        Assert.AreEqual("John Smith", _manager.Value["name"]["first"][0][0].ToString());
+    }
 }
 
