@@ -139,15 +139,32 @@ public class JsonPathManager : IJsonPathManager
         foreach (JsonNodeToken lastAvailableToken in
                  JsonNodeTokenCollector.CollectLastAvailableTokens(rootCopy, pathTokens, priority))
         {
-            foreach (JToken token in JsonNodeTokenCollector.GetExactTokens(lastAvailableToken.Token, pathTokens.Last()))
+            if (lastAvailableToken.Index < pathTokens.Count - 1)
             {
-                if (token is JArray array)
+                JArray jArray = new() { value };
+
+                rootCopy = JTokenGenerator.GenerateNewRoot(lastAvailableToken, pathTokens, rootCopy, jArray, priority);
+            }
+            else
+            {
+                foreach (JToken token in JsonNodeTokenCollector.GetLeafTokens(
+                             lastAvailableToken.Token,
+                             pathTokens.Last(),
+                             priority
+                         ))
                 {
-                    array.Add(value);
-                }
-                else
-                {
-                    throw new ArgumentException("Cannot append to a non-array value.");
+                    if (token is JArray array)
+                    {
+                        array.Add(value);
+                    }
+                    else if (priority == Priority.High)
+                    {
+                        token.Replace(new JArray { value });
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Cannot append to a non-array value.");
+                    }
                 }
             }
         }

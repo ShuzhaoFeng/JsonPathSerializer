@@ -165,55 +165,100 @@ internal class JsonNodeTokenCollector
         }
     }
 
-    public static List<JToken> GetExactTokens(
+    public static List<JToken> GetLeafTokens(
         JToken json,
-        IJsonPathToken pathToken
+        IJsonPathToken pathToken,
+        Priority priority
     )
     {
         switch (pathToken)
         {
             case JsonPathPropertyToken propertyToken:
 
-                return new List<JToken>
+                if (json is JObject jObject)
                 {
-                    json[propertyToken.Property] ?? throw new ArgumentException()
-                };
+                    if (jObject.TryGetValue(propertyToken.Property, out JToken? value))
+                    {
+                        return new List<JToken> { value ?? throw new ArgumentException() };
+                    }
+
+                    JObject newJObject = new();
+
+                    jObject.Add(propertyToken.Property, newJObject);
+
+                    return new List<JToken> { newJObject };
+                }
+
+                if (priority == Priority.High)
+                {
+                    JObject newJObject = new();
+
+                    json.Replace(newJObject);
+
+                    return new List<JToken>
+                    {
+                        newJObject[propertyToken.Property] ?? throw new ArgumentException()
+                    };
+                }
+
+                throw new ArgumentException();
 
             case JsonPathIndexToken indexToken:
-                JArray jArray = json as JArray
-                                ?? throw new ArgumentException();
+                if (json is JArray jArray)
+                {
+                    return GetTokens(jArray, indexToken);
+                }
 
-                List<JToken> tokens = new();
+                if (priority == Priority.High)
+                {
+                    JArray newJArray = new();
 
-                foreach (IValueContainer container in indexToken.Indexes)
-                    // replace the element at the specified index/index span with the new value.
-
-                    if (container is IndexValueContainer indexValueContainer)
+                    for (int i = 0; i < indexToken.Bound; i++)
                     {
-                        int index = indexValueContainer.Index;
-
-                        // if the index is negative, count the index from the end of the array.
-                        tokens.Add(jArray[index >= 0 ? index : jArray.Count + index]);
-                    }
-                    else if (container is IndexSpanValueContainer indexSpanValueContainer)
-                    {
-                        int start = indexSpanValueContainer.StartIndex;
-
-                        // if the end index is not specified, it is defaulted the last index of the array.
-                        int end = indexSpanValueContainer.EndIndex ??
-                                  (start < 0 ? -1 : jArray.Count - 1);
-
-                        int min = Math.Min(start, end);
-                        int max = Math.Max(start, end);
-
-                        // replace the value across the span.
-                        for (int i = min; i <= max; i++) tokens.Add(jArray[i >= 0 ? i : jArray.Count + i]);
+                        newJArray.Add(new JObject());
                     }
 
-                return tokens;
+                    json.Replace(newJArray);
+
+                    return GetTokens(newJArray, indexToken);
+                }
+
+                throw new ArgumentException();
 
             default:
                 throw new NotSupportedException(ErrorMessage.UNSUPPORTED_TOKEN);
         }
+    }
+
+    private static List<JToken> GetTokens(JArray jArray, JsonPathIndexToken indexToken)
+    {
+        List<JToken> tokens = new();
+
+        foreach (IValueContainer container in indexToken.Indexes)
+            // replace the element at the specified index/index span with the new value.
+
+            if (container is IndexValueContainer indexValueContainer)
+            {
+                int index = indexValueContainer.Index;
+
+                // if the index is negative, count the index from the end of the array.
+                tokens.Add(jArray[index >= 0 ? index : jArray.Count + index]);
+            }
+            else if (container is IndexSpanValueContainer indexSpanValueContainer)
+            {
+                int start = indexSpanValueContainer.StartIndex;
+
+                // if the end index is not specified, it is defaulted the last index of the array.
+                int end = indexSpanValueContainer.EndIndex ??
+                          (start < 0 ? -1 : jArray.Count - 1);
+
+                int min = Math.Min(start, end);
+                int max = Math.Max(start, end);
+
+                // replace the value across the span.
+                for (int i = min; i <= max; i++) tokens.Add(jArray[i >= 0 ? i : jArray.Count + i]);
+            }
+
+        return tokens;
     }
 }
