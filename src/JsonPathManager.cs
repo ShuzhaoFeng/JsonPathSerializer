@@ -147,7 +147,7 @@ public class JsonPathManager : IJsonPathManager
             }
             else
             {
-                foreach (JToken token in JsonNodeTokenCollector.GetLeafTokens(
+                foreach (JToken token in JsonNodeTokenCollector.GetOrCreateLeafTokens(
                              lastAvailableToken.Token,
                              pathTokens.Last(),
                              priority

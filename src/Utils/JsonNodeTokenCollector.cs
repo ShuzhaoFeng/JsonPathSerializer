@@ -165,7 +165,7 @@ internal class JsonNodeTokenCollector
         }
     }
 
-    public static List<JToken> GetLeafTokens(
+    public static List<JToken> GetOrCreateLeafTokens(
         JToken json,
         IJsonPathToken pathToken,
         Priority priority
@@ -181,17 +181,25 @@ internal class JsonNodeTokenCollector
                     {
                         return new List<JToken> { value ?? throw new ArgumentException() };
                     }
+                    
+                    if (priority != Priority.Low)
+                    {
+                        JArray newJArray = new();
 
-                    JObject newJObject = new();
+                        jObject.Add(propertyToken.Property, newJArray);
 
-                    jObject.Add(propertyToken.Property, newJObject);
+                        return new List<JToken> { newJArray };
+                    }
 
-                    return new List<JToken> { newJObject };
+                    throw new ArgumentException();
                 }
 
-                if (priority == Priority.High)
+                if (priority != Priority.Low)
                 {
-                    JObject newJObject = new();
+                    JObject newJObject = new()
+                    {
+                        { propertyToken.Property, new JObject() }
+                    };
 
                     json.Replace(newJObject);
 
@@ -209,13 +217,13 @@ internal class JsonNodeTokenCollector
                     return GetTokens(jArray, indexToken);
                 }
 
-                if (priority == Priority.High)
+                if (priority != Priority.Low)
                 {
                     JArray newJArray = new();
 
                     for (int i = 0; i < indexToken.Bound; i++)
                     {
-                        newJArray.Add(new JObject());
+                        newJArray.Add(new JArray());
                     }
 
                     json.Replace(newJArray);
