@@ -139,13 +139,16 @@ public class JsonPathManager : IJsonPathManager
         foreach (JsonNodeToken lastAvailableToken in
                  JsonNodeTokenCollector.CollectLastAvailableTokens(rootCopy, pathTokens, priority))
         {
+            // if the number of unavailable tokens exceeds 1,
+            // then it is equivalent to adding a new array to the path
+            // and adding the value to the new array.
             if (lastAvailableToken.Index < pathTokens.Count - 1)
             {
                 JArray jArray = new() { value };
 
                 rootCopy = JTokenGenerator.GenerateNewRoot(lastAvailableToken, pathTokens, rootCopy, jArray, priority);
             }
-            else
+            else // the path token either exists or the token's direct parent exists.
             {
                 foreach (JToken token in JsonNodeTokenCollector.GetOrCreateLeafTokens(
                              lastAvailableToken.Token,
@@ -157,7 +160,7 @@ public class JsonPathManager : IJsonPathManager
                     {
                         array.Add(value);
                     }
-                    else if (priority == Priority.High)
+                    else if (priority == Priority.High) // replacing an existing object or value is allowed.
                     {
                         token.Replace(new JArray { value });
                     }
