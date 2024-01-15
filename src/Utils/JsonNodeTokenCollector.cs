@@ -165,6 +165,16 @@ internal class JsonNodeTokenCollector
         }
     }
 
+    /// <summary>
+    ///     Gets or creates the leaf tokens of a json tree given the leaf's parent token and the last path.
+    ///     If the leaf token exists, it is returned.
+    ///     If the leaf token does not exist and priority is not Low, it is created and returned.
+    /// </summary>
+    /// <param name="json">The leaf's parent token.</param>
+    /// <param name="pathToken">The last path token.</param>
+    /// <param name="priority">The priority of the operation.</param>
+    /// <returns>The leaf token of the tree.</returns>
+    /// <exception cref="ArgumentException">If the leaf token does not exist and priority is Low.</exception>
     public static List<JToken> GetOrCreateLeafTokens(
         JToken json,
         IJsonPathToken pathToken,
@@ -181,20 +191,15 @@ internal class JsonNodeTokenCollector
                     {
                         return new List<JToken> { value ?? throw new ArgumentException() };
                     }
-                    
-                    if (priority != Priority.Low)
-                    {
-                        JArray newJArray = new();
 
-                        jObject.Add(propertyToken.Property, newJArray);
+                    JArray newJArray = new();
 
-                        return new List<JToken> { newJArray };
-                    }
+                    jObject.Add(propertyToken.Property, newJArray);
 
-                    throw new ArgumentException();
+                    return new List<JToken> { newJArray };
                 }
 
-                if (priority != Priority.Low)
+                if (priority == Priority.High)
                 {
                     JObject newJObject = new()
                     {
@@ -217,7 +222,7 @@ internal class JsonNodeTokenCollector
                     return GetTokens(jArray, indexToken);
                 }
 
-                if (priority != Priority.Low)
+                if (priority == Priority.High)
                 {
                     JArray newJArray = new();
 

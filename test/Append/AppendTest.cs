@@ -60,40 +60,40 @@ public class AppendTest
     }
 
     [TestMethod]
-    public void CanAppendToNewProperty()
+    public void CanAppendToNewPropertyIfHighPriority()
     {
-        _manager.Append("name[0].middle", "Doe", Priority.Normal);
+        _manager.Append("name.middle", "Doe", Priority.High);
 
-        Assert.AreEqual("Doe", _manager.Value["name"][0]["middle"][0].ToString());
+        Assert.AreEqual("Doe", _manager.Value["name"]["middle"][0].ToString());
     }
 
     [TestMethod]
-    public void ThrowsExceptionWhenAppendToNewPropertyIfLowPriority()
+    public void ThrowsExceptionWhenAppendToNewProperty()
     {
-        Assert.ThrowsException<ArgumentException>(() => _manager.Append("name[0].middle", "Doe", Priority.Low));
+        Assert.ThrowsException<ArgumentException>(() => _manager.Append("name.middle", "Doe", Priority.Normal));
     }
 
 
     [TestMethod]
-    public void CanAppendToNewIndex()
+    public void CanAppendToNewIndexIfHighPriority()
     {
-        _manager.Append("name[0][9]", "Doe", Priority.Normal);
+        _manager.Append("name[0][9]", "Doe", Priority.High);
 
         Assert.AreEqual("Doe", _manager.Value["name"][0][9][0].ToString());
     }
 
     [TestMethod]
-    public void ThrowsExceptionWhenAppendToNewIndexIfLowPriority()
+    public void ThrowsExceptionWhenAppendToNewIndex()
     {
-        Assert.ThrowsException<ArgumentException>(() => _manager.Append("name[0][9]", "Doe", Priority.Low));
+        Assert.ThrowsException<ArgumentException>(() => _manager.Append("name[0][9]", "Doe", Priority.Normal));
     }
 
     [TestMethod]
     public void CanAppendToNewPath()
     {
-        _manager.Append("name[0].middle[0]", "Doe", Priority.Normal);
+        _manager.Append("name[0].middle", "Doe", Priority.Normal);
 
-        Assert.AreEqual("Doe", _manager.Value["name"][0]["middle"][0][0].ToString());
+        Assert.AreEqual("Doe", _manager.Value["name"][0]["middle"][0].ToString());
     }
 }
 
