@@ -25,8 +25,10 @@ internal class JTokenRemover
             else
                 arrayToKeep.Add(parent[i]);
 
+        // replace the target array with the new array that only contains the elements to keep
         parent.Replace(arrayToKeep);
 
+        // return the other elements as removed.
         if (arrayToRemove.Count > 0) return arrayToRemove;
 
         return null;

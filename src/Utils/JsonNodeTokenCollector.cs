@@ -187,11 +187,13 @@ internal class JsonNodeTokenCollector
 
                 if (json is JObject jObject)
                 {
+                    // if the path already exists, return the value.
                     if (jObject.TryGetValue(propertyToken.Property, out JToken? value))
                     {
                         return new List<JToken> { value ?? throw new ArgumentException() };
                     }
 
+                    // if the path doesn't exist, add a new array to the path.
                     JArray newJArray = new();
 
                     jObject.Add(propertyToken.Property, newJArray);
@@ -199,6 +201,7 @@ internal class JsonNodeTokenCollector
                     return new List<JToken> { newJArray };
                 }
 
+                // expecting a JObject where to add property, discovered JArray or JValue instead.
                 if (priority == Priority.High)
                 {
                     JObject newJObject = new()
@@ -214,14 +217,23 @@ internal class JsonNodeTokenCollector
                     };
                 }
 
+                // if not High priority, throw an exception.
                 throw new ArgumentException();
 
             case JsonPathIndexToken indexToken:
+                // if the path already exists, return the value.
                 if (json is JArray jArray)
                 {
+                    // in case where the minimum bound is not met, add empty arrays to the path.
+                    for (int i = jArray.Count; i < indexToken.Bound; i++)
+                    {
+                        jArray.Add(new JArray());
+                    }
+
                     return GetTokens(jArray, indexToken);
                 }
 
+                // expecting a JArray where to add index, discovered JObject or JValue instead.
                 if (priority == Priority.High)
                 {
                     JArray newJArray = new();
@@ -236,6 +248,7 @@ internal class JsonNodeTokenCollector
                     return GetTokens(newJArray, indexToken);
                 }
 
+                // if not High priority, throw an exception.
                 throw new ArgumentException();
 
             default:
