@@ -4,7 +4,7 @@ using JsonPathSerializer.Structs.Types;
 using JsonPathSerializer.Structs.Types.Index;
 using JsonPathSerializer.Structs.Types.IndexSpan;
 using Newtonsoft.Json.Linq;
-using static JsonPathSerializer.Globals;
+using JsonPathSerializer.Globals;
 
 namespace JsonPathSerializer.Utils;
 
