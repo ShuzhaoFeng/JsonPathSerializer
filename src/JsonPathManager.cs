@@ -3,7 +3,7 @@ using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using static JsonPathSerializer.Globals;
+using JsonPathSerializer.Globals;
 
 namespace JsonPathSerializer;
 
