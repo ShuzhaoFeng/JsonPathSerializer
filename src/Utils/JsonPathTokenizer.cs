@@ -90,7 +90,7 @@ internal class JsonPathTokenizer
                                 .Value
                         ));
                     else
-                        throw new NotSupportedException(ErrorMessage.UNSUPPORTED_TOKEN);
+                        throw new NotSupportedException(ErrorMessage.UnsupportedToken);
                 }
             }
         }

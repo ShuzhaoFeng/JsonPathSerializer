@@ -1,4 +1,5 @@
-﻿using JsonPathSerializer.Structs;
+﻿using JsonPathSerializer.Exceptions;
+using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Utils;
 using Newtonsoft.Json;
@@ -150,11 +151,28 @@ public class JsonPathManager : IJsonPathManager
             }
             else // the path token either exists or the token's direct parent exists.
             {
-                foreach (JToken token in JsonNodeTokenCollector.GetOrCreateLeafTokens(
-                             lastAvailableToken.Token,
-                             pathTokens.Last(),
-                             priority
-                         ))
+                List<JToken> leafTokens;
+                
+                try
+                {
+                    leafTokens = JsonNodeTokenCollector.GetOrCreateLeafTokens(
+                        lastAvailableToken.Token,
+                        pathTokens.Last(),
+                        priority
+                    );
+                }
+                catch (Exception exception)
+                {
+                    // attach more information to the exception.
+                    throw new JsonPathSerializerException(
+                        exception.Message,
+                        lastAvailableToken.Token.Path,
+                        lastAvailableToken.Token,
+                        value
+                    );
+                }
+                
+                foreach (JToken token in leafTokens)
                 {
                     if (token is JArray array)
                     {
@@ -166,7 +184,7 @@ public class JsonPathManager : IJsonPathManager
                     }
                     else
                     {
-                        throw new ArgumentException("Cannot append to a non-array value.");
+                        throw new JsonPathSerializerException(ErrorMessage.AppendToNonArray, token.Path, token, value);
                     }
                 }
             }

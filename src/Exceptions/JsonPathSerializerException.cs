@@ -10,11 +10,18 @@ public class JsonPathSerializerException : SystemException
 
     public object? Value { get; }
 
-    public JsonPathSerializerException() : base(ErrorMessage.GENERIC)
+    public JsonPathSerializerException() : base(ErrorMessage.Generic)
     {
     }
 
     public JsonPathSerializerException(string message) : base(message)
     {
+    }
+
+    public JsonPathSerializerException(string message, string? path, JToken? token, object? value) : base(message)
+    {
+        Path = path;
+        Token = token;
+        Value = value;
     }
 }
