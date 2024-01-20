@@ -1,4 +1,5 @@
-﻿using JsonPathSerializer.Structs;
+﻿using JsonPathSerializer.Exceptions;
+using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Structs.Types;
 using JsonPathSerializer.Structs.Types.Index;
@@ -56,9 +57,12 @@ internal class JTokenGenerator
                 {
                     if (priority < Priority.High)
                     {
-                        throw new ArgumentException("JSON element $." +
-                                                    $"{lastAvailableToken.Token.Path} contains a value," +
-                                                    "therefore cannot contain child elements.");
+                        throw new JsonPathSerializerException(
+                            ErrorMessage.TypeConflict("JObject", lastAvailableToken.Token.Type.ToString()),
+                            lastAvailableToken.Token.Path,
+                            lastAvailableToken.Token,
+                            value
+                        );
                     }
 
                     JObject emptyJObject = new();
@@ -74,18 +78,16 @@ internal class JTokenGenerator
                     if (priority < Priority.High
                         && lastAvailableToken.Token[propertyToken.Property] is JContainer jContainer)
                     {
-                        throw new ArgumentException("JSON element $." +
-                                                    $"{jContainer.Path} contains a child element," +
-                                                    "therefore cannot be replaced.");
+                        throw new JsonPathSerializerException(ErrorMessage.Override(jContainer.Path));
                     }
 
                     // replacing an existing value
                     if (priority < Priority.Normal
                         && lastAvailableToken.Token[propertyToken.Property] is not null)
                     {
-                        throw new ArgumentException("JSON element $." +
-                            $"{lastAvailableToken.Token.Path}.{propertyToken.Property} contains an element," +
-                            "therefore cannot be replaced.");
+                        throw new JsonPathSerializerException(
+                            ErrorMessage.Override($"{lastAvailableToken.Token.Path}.{propertyToken.Property}")
+                        );
                     }
                 }
 
@@ -101,9 +103,12 @@ internal class JTokenGenerator
                 {
                     if (priority < Priority.High)
                     {
-                        throw new ArgumentException("JSON element $." +
-                                                    $"{lastAvailableToken.Token.Path} contains a value," +
-                                                    "therefore cannot contain child elements.");
+                        throw new JsonPathSerializerException(
+                            ErrorMessage.TypeConflict("JArray", lastAvailableToken.Token.Type.ToString()),
+                            lastAvailableToken.Token.Path,
+                            lastAvailableToken.Token,
+                            value
+                        );
                     }
 
                     JArray emptyJArray = new();
@@ -137,18 +142,18 @@ internal class JTokenGenerator
                         if (priority < Priority.High && arrayContainsIndex
                                                      && lastAvailableToken.Token[i] is JContainer jContainer)
                         {
-                            throw new ArgumentException("JSON element $." +
-                                $"{jContainer.Path} contains a child element," +
-                                "therefore cannot be replaced.");
+                            throw new JsonPathSerializerException(
+                                ErrorMessage.Override(jContainer.Path)
+                            );
                         }
 
                         if (priority < Priority.Normal && arrayContainsIndex
                                                        && lastAvailableToken.Token[i] is not null
                                                        && !JsonValidator.IsEmpty(lastAvailableToken.Token[i]!))
                         {
-                            throw new ArgumentException("JSON element $." +
-                                $"{lastAvailableToken.Token.Path}[{i}] contains an element," +
-                                "therefore cannot be replaced.");
+                            throw new JsonPathSerializerException(
+                                ErrorMessage.Override($"{lastAvailableToken.Token.Path}[{i}]")
+                            );
                         }
                     }
 
@@ -183,7 +188,7 @@ internal class JTokenGenerator
                 break;
 
             default:
-                throw new NotSupportedException(ErrorMessage.UNSUPPORTED_TOKEN);
+                throw new NotSupportedException(ErrorMessage.UnsupportedToken);
         }
 
         return root;
@@ -246,7 +251,7 @@ internal class JTokenGenerator
                     break;
 
                 default:
-                    throw new NotSupportedException(ErrorMessage.UNSUPPORTED_TOKEN);
+                    throw new NotSupportedException(ErrorMessage.UnsupportedToken);
             }
         }
 

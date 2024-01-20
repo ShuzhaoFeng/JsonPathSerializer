@@ -27,18 +27,18 @@ public class PropertyTest
     [TestMethod]
     public void ThrowsExceptionWhenAddingPropertyToArray()
     {
-        Assert.ThrowsException<ArgumentException>(() => _manager.Add("name.first.first", "John", Priority.Normal));
+        Assert.ThrowsException<JsonPathSerializerException>(() => _manager.Add("name.first.first", "John", Priority.Normal));
     }
 
     [TestMethod]
     public void ThrowsExceptionWhenAddingPropertyToObjectWithChildren()
     {
-        Assert.ThrowsException<ArgumentException>(() => _manager.Add("name", "John Smith Doe", Priority.Normal));
+        Assert.ThrowsException<JsonPathSerializerException>(() => _manager.Add("name", "John Smith Doe", Priority.Normal));
     }
 
     [TestMethod]
     public void ThrowsExceptionWhenAddingPropertyAsChildUnderPropertyValue()
     {
-        Assert.ThrowsException<ArgumentException>(() => _manager.Add("name.last.first", "Doe", Priority.Normal));
+        Assert.ThrowsException<JsonPathSerializerException>(() => _manager.Add("name.last.first", "Doe", Priority.Normal));
     }
 }

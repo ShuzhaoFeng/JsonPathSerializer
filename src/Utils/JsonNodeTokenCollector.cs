@@ -1,4 +1,5 @@
-﻿using JsonPathSerializer.Structs;
+﻿using JsonPathSerializer.Exceptions;
+using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Structs.Types.Index;
 using JsonPathSerializer.Structs.Types.IndexSpan;
@@ -81,7 +82,7 @@ internal class JsonNodeTokenCollector
                         }
                         else
                         {
-                            throw new ArgumentException
+                            throw new JsonPathSerializerException
                             (
                                 $"JSON element $.{jToken.Path} " +
                                 $"is a {jToken.Type}, therefore cannot be taken as an Object."
@@ -140,7 +141,7 @@ internal class JsonNodeTokenCollector
                         }
                         else
                         {
-                            throw new ArgumentException
+                            throw new JsonPathSerializerException
                             (
                                 $"JSON element $.{jToken.Path} " +
                                 $"is a {jToken.Type}, therefore cannot be taken as an Array."
@@ -154,7 +155,7 @@ internal class JsonNodeTokenCollector
                     break;
 
                 default:
-                    throw new NotSupportedException(ErrorMessage.UNSUPPORTED_TOKEN);
+                    throw new NotSupportedException(ErrorMessage.UnsupportedToken);
             }
 
             // if all tokens are the last available, no need to search further down.
@@ -174,7 +175,7 @@ internal class JsonNodeTokenCollector
     /// <param name="pathToken">The last path token.</param>
     /// <param name="priority">The priority of the operation.</param>
     /// <returns>The leaf token of the tree.</returns>
-    /// <exception cref="ArgumentException">If the leaf token does not exist and priority is Low.</exception>
+    /// <exception cref="JsonPathSerializerException">If the leaf token does not exist and priority is Low.</exception>
     public static List<JToken> GetOrCreateLeafTokens(
         JToken json,
         IJsonPathToken pathToken,
@@ -190,7 +191,7 @@ internal class JsonNodeTokenCollector
                     // if the path already exists, return the value.
                     if (jObject.TryGetValue(propertyToken.Property, out JToken? value))
                     {
-                        return new List<JToken> { value ?? throw new ArgumentException() };
+                        return new List<JToken> { value ?? throw new Exception() };
                     }
 
                     // if the path doesn't exist, add a new array to the path.
@@ -213,12 +214,14 @@ internal class JsonNodeTokenCollector
 
                     return new List<JToken>
                     {
-                        newJObject[propertyToken.Property] ?? throw new ArgumentException()
+                        newJObject[propertyToken.Property] ?? throw new Exception()
                     };
                 }
 
                 // if not High priority, throw an exception.
-                throw new ArgumentException();
+                throw new JsonPathSerializerException(
+                    ErrorMessage.TypeConflict("JObject", json.Type.ToString())
+                );
 
             case JsonPathIndexToken indexToken:
                 // if the path already exists, return the value.
@@ -249,10 +252,12 @@ internal class JsonNodeTokenCollector
                 }
 
                 // if not High priority, throw an exception.
-                throw new ArgumentException();
+                throw new JsonPathSerializerException(
+                    ErrorMessage.TypeConflict("JArray", json.Type.ToString())
+                );
 
             default:
-                throw new NotSupportedException(ErrorMessage.UNSUPPORTED_TOKEN);
+                throw new NotSupportedException(ErrorMessage.UnsupportedToken);
         }
     }
 

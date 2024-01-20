@@ -47,7 +47,7 @@ public class AppendTest
     [TestMethod]
     public void ThrowsExceptionWhenAppendToExistingObjectIfNotHighPriority()
     {
-        Assert.ThrowsException<ArgumentException>(() => _manager.Append("name[0]", "John Smith", Priority.Normal));
+        Assert.ThrowsException<JsonPathSerializerException>(() => _manager.Append("name[0]", "John Smith", Priority.Normal));
     }
 
     [TestMethod]
@@ -70,7 +70,7 @@ public class AppendTest
     [TestMethod]
     public void ThrowsExceptionWhenAppendToNewProperty()
     {
-        Assert.ThrowsException<ArgumentException>(() => _manager.Append("name.middle", "Doe", Priority.Normal));
+        Assert.ThrowsException<JsonPathSerializerException>(() => _manager.Append("name.middle", "Doe", Priority.Normal));
     }
 
 
@@ -85,7 +85,7 @@ public class AppendTest
     [TestMethod]
     public void ThrowsExceptionWhenAppendToNewIndex()
     {
-        Assert.ThrowsException<ArgumentException>(() => _manager.Append("name[0][9]", "Doe", Priority.Normal));
+        Assert.ThrowsException<JsonPathSerializerException>(() => _manager.Append("name[0][9]", "Doe", Priority.Normal));
     }
 
     [TestMethod]

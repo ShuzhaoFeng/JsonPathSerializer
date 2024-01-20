@@ -1,4 +1,5 @@
-﻿using JsonPathSerializer.Structs.Path;
+﻿using JsonPathSerializer.Exceptions;
+using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Structs.Types;
 using JsonPathSerializer.Structs.Types.Index;
 using JsonPathSerializer.Structs.Types.IndexSpan;
@@ -18,10 +19,10 @@ internal class JsonValidator
     public static void ValidateJsonPath(string path)
     {
         // Check for empty path
-        if (path.Length < 1) throw new ArgumentException("Path cannot be empty");
+        if (path.Length < 1) throw new JsonPathSerializerException("Path cannot be empty");
 
         // Check for unsupported operations
-        if (path.Contains("..")) throw new ArgumentException("Deep scan \'..\' is unsupported.");
+        if (path.Contains("..")) throw new JsonPathSerializerException("Deep scan \'..\' is unsupported.");
 
         // If the string is not valid JsonPath, the following will throw a JsonException
         new JObject().SelectToken(path);

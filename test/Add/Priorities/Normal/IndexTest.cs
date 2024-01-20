@@ -27,19 +27,19 @@ public class IndexTest
     [TestMethod]
     public void ThrowsExceptionWhenAddingIndexToObject()
     {
-        Assert.ThrowsException<ArgumentException>(() => _manager.Add("name[0]", "John", Priority.Normal));
+        Assert.ThrowsException<JsonPathSerializerException>(() => _manager.Add("name[0]", "John", Priority.Normal));
     }
 
     [TestMethod]
     public void ThrowsExceptionWhenAddingIndexToArrayWithChildren()
     {
-        Assert.ThrowsException<ArgumentException>(() => _manager.Add("name.first[1]", "Smith", Priority.Normal));
+        Assert.ThrowsException<JsonPathSerializerException>(() => _manager.Add("name.first[1]", "Smith", Priority.Normal));
     }
 
     [TestMethod]
     public void ThrowsExceptionWhenAddingIndexAsChildUnderIndexValue()
     {
-        Assert.ThrowsException<ArgumentException>(() => _manager.Add("name.last[0]", "John", Priority.Normal));
+        Assert.ThrowsException<JsonPathSerializerException>(() => _manager.Add("name.last[0]", "John", Priority.Normal));
     }
 }
 

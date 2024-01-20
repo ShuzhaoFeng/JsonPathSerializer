@@ -45,7 +45,7 @@ public class DotTest
     [TestMethod]
     public void ThrowsExceptionWhenAddingPropertyWithDoubleDots()
     {
-        Assert.ThrowsException<ArgumentException>(() => _emptyManager.Add("name..last", "Feng", Priority.Normal));
+        Assert.ThrowsException<JsonPathSerializerException>(() => _emptyManager.Add("name..last", "Feng", Priority.Normal));
     }
 
     [TestMethod]

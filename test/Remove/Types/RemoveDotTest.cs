@@ -57,7 +57,7 @@ public class RemoveDotTest
     [TestMethod]
     public void ThrowsExceptionWhenRemovingPropertyWithDoubleDots()
     {
-        Assert.ThrowsException<ArgumentException>(() => _loadedManager.Remove("name..last'"));
+        Assert.ThrowsException<JsonPathSerializerException>(() => _loadedManager.Remove("name..last'"));
     }
 
     [TestMethod]
