@@ -2,6 +2,6 @@
 
 internal class JsonPathUri
 {
-    internal static readonly Uri JSON_PATH_SERIALIZER_REPOSITORY_URI =
+    internal static readonly Uri JsonPathSerializerRepositoryUri =
         new("https://github.com/ShuzhaoFeng/JsonPathSerializer");
 }
