@@ -5,7 +5,7 @@
 
         internal static readonly string UnsupportedToken = "The JsonPath contains an unsupported token." +
                                                             " Please check the documentation at " +
-                                                            JsonPathUri.JSON_PATH_SERIALIZER_REPOSITORY_URI +
+                                                            JsonPathUri.JsonPathSerializerRepositoryUri +
                                                             " for supported tokens.";
 
         internal static readonly string AppendToNonArray = "Cannot append value to a non-array token.";

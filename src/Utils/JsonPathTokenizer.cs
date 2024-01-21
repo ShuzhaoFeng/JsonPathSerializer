@@ -31,10 +31,10 @@ internal class JsonPathTokenizer
             // Try match the token into a known type.
 
             // match to indexes
-            if (PathRegex.INDEX.IsMatch(token))
+            if (PathRegex.Index.IsMatch(token))
             {
                 // match the token into a collection of indexes or index spans
-                MatchCollection matches = PathRegex.INDEX_TOKEN.Matches(token);
+                MatchCollection matches = PathRegex.IndexToken.Matches(token);
 
                 JsonPathIndexToken indexToken = new();
 
@@ -43,7 +43,7 @@ internal class JsonPathTokenizer
                     string tokenString = match.Groups[0].Value;
 
                     // try matching the token to a index span
-                    Match indexSpanMatch = PathRegex.INDEX_SPAN.Match(tokenString);
+                    Match indexSpanMatch = PathRegex.IndexSpan.Match(tokenString);
 
                     if (indexSpanMatch.Success)
                         indexToken.Add(new IndexSpanValueContainer
@@ -66,7 +66,7 @@ internal class JsonPathTokenizer
                 // guard against a first property without a dot, which should be allowed.
                 if (parsedTokenList.IndexOf(token) == 0 && !token.StartsWith('.') && !token.StartsWith('['))
                 {
-                    Match propertyDotMatch = PathRegex.PROPERTY.Match('.' + token);
+                    Match propertyDotMatch = PathRegex.Property.Match('.' + token);
 
                     if (propertyDotMatch.Success)
                         pathTokens.Add(new JsonPathPropertyToken
@@ -79,7 +79,7 @@ internal class JsonPathTokenizer
                 }
                 else
                 {
-                    Match propertyMatch = PathRegex.PROPERTY.Match(token);
+                    Match propertyMatch = PathRegex.Property.Match(token);
 
                     if (propertyMatch.Success)
                         pathTokens.Add(new JsonPathPropertyToken
