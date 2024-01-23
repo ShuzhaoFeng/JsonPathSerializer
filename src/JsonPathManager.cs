@@ -1,10 +1,10 @@
 ﻿using JsonPathSerializer.Exceptions;
+using JsonPathSerializer.Globals;
 using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using JsonPathSerializer.Globals;
 
 namespace JsonPathSerializer;
 
@@ -152,7 +152,7 @@ public class JsonPathManager : IJsonPathManager
             else // the path token either exists or the token's direct parent exists.
             {
                 List<JToken> leafTokens;
-                
+
                 try
                 {
                     leafTokens = JsonNodeTokenCollector.GetOrCreateLeafTokens(
@@ -171,7 +171,7 @@ public class JsonPathManager : IJsonPathManager
                         value
                     );
                 }
-                
+
                 foreach (JToken token in leafTokens)
                 {
                     if (token is JArray array)

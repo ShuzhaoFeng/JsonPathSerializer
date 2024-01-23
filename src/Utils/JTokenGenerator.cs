@@ -1,11 +1,11 @@
 ﻿using JsonPathSerializer.Exceptions;
+using JsonPathSerializer.Globals;
 using JsonPathSerializer.Structs;
 using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Structs.Types;
 using JsonPathSerializer.Structs.Types.Index;
 using JsonPathSerializer.Structs.Types.IndexSpan;
 using Newtonsoft.Json.Linq;
-using JsonPathSerializer.Globals;
 
 namespace JsonPathSerializer.Utils;
 

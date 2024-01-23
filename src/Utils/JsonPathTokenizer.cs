@@ -1,8 +1,8 @@
+using JsonPathSerializer.Globals;
 using JsonPathSerializer.Structs.Path;
 using JsonPathSerializer.Structs.Types.Index;
 using JsonPathSerializer.Structs.Types.IndexSpan;
 using System.Text.RegularExpressions;
-using JsonPathSerializer.Globals;
 
 namespace JsonPathSerializer.Utils;
 
@@ -31,10 +31,10 @@ internal class JsonPathTokenizer
             // Try match the token into a known type.
 
             // match to indexes
-            if (PathRegex.SingleIndex.IsMatch(token))
+            if (PathRegex.Index.IsMatch(token))
             {
                 // match the token into a collection of indexes or index spans
-                MatchCollection matches = PathRegex.Index.Matches(token);
+                MatchCollection matches = PathRegex.IndexToken.Matches(token);
 
                 JsonPathIndexToken indexToken = new();
 
