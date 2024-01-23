@@ -31,10 +31,10 @@ internal class JsonPathTokenizer
             // Try match the token into a known type.
 
             // match to indexes
-            if (PathRegex.Index.IsMatch(token))
+            if (PathRegex.SingleIndex.IsMatch(token))
             {
                 // match the token into a collection of indexes or index spans
-                MatchCollection matches = PathRegex.IndexToken.Matches(token);
+                MatchCollection matches = PathRegex.Index.Matches(token);
 
                 JsonPathIndexToken indexToken = new();
 
