@@ -34,7 +34,7 @@ internal class JsonPathTokenizer
             if (PathRegex.Index.IsMatch(token))
             {
                 // match the token into a collection of indexes or index spans
-                MatchCollection matches = PathRegex.IndexToken.Matches(token);
+                MatchCollection matches = PathRegex.Index.Matches(token);
 
                 JsonPathIndexToken indexToken = new();
 
@@ -42,7 +42,7 @@ internal class JsonPathTokenizer
                 {
                     string tokenString = match.Groups[0].Value;
 
-                    // try matching the token to a index span
+                    // try matching the token to an index span
                     Match indexSpanMatch = PathRegex.IndexSpan.Match(tokenString);
 
                     if (indexSpanMatch.Success)
