@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using JsonPathSerializer.Globals;
+using Newtonsoft.Json.Linq;
 
 namespace JsonPathSerializer;
 
@@ -11,7 +12,11 @@ internal interface IJsonPathManager
 
     void Add(string path, object value);
 
+    void Add(string path, object value, Priority priority);
+
     void Force(string path, object value);
+
+    void Append(string path, object value, Priority priority);
 
     JToken? Remove(string path);
 
