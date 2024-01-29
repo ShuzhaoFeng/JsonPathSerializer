@@ -121,13 +121,13 @@ For more use case information, please consult the [wiki](https://github.com/Shuz
 
 ## Constaints
 
-There are several important known issues and limitations for **JsonPathSerializer**:
-
-* The library is missing a validation method on type conflict in case the path contains a negative value.
-* Supports for wildcard will be implemented in the future.
-* Supports for JSON path operators will be gradually implemented.
+The library currently does not support using wildcards or operations in the JsonPath. As they would create substantial ambiguity in defining what they would mean in the context of this library, **I currently have no plans to support them**. If such a need is present for you, please open an issue on [GitHub](https://github.com/ShuzhaoFeng/JsonPathSerializer/issues) and I will consider it given enough demand.
 
 ## Release Notes
+
+### 0.3.0
+
+See [v0.3.0 Changelog](https://github.com/ShuzhaoFeng/JsonPathSerializer/wiki/v0.3.0-Changelog).
 
 ### 0.2.0
 
@@ -141,12 +141,6 @@ See [v0.1.2 Changelog](https://github.com/ShuzhaoFeng/JsonPathSerializer/wiki/v0
 
 * Initial release.
 
-## Future Plans for v0.3.0
+## Future Plans
 
-* Implement a priority mechanism to handle conflicts when adding a value, effectively replacing the `Force()` method.
-There will be 3 levels of priority: `Low`, `Medium`, and `High`, with `Medium` being the default equivalent to the current `Add()`,
-`High` being equivalent to the current `Force()`, and `Low` to be implemented.
-
-* Implement an `Append()` method that allows user to append a value at the end of the array specified by the path.
-
-* Implement a validation method on type conflict in case the path contains a negative value.
+As of v0.3.0, I've implemented all features I wanted to implement for this library. I'm giving it enough time to see if I should make it v1.0.0. Note that I'm still planning to actively maintain this library, so if you have any feature requests or bugs to report, please open an issue on [GitHub](https://github.com/ShuzhaoFeng/JsonPathSerializer/issues).
