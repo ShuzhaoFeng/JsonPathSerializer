@@ -73,7 +73,7 @@ Dictionary<string, string> pathToValue = new Dictionary<string, string>()
     { "$.say.hello.world", "Hello world!" },
     { "$.say.hello.john", "Hello John!" },
     { "$.say.hi.jane", "Hi jane!" },
-    { "$.say.hi.montreal[0]", "Salut Montréal!" },
+    { "$.say.hi.montreal[0]", "Salut Montreal!" },
     { "$.say.hi.montreal[1]", "Hi Montreal!" },
 };
 
@@ -86,7 +86,7 @@ Console.WriteLine(manager.Build());
 ```
 Which gives:
 ```
-{"say":{"hello":{"world":"Hello world!","john":"Hello John!"},"hi":{"jane":"Hi jane!","montreal":["Salut Montréal!","Hi Montreal!"]}}}
+{"say":{"hello":{"world":"Hello world!","john":"Hello John!"},"hi":{"jane":"Hi jane!","montreal":["Salut Montreal!","Hi Montreal!"]}}}
 ```
 
 Or:
@@ -100,7 +100,7 @@ Or:
     "hi": {
       "jane": "Hi jane!",
       "montreal": [
-        "Salut Montréal!",
+        "Salut Montreal!",
         "Hi Montreal!"
       ]
     }
