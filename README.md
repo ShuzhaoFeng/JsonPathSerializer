@@ -40,7 +40,7 @@ This class library can help:
 
 ## Requirements
 
-* [.NET](https://github.com/dotnet/sdk) 6.0 or higher.
+* [.NET](https://github.com/dotnet/sdk) 8.0 or higher (.NET 6.0 or higher or pre-1.0.0 versions).
 
 * [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) 13.0.1 or higher.
 
@@ -108,6 +108,8 @@ Or:
 }
 ```
 
+For a more comprehensive feature list, please consult [the wiki](https://github.com/ShuzhaoFeng/JsonPathSerializer/wiki).
+
 ## Feature Summary
 
 **JsonPathSerializer** supports a combination of the following JsonPath tokens:
@@ -125,6 +127,10 @@ The library currently does not support using wildcards or operations in the Json
 
 ## Release Notes
 
+### 1.0.0
+
+See [v1.0.0 Changelog](https://github.com/ShuzhaoFeng/JsonPathSerializer/wiki/v1.0.0-Changelog).
+
 ### 0.3.0
 
 See [v0.3.0 Changelog](https://github.com/ShuzhaoFeng/JsonPathSerializer/wiki/v0.3.0-Changelog).
@@ -139,8 +145,8 @@ See [v0.1.2 Changelog](https://github.com/ShuzhaoFeng/JsonPathSerializer/wiki/v0
 
 ### 0.1.0 (Unstable)
 
-* Initial release.
+Initial release.
 
 ## Future Plans
 
-As of v0.3.0, I've implemented all features I wanted to implement for this library. I'm giving it enough time to see if I should make it v1.0.0. Note that I'm still planning to actively maintain this library, so if you have any feature requests or bugs to report, please open an issue on [GitHub](https://github.com/ShuzhaoFeng/JsonPathSerializer/issues).
+I'm actively maintaining this library, so if you have any feature requests or bugs to report, please open an issue on [GitHub](https://github.com/ShuzhaoFeng/JsonPathSerializer/issues).

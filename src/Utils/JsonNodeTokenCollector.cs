@@ -28,7 +28,7 @@ internal class JsonNodeTokenCollector
     )
     {
         int pathIndex = 0;
-        List<JsonNodeToken> currentTokens = new() { new JsonNodeToken(json, pathIndex) };
+        List<JsonNodeToken> currentTokens = [new JsonNodeToken(json, pathIndex)];
 
         // Navigate through the json tree and keep track of all nodes.
         // Stop when the path is fully consumed or when all nodes are the last available.
@@ -96,7 +96,7 @@ internal class JsonNodeTokenCollector
 
                     // due to index tokens may increase the number of current tokens
                     // use a new list to store the new tokens to simplify code development.
-                    List<JsonNodeToken> newCurrentTokens = new();
+                    List<JsonNodeToken> newCurrentTokens = [];
 
                     // at each level of the tree, do the same check for each token.
                     for (int i = 0; i < currentTokens.Count; i++)
@@ -133,7 +133,7 @@ internal class JsonNodeTokenCollector
                         // expecting a JArray where to add index, discovered JObject or JValue instead.
                         else if (priority == Priority.High)
                         {
-                            JArray emptyJArray = new();
+                            JArray emptyJArray = [];
                             jToken.Replace(emptyJArray);
                             currentToken.Token = emptyJArray;
 
@@ -195,7 +195,7 @@ internal class JsonNodeTokenCollector
                     }
 
                     // if the path doesn't exist, add a new array to the path.
-                    JArray newJArray = new();
+                    JArray newJArray = [];
 
                     jObject.Add(propertyToken.Property, newJArray);
 
@@ -203,25 +203,20 @@ internal class JsonNodeTokenCollector
                 }
 
                 // expecting a JObject where to add property, discovered JArray or JValue instead.
-                if (priority == Priority.High)
+                if (priority != Priority.High)
+                    throw new JsonPathSerializerException(
+                        ErrorMessage.TypeConflict(nameof(JObject), json.Type.ToString())
+                    );
+                JObject newJObject = new()
                 {
-                    JObject newJObject = new()
-                    {
-                        { propertyToken.Property, new JObject() }
-                    };
+                    { propertyToken.Property, new JObject() }
+                };
 
-                    json.Replace(newJObject);
+                json.Replace(newJObject);
 
-                    return new List<JToken>
-                    {
-                        newJObject[propertyToken.Property] ?? throw new Exception()
-                    };
-                }
+                return [newJObject[propertyToken.Property] ?? throw new Exception()];
 
                 // if not High priority, throw an exception.
-                throw new JsonPathSerializerException(
-                    ErrorMessage.TypeConflict("JObject", json.Type.ToString())
-                );
 
             case JsonPathIndexToken indexToken:
                 // if the path already exists, return the value.
@@ -239,7 +234,7 @@ internal class JsonNodeTokenCollector
                 // expecting a JArray where to add index, discovered JObject or JValue instead.
                 if (priority == Priority.High)
                 {
-                    JArray newJArray = new();
+                    JArray newJArray = [];
 
                     for (int i = 0; i < indexToken.Bound; i++)
                     {
@@ -263,7 +258,7 @@ internal class JsonNodeTokenCollector
 
     private static List<JToken> GetTokens(JArray jArray, JsonPathIndexToken indexToken)
     {
-        List<JToken> tokens = new();
+        List<JToken> tokens = [];
 
         foreach (IValueContainer container in indexToken.Indexes)
             // replace the element at the specified index/index span with the new value.

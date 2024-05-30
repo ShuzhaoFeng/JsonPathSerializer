@@ -45,29 +45,12 @@ public class JsonPathManager : IJsonPathManager
     }
 
     /// <summary>
-    ///     Returns a read-only instance of root.
+    ///     Returns a read-only instance of the root JSON object state.
     /// </summary>
     public IJEnumerable<JToken> Value => _root ?? new JObject();
 
     /// <summary>
-    ///     Clear the JsonPathManager root.
-    /// </summary>
-    public void Clear()
-    {
-        _root = null;
-    }
-
-    /// <summary>
-    ///     Build the Json string from the JsonPathManager root.
-    /// </summary>
-    /// <returns>A Json string representing the root.</returns>
-    public string Build()
-    {
-        return JsonConvert.SerializeObject(_root ?? new JObject());
-    }
-
-    /// <summary>
-    ///     Add a value to the JsonPathManager root.
+    ///     Add a value to the JsonPathManager root with default priority.
     /// </summary>
     /// <param name="path">The path where to add the value.</param>
     /// <param name="value">The value to be added.</param>
@@ -107,6 +90,7 @@ public class JsonPathManager : IJsonPathManager
 
     /// <summary>
     ///     Force add a value to the JsonPathManager root, regardless of whether existing values will be overriden.
+    ///     <br/>
     ///     This method is obsolete. Use Add(string, object, Priority.High) instead.
     /// </summary>
     /// <param name="path">The path where to add the value.</param>
@@ -145,7 +129,7 @@ public class JsonPathManager : IJsonPathManager
             // and adding the value to the new array.
             if (lastAvailableToken.Index < pathTokens.Count - 1)
             {
-                JArray jArray = new() { value };
+                JArray jArray = [JToken.FromObject(value)];
 
                 rootCopy = JTokenGenerator.GenerateNewRoot(lastAvailableToken, pathTokens, rootCopy, jArray, priority);
             }
@@ -229,6 +213,23 @@ public class JsonPathManager : IJsonPathManager
             default:
                 return null;
         }
+    }
+
+    /// <summary>
+    ///     Build the Json string from the JsonPathManager root.
+    /// </summary>
+    /// <returns>The string representation of the root JSON object.</returns>
+    public string Build()
+    {
+        return JsonConvert.SerializeObject(_root ?? new JObject());
+    }
+
+    /// <summary>
+    ///     Clear the JsonPathManager root.
+    /// </summary>
+    public void Clear()
+    {
+        _root = null;
     }
 
     /// <summary>
