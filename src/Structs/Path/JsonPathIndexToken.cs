@@ -12,7 +12,7 @@ internal class JsonPathIndexToken : IJsonPathToken
     /// <summary>
     ///     The indexes of the array.
     /// </summary>
-    public List<IValueContainer> Indexes { get; } = new();
+    public List<IValueContainer> Indexes { get; } = [];
 
     /// <summary>
     ///     The minimum number of elements that an array must have so that all Indexes are valid.
@@ -30,8 +30,8 @@ internal class JsonPathIndexToken : IJsonPathToken
         // update bound
         if (container is IndexValueContainer index)
         {
-            // if a index x is positive (e.g. [3]), then we need at least x + 1 elements.
-            // if a index x is negative (e.g. [-3]), then we need at least -x elements.
+            // if an index x is positive (e.g. [3]), then we need at least x + 1 elements.
+            // if an index x is negative (e.g. [-3]), then we need at least -x elements.
             int absoluteBound = index.Index < 0 ? -index.Index : index.Index + 1;
 
             Bound = Math.Max(Bound, absoluteBound);

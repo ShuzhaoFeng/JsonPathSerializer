@@ -18,7 +18,7 @@ internal class JsonPathTokenizer
     /// <returns>A list of JsonPathTokens from the entire JsonPath.</returns>
     public static List<IJsonPathToken> Tokenize(string jsonPath)
     {
-        List<IJsonPathToken> pathTokens = new();
+        List<IJsonPathToken> pathTokens = [];
 
         // Parse the JsonPath into strings of tokens.
         List<string> parsedTokenList = ParseJsonPath(jsonPath.Trim());
@@ -124,7 +124,7 @@ internal class JsonPathTokenizer
     /// <returns>A list of strings, each represents a token of the path.</returns>
     private static List<string> ParseJsonPath(string path)
     {
-        List<string> paths = new();
+        List<string> paths = [];
 
         int index = 0;
 

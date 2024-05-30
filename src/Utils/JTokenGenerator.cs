@@ -111,7 +111,7 @@ internal class JTokenGenerator
                         );
                     }
 
-                    JArray emptyJArray = new();
+                    JArray emptyJArray = [];
                     lastAvailableToken.Token.Replace(emptyJArray);
                     lastAvailableToken.Token = emptyJArray;
                 }
